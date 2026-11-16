@@ -1,0 +1,4 @@
+# 可选：04_rag_knowledge.py 的向量库依赖（约 2 GB，且需联网下载 embedding 模型）
+# 不装不影响 01/02/03/05/06 与整个界面。
+chromadb>=1.0
+sentence-transformers>=3.0

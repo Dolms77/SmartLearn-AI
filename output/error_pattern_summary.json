@@ -1,0 +1,380 @@
+{
+  "total_errors": 385,
+  "by_error_type": {
+    "C1": {
+      "name": "概念误解",
+      "count": 174,
+      "percentage": 45.2
+    },
+    "C3": {
+      "name": "计算失误",
+      "count": 94,
+      "percentage": 24.4
+    },
+    "C6": {
+      "name": "级联错误",
+      "count": 49,
+      "percentage": 12.7
+    },
+    "C4": {
+      "name": "步骤遗漏",
+      "count": 32,
+      "percentage": 8.3
+    },
+    "C5": {
+      "name": "表达不规范",
+      "count": 27,
+      "percentage": 7.0
+    },
+    "C2": {
+      "name": "符号错误",
+      "count": 9,
+      "percentage": 2.3
+    }
+  },
+  "by_indicator": {
+    "T01I2": {
+      "total_errors": 73,
+      "type_distribution": {
+        "C3": 59,
+        "C5": 5,
+        "C1": 5,
+        "C6": 4
+      }
+    },
+    "T02I1": {
+      "total_errors": 60,
+      "type_distribution": {
+        "C1": 44,
+        "C6": 8,
+        "C4": 8
+      }
+    },
+    "T01I1": {
+      "total_errors": 68,
+      "type_distribution": {
+        "C3": 33,
+        "C1": 20,
+        "C5": 11,
+        "C6": 4
+      }
+    },
+    "T01I3": {
+      "total_errors": 32,
+      "type_distribution": {
+        "C5": 11,
+        "C1": 10,
+        "C4": 7,
+        "C6": 4
+      }
+    },
+    "T03I1": {
+      "total_errors": 31,
+      "type_distribution": {
+        "C1": 12,
+        "C2": 9,
+        "C6": 9,
+        "C4": 1
+      }
+    },
+    "T03I2": {
+      "total_errors": 25,
+      "type_distribution": {
+        "C1": 16,
+        "C4": 5,
+        "C6": 4
+      }
+    },
+    "T02I2": {
+      "total_errors": 47,
+      "type_distribution": {
+        "C1": 36,
+        "C4": 6,
+        "C6": 5
+      }
+    },
+    "T02I3": {
+      "total_errors": 32,
+      "type_distribution": {
+        "C1": 19,
+        "C6": 8,
+        "C4": 5
+      }
+    },
+    "T03I3": {
+      "total_errors": 17,
+      "type_distribution": {
+        "C1": 12,
+        "C6": 3,
+        "C3": 2
+      }
+    }
+  },
+  "by_question": {
+    "Q014": {
+      "error_count": 18,
+      "error_rate": 45.0,
+      "error_students": [
+        "D01",
+        "D02",
+        "D03",
+        "D04",
+        "D05",
+        "D06",
+        "D07",
+        "D08",
+        "D12",
+        "D13",
+        "D16",
+        "D22",
+        "D23",
+        "D25",
+        "D29",
+        "D30",
+        "D32",
+        "D34"
+      ]
+    },
+    "Q018": {
+      "error_count": 18,
+      "error_rate": 45.0,
+      "error_students": [
+        "D01",
+        "D03",
+        "D03",
+        "D06",
+        "D10",
+        "D15",
+        "D16",
+        "D20",
+        "D21",
+        "D21",
+        "D23",
+        "D25",
+        "D30",
+        "D30",
+        "D34",
+        "D36",
+        "D39",
+        "D40"
+      ]
+    },
+    "Q006": {
+      "error_count": 17,
+      "error_rate": 42.5,
+      "error_students": [
+        "D02",
+        "D04",
+        "D05",
+        "D06",
+        "D07",
+        "D11",
+        "D11",
+        "D12",
+        "D12",
+        "D19",
+        "D22",
+        "D22",
+        "D26",
+        "D28",
+        "D29",
+        "D30",
+        "D39"
+      ]
+    },
+    "Q011": {
+      "error_count": 14,
+      "error_rate": 35.0,
+      "error_students": [
+        "D01",
+        "D01",
+        "D02",
+        "D02",
+        "D04",
+        "D08",
+        "D16",
+        "D27",
+        "D30",
+        "D31",
+        "D34",
+        "D35",
+        "D39",
+        "D40"
+      ]
+    },
+    "Q002": {
+      "error_count": 12,
+      "error_rate": 30.0,
+      "error_students": [
+        "D01",
+        "D04",
+        "D05",
+        "D05",
+        "D08",
+        "D11",
+        "D19",
+        "D20",
+        "D20",
+        "D34",
+        "D37",
+        "D39"
+      ]
+    },
+    "Q012": {
+      "error_count": 12,
+      "error_rate": 30.0,
+      "error_students": [
+        "D02",
+        "D05",
+        "D06",
+        "D06",
+        "D08",
+        "D09",
+        "D22",
+        "D24",
+        "D25",
+        "D28",
+        "D30",
+        "D37"
+      ]
+    },
+    "Q034": {
+      "error_count": 12,
+      "error_rate": 30.0,
+      "error_students": [
+        "D06",
+        "D10",
+        "D19",
+        "D28",
+        "D29",
+        "D30",
+        "D32",
+        "D33",
+        "D34",
+        "D37",
+        "D39",
+        "D40"
+      ]
+    },
+    "Q022": {
+      "error_count": 11,
+      "error_rate": 27.5,
+      "error_students": [
+        "D01",
+        "D02",
+        "D03",
+        "D09",
+        "D13",
+        "D16",
+        "D20",
+        "D28",
+        "D30",
+        "D32",
+        "D38"
+      ]
+    },
+    "Q025": {
+      "error_count": 11,
+      "error_rate": 27.5,
+      "error_students": [
+        "D03",
+        "D04",
+        "D06",
+        "D16",
+        "D22",
+        "D24",
+        "D27",
+        "D31",
+        "D33",
+        "D34",
+        "D39"
+      ]
+    },
+    "Q032": {
+      "error_count": 11,
+      "error_rate": 27.5,
+      "error_students": [
+        "D03",
+        "D05",
+        "D07",
+        "D19",
+        "D20",
+        "D23",
+        "D24",
+        "D26",
+        "D28",
+        "D39",
+        "D40"
+      ]
+    }
+  },
+  "critical_findings": [
+    {
+      "type": "zero_score_rate",
+      "point_id": "Q043P2",
+      "description": "Q043P2 得分率为0%（9人全错），属于全班共性难点",
+      "severity": "critical"
+    },
+    {
+      "type": "zero_score_rate",
+      "point_id": "Q043P3",
+      "description": "Q043P3 得分率为0%（9人全错），属于全班共性难点",
+      "severity": "critical"
+    },
+    {
+      "type": "persistent_error",
+      "student_id": "D02",
+      "question_id": "Q011",
+      "description": "D02在Q011上两次答题答案相同且都错（顽固性错误）",
+      "severity": "high"
+    },
+    {
+      "type": "persistent_error",
+      "student_id": "D03",
+      "question_id": "Q018",
+      "description": "D03在Q018上两次答题答案相同且都错（顽固性错误）",
+      "severity": "high"
+    },
+    {
+      "type": "persistent_error",
+      "student_id": "D05",
+      "question_id": "Q002",
+      "description": "D05在Q002上两次答题答案相同且都错（顽固性错误）",
+      "severity": "high"
+    },
+    {
+      "type": "persistent_error",
+      "student_id": "D06",
+      "question_id": "Q012",
+      "description": "D06在Q012上两次答题答案相同且都错（顽固性错误）",
+      "severity": "high"
+    },
+    {
+      "type": "persistent_error",
+      "student_id": "D12",
+      "question_id": "Q006",
+      "description": "D12在Q006上两次答题答案相同且都错（顽固性错误）",
+      "severity": "high"
+    },
+    {
+      "type": "persistent_error",
+      "student_id": "D21",
+      "question_id": "Q018",
+      "description": "D21在Q018上两次答题答案相同且都错（顽固性错误）",
+      "severity": "high"
+    },
+    {
+      "type": "persistent_error",
+      "student_id": "D37",
+      "question_id": "Q004",
+      "description": "D37在Q004上两次答题答案相同且都错（顽固性错误）",
+      "severity": "high"
+    },
+    {
+      "type": "cascade_pattern",
+      "description": "发现49条级联错误：前一步出错导致后续步骤全部不得分",
+      "severity": "medium",
+      "implication": "教学中应重点攻克关键步骤，避免级联失分"
+    }
+  ]
+}

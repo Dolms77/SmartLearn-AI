@@ -1,0 +1,12 @@
+# 智慧学伴 · 运行依赖（Python >= 3.10）
+# 安装见 scripts/bootstrap.ps1 或 docs/复现手册.md
+pandas==3.1.1
+numpy==2.5.5
+openpyxl==3.1.5
+networkx==3.7
+pyvis>=0.3.2        # 05_knowledge_graph.py 生成交互式图谱用
+streamlit==1.67.0
+plotly==7.1.0
+
+# 仅"LLM 错因诊断"需要；不装则自动走离线（规则结果）
+openai==3.51.0

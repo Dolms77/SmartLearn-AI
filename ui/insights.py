@@ -1,0 +1,161 @@
+# -*- coding: utf-8 -*-
+"""把 01–06 产出里"界面还没用上"的部分接出来。
+
+覆盖：
+  * statistics.by_scoring_point  → 评分点级薄弱清单（任务2 最硬的证据）
+  * statistics.by_student.theme_rates → 个体三主题得分率
+  * error_pattern_summary → 错误类型分布 / 关键发现 / 高频错题
+  * mastery_matrix + 每人证据量 → 全班 40×9 热力图（证据不足的格子留白）
+  * cleaned_data.test_nodes → 两个测验节点的口径说明
+  * 05/06 生成的 HTML、04 的 knowledge_base.json → 成果附件
+"""
+from __future__ import annotations
+
+import os
+
+import adapter as A
+
+IND = A.INDICATORS
+
+
+def scoring_points(bundle: dict, limit: int | None = None,
+                   flags: tuple[str, ...] = ("critical", "weak")) -> list[dict]:
+    """评分点级排行：把 90 个评分点按得分率升序，标注 critical/weak/normal。"""
+    stats = bundle.get("statistics") or {}
+    sp = stats.get("by_scoring_point") or {}
+    qmap = bundle["question_map"]
+    rows = []
+    for pid, v in sp.items():
+        qid = pid.split("P")[0]
+        q = qmap.get(qid, {})
+        rows.append({
+            "评分点": pid,
+            "题号": qid,
+            "指标": q.get("indicator", ""),
+            "题型": q.get("type", ""),
+            "得分率": round(float(v.get("score_rate", 0)), 4),
+            "正确/总数": f"{v.get('correct', 0)}/{v.get('total', 0)}",
+            "样本": int(v.get("total", 0)),
+            "标记": v.get("flag", "normal"),
+            "题干": (q.get("question_text") or "")[:36],
+        })
+    if flags:
+        rows = [r for r in rows if r["标记"] in flags]
+    rows.sort(key=lambda r: (r["得分率"], -r["样本"]))
+    return rows[:limit] if limit else rows
+
+
+def scoring_point_definition(bundle: dict, pid: str) -> str:
+    """从题目表里取该评分点的中文定义（如 Q015P3 写出正确结果）。"""
+    qid = pid.split("P")[0]
+    q = bundle["question_map"].get(qid, {})
+    for line in str(q.get("scoring_points", "")).splitlines():
+        if line.strip().startswith(pid):
+            return line.strip()
+    return ""
+
+
+def error_types(bundle: dict) -> list[dict]:
+    pattern = bundle.get("pattern") or {}
+    by = pattern.get("by_error_type") or {}
+    rows = [{"代码": code, "类型": v.get("name", code),
+             "条数": int(v.get("count", 0)), "占比": float(v.get("percentage", 0))}
+            for code, v in by.items()]
+    rows.sort(key=lambda r: -r["条数"])
+    return rows
+
+
+def critical_findings(bundle: dict) -> list[dict]:
+    return (bundle.get("pattern") or {}).get("critical_findings") or []
+
+
+def frequent_questions(bundle: dict, top: int = 10) -> list[dict]:
+    by = (bundle.get("pattern") or {}).get("by_question") or {}
+    rows = [{"题号": qid, "错误人数": v.get("error_count", 0),
+             "错误率": v.get("error_rate", 0),
+             "指标": (bundle["question_map"].get(qid) or {}).get("indicator", "")}
+            for qid, v in by.items()]
+    rows.sort(key=lambda r: -r["错误人数"])
+    return rows[:top]
+
+
+def student_theme_rates(bundle: dict, sid: str) -> dict:
+    stats = (bundle.get("statistics") or {}).get("by_student", {}).get(sid, {})
+    return stats.get("theme_rates") or {}
+
+
+def mastery_heatmap(bundle: dict) -> dict:
+    """40×9 掌握度热力图；证据 <3 条的格子置空，避免把先验值画成"掌握"。"""
+    profiles = bundle.get("profiles") or {}
+    students = sorted(profiles.keys())
+    z, hover = [], []
+    for sid in students:
+        details = (profiles[sid] or {}).get("indicator_details") or {}
+        row, hrow = [], []
+        for code in IND:
+            d = details.get(code) or {}
+            n = int(d.get("answer_count") or 0)
+            val = d.get("current_mastery")
+            if n < A.MIN_EVIDENCE or val is None:
+                row.append(None)
+                hrow.append(f"{sid} {code}：证据 {n} 条（不足 3 条，不下结论）")
+            else:
+                row.append(round(float(val), 3))
+                hrow.append(f"{sid} {code}：{val:.0%}（证据 {n} 条）")
+        z.append(row)
+        hover.append(hrow)
+    return {"students": students, "indicators": IND, "z": z, "hover": hover}
+
+
+def class_mastery_summary(bundle: dict) -> dict:
+    """按班级汇总"可判定"的指标数量与均值，体现记录覆盖差异。"""
+    profiles = bundle.get("profiles") or {}
+    out: dict[str, dict] = {}
+    for sid, p in profiles.items():
+        cls = (p or {}).get("class_id", "—")
+        details = (p or {}).get("indicator_details") or {}
+        decided = [d for d in details.values() if int(d.get("answer_count") or 0) >= A.MIN_EVIDENCE]
+        cell = out.setdefault(cls, {"students": 0, "decided": 0, "evidence": 0, "sum": 0.0})
+        cell["students"] += 1
+        cell["decided"] += len(decided)
+        cell["evidence"] += sum(int(d.get("answer_count") or 0) for d in details.values())
+        cell["sum"] += sum(float(d.get("current_mastery") or 0) for d in decided)
+    for cls, c in out.items():
+        c["avg_mastery"] = round(c["sum"] / c["decided"], 4) if c["decided"] else None
+        c["decided_rate"] = round(c["decided"] / (c["students"] * len(IND)), 3) if c["students"] else 0
+    return out
+
+
+def node_info(bundle: dict) -> list[dict]:
+    nodes = bundle.get("test_nodes") or {}
+    rows = []
+    for nid, v in nodes.items():
+        rows.append({
+            "节点": nid,
+            "日期": v.get("模拟测验日期", ""),
+            "已教及测量主题": v.get("已教及测量主题", ""),
+            "说明": v.get("说明", ""),
+            "可用题目数": len(str(v.get("可用题目编号", "")).split("、")),
+        })
+    return sorted(rows, key=lambda r: r["节点"])
+
+
+def artifact_files(bundle: dict) -> list[dict]:
+    """01–06 生成、但界面尚未内联展示的成果文件，用于下载/外链。"""
+    d = bundle.get("output_dir", "")
+    items = [
+        ("knowledge_graph.html", "05 交互式知识图谱", "text/html"),
+        ("dashboard.html", "06 学情仪表盘（8 图）", "text/html"),
+        ("bkt_summary.txt", "02 掌握度矩阵摘要", "text/plain"),
+        ("statistics_summary.txt", "01 统计摘要", "text/plain"),
+        ("error_diagnosis_summary.txt", "03 错因摘要", "text/plain"),
+        ("knowledge_base.json", "04 RAG 知识库索引（可选）", "application/json"),
+        ("task1_knowledge_structure.json", "任务1 成果（B）", "application/json"),
+        ("task3_recommendations.json", "任务3 建议（B）", "application/json"),
+    ]
+    out = []
+    for name, desc, mime in items:
+        p = os.path.join(d, name)
+        out.append({"file": name, "desc": desc, "mime": mime,
+                    "exists": os.path.exists(p), "size": os.path.getsize(p) if os.path.exists(p) else 0})
+    return out
