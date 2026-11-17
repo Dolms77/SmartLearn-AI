@@ -9,6 +9,10 @@ api.txt
 .streamlit-home/
 __pycache__/
 *.pyc
+/build/
+/dist/
+/output_backup_*/
+/.output.staging_*/
 
 # 运行产物（按需保留；交付给队友时建议带上 output/，但不入库）
 output/llm_cache/

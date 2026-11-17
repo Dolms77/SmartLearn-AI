@@ -17,6 +17,16 @@ cd ui ; .\run.bat                                           # 启动界面 http:
 
 详细说明、文件清单、常见错误：**[docs/复现手册.md](docs/复现手册.md)**
 
+## 单文件 EXE（队内使用）
+
+```powershell
+.\.venv-ui\Scripts\python.exe -m pip install -r requirements-build.txt
+.\scripts\build_exe.ps1
+.\dist\SmartLearn-AI.exe
+```
+
+EXE 将赛题 CSV 嵌入单文件，默认生成到项目根目录 `output/`，供现有 UI 读取；生成先在暂存目录完成并通过校验，再更新产物，旧版同名文件会备份到 `output_backup_*`。04 RAG 因依赖和模型体积较大、07 多智能体因仍需接入模型，均不打入 EXE；已有 `knowledge_base.json` 会保留。赛题数据和 EXE 仅限队内使用。
+
 ## 这套东西是什么
 
 | 模块 | 目录 | 产出 |
