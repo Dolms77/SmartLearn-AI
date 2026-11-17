@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-智慧学伴 - 模块6：学情可视化仪表盘
-================================
-职责：生成8种交互式图表的HTML页面
+智慧学伴 - 模块6：学情可视化仪表盘（零依赖版）
+================================================
+职责：生成8种图表的HTML仪表盘页面
 
-安装依赖：
-  pip install plotly
+★ 本文件不需要安装任何第三方库，只用Python标准库 ★
+不需要 pip install 任何东西，直接运行即可
 
 输入：
   - statistics.json（模块1输出）
   - mastery_matrix.json（模块2输出）
   - student_profiles.json（模块2输出）
   - error_pattern_summary.json（模块3输出）
-  - cleaned_data.json（模块1输出）
 
 输出：
-  - dashboard.html（交互式学情仪表盘，浏览器直接打开）
+  - dashboard.html（浏览器直接打开，所有图表和样式内嵌，不需要联网）
 
 运行方式：
   python 06_dashboard.py
@@ -23,42 +22,38 @@
 
 import json
 import os
-import sys
 from collections import Counter, defaultdict
 
 # ============================================================
-# 配置区
+# 配置区（可通过 SS_OUT 覆盖输出目录）
 # ============================================================
 
-OUTPUT_DIR = os.environ.get("SS_OUT") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "output")
+OUTPUT_DIR = os.environ.get("SS_OUT") or os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "output"
+)
+
 INDICATOR_NAMES = {
     'T01I1': '表示数量关系并代入求值',
-    'T01I2': '识别同类项、去括号并化简',
+    'T01I2': '识别同类项去括号并化简',
     'T01I3': '用整式解释具体问题',
     'T02I1': '运用等式性质解一元一次方程',
     'T02I2': '用消元法解二元一次方程组',
-    'T02I3': '列方程/方程组解决实际问题',
+    'T02I3': '列方程方程组解决实际问题',
     'T03I1': '运用不等式性质求解',
     'T03I2': '求两个不等式解集的交集',
     'T03I3': '根据实际限制列不等式'
 }
-
 INDICATORS = list(INDICATOR_NAMES.keys())
 
 
-def check_dependencies():
-    try:
-        import plotly
-    except ImportError:
-        print("缺少依赖，请运行: pip install plotly")
-        sys.exit(1)
-
+# ============================================================
+# 数据加载
+# ============================================================
 
 def load_all_data():
-    """加载所有模块的输出"""
     data = {}
-    for name in ['statistics.json', 'mastery_matrix.json', 'student_profiles.json',
-                 'error_pattern_summary.json', 'cleaned_data.json']:
+    for name in ['statistics.json', 'mastery_matrix.json',
+                 'student_profiles.json', 'error_pattern_summary.json']:
         path = os.path.join(OUTPUT_DIR, name)
         if os.path.exists(path):
             with open(path, 'r', encoding='utf-8') as f:
@@ -70,427 +65,497 @@ def load_all_data():
 
 
 # ============================================================
-# 图表生成函数
+# HTML片段生成函数
 # ============================================================
 
-def make_radar_chart(stats):
-    """1. 九指标雷达图"""
-    import plotly.graph_objects as go
+def bar_chart_html(title, labels, values, colors=None, max_val=100, unit='%'):
+    """生成纯CSS柱状图"""
+    if not labels:
+        return f'<div class="chart-box"><h3>{title}</h3><p>无数据</p></div>'
 
-    indicators = INDICATORS
-    values = [stats.get('by_indicator', {}).get(ind, {}).get('score_rate', 0) * 100
-              for ind in indicators]
+    if colors is None:
+        colors = ['#4ECDC4'] * len(labels)
 
-    fig = go.Figure(data=go.Scatterpolar(
-        r=values + [values[0]],
-        theta=[INDICATOR_NAMES[ind] for ind in indicators] + [INDICATOR_NAMES[indicators[0]]],
-        fill='toself',
-        fillcolor='rgba(78, 205, 196, 0.3)',
-        line=dict(color='#4ECDC4', width=2),
-        name='全班得分率'
-    ))
+    bars = ''
+    for i, (label, val) in enumerate(zip(labels, values)):
+        height = max(2, val / max_val * 200) if max_val > 0 else 2
+        color = colors[i] if i < len(colors) else '#4ECDC4'
+        bars += f'''
+        <div class="bar-item">
+            <div class="bar-value">{val:.1f}{unit}</div>
+            <div class="bar-fill" style="height:{height}px;background:{color};"></div>
+            <div class="bar-label">{label}</div>
+        </div>'''
 
-    fig.update_layout(
-        polar=dict(radialaxis=dict(range=[0, 100], tickfont=dict(size=10))),
-        showlegend=True,
-        title='九大观察指标得分率雷达图',
-        height=450
-    )
-    return fig.to_html(full_html=False, include_plotlyjs=False, div_id='chart_radar')
-
-
-def make_class_comparison_bar(stats):
-    """2. 班级×主题对比柱状图"""
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
-
-    themes = ['T01', 'T02', 'T03']
-    theme_names = {'T01': '代数式与整式', 'T02': '方程与方程组', 'T03': '不等式与不等式组'}
-
-    dc01_rates = []
-    dc02_rates = []
-    for t in themes:
-        key1 = f"DC01-{t}"
-        key2 = f"DC02-{t}"
-        dc01_rates.append(stats.get('by_class_theme', {}).get(key1, {}).get('score_rate', 0) * 100)
-        dc02_rates.append(stats.get('by_class_theme', {}).get(key2, {}).get('score_rate', 0) * 100)
-
-    fig = go.Figure(data=[
-        go.Bar(name='DC01班', x=[theme_names[t] for t in themes], y=dc01_rates,
-               marker_color='#4ECDC4', text=[f'{r:.1f}%' for r in dc01_rates], textposition='outside'),
-        go.Bar(name='DC02班', x=[theme_names[t] for t in themes], y=dc02_rates,
-               marker_color='#FF6B6B', text=[f'{r:.1f}%' for r in dc02_rates], textposition='outside')
-    ])
-
-    fig.update_layout(
-        barmode='group',
-        title='班级×主题得分率对比',
-        yaxis=dict(range=[0, 100], title='得分率(%)'),
-        height=400
-    )
-    return fig.to_html(full_html=False, include_plotlyjs=False, div_id='chart_class_bar')
+    return f'''
+    <div class="chart-box">
+        <h3>{title}</h3>
+        <div class="bar-chart">{bars}</div>
+    </div>'''
 
 
-def make_scoring_point_heatmap(stats):
-    """3. 评分点热力图"""
-    import plotly.graph_objects as go
+def grouped_bar_html(title, labels, series1, series2, name1, name2, max_val=100):
+    """分组柱状图（两个班对比）"""
+    if not labels:
+        return f'<div class="chart-box"><h3>{title}</h3><p>无数据</p></div>'
 
-    point_stats = stats.get('by_scoring_point', {})
-    # 按题目分组
-    question_points = defaultdict(list)
-    for pid, info in point_stats.items():
-        qid = pid[:4]  # 提取题目编号
-        question_points[qid].append((pid, info['score_rate'] * 100))
+    bars = ''
+    for i, label in enumerate(labels):
+        v1 = series1[i]
+        v2 = series2[i]
+        h1 = max(2, v1 / max_val * 200)
+        h2 = max(2, v2 / max_val * 200)
+        bars += f'''
+        <div class="bar-item">
+            <div class="bar-group">
+                <div class="bar-value">{v1:.1f}%</div>
+                <div class="bar-fill" style="height:{h1}px;background:#4ECDC4;"></div>
+            </div>
+            <div class="bar-group">
+                <div class="bar-value">{v2:.1f}%</div>
+                <div class="bar-fill" style="height:{h2}px;background:#FF6B6B;"></div>
+            </div>
+            <div class="bar-label">{label}</div>
+        </div>'''
 
-    # 排序
-    sorted_questions = sorted(question_points.keys())
-    all_pids = []
-    all_rates = []
-    all_labels = []
-    for qid in sorted_questions:
-        for pid, rate in sorted(question_points[qid]):
-            all_pids.append(pid)
-            all_rates.append(rate)
-            all_labels.append(f"{rate:.0f}%")
-
-    # 颜色映射：红色=低，黄色=中，绿色=高
-    colors = ['#FF4444' if r < 30 else '#FFAA00' if r < 50 else '#44AA44' for r in all_rates]
-
-    fig = go.Figure(data=go.Bar(
-        x=all_pids,
-        y=all_rates,
-        marker_color=colors,
-        text=all_labels,
-        textposition='outside'
-    ))
-
-    fig.update_layout(
-        title='评分点得分率热力图（红色=重点关注）',
-        xaxis=dict(title='评分点编号', tickangle=45),
-        yaxis=dict(range=[0, 110], title='得分率(%)'),
-        height=500
-    )
-    return fig.to_html(full_html=False, include_plotlyjs=False, div_id='chart_heatmap')
+    return f'''
+    <div class="chart-box">
+        <h3>{title}</h3>
+        <div class="legend"><span style="color:#4ECDC4;">■</span> {name1} &nbsp; <span style="color:#FF6B6B;">■</span> {name2}</div>
+        <div class="bar-chart">{bars}</div>
+    </div>'''
 
 
-def make_student_distribution(stats):
-    """4. 学生得分率分布图"""
-    import plotly.graph_objects as go
+def radar_html(title, labels, values, max_val=100):
+    """生成CSS雷达图（用SVG）"""
+    if not labels:
+        return f'<div class="chart-box"><h3>{title}</h3><p>无数据</p></div>'
 
-    students = stats.get('by_student', {})
-    sorted_students = sorted(students.items(), key=lambda x: x[1]['score_rate'])
+    n = len(labels)
+    cx, cy, r = 150, 160, 110
+    import math
 
-    sids = [s[0] for s in sorted_students]
-    rates = [s[1]['score_rate'] * 100 for s in sorted_students]
-    classes = [s[1]['class'] for s in sorted_students]
-    colors = ['#4ECDC4' if c == 'DC01' else '#FF6B6B' for c in classes]
+    # 计算各点坐标
+    points = []
+    for i in range(n):
+        angle = -math.pi / 2 + i * 2 * math.pi / n
+        x = cx + r * values[i] / max_val * math.cos(angle)
+        y = cy + r * values[i] / max_val * math.sin(angle)
+        points.append(f"{x:.1f},{y:.1f}")
 
-    fig = go.Figure(data=go.Bar(
-        x=sids, y=rates,
-        marker_color=colors,
-        text=[f'{r:.0f}%' for r in rates],
-        textposition='outside'
-    ))
+    # 网格线（5圈）
+    grid = ''
+    for pct in [0.2, 0.4, 0.6, 0.8, 1.0]:
+        pts = []
+        for i in range(n):
+            angle = -math.pi / 2 + i * 2 * math.pi / n
+            x = cx + r * pct * math.cos(angle)
+            y = cy + r * pct * math.sin(angle)
+            pts.append(f"{x:.1f},{y:.1f}")
+        grid += f'<polygon points="{" ".join(pts)}" fill="none" stroke="#E0E0E0" stroke-width="1"/>'
 
-    fig.update_layout(
-        title='学生得分率分布（按得分率排序）',
-        xaxis=dict(title='学生编号', tickangle=45),
-        yaxis=dict(range=[0, 110], title='得分率(%)'),
-        height=450,
-        showlegend=False
-    )
+    # 轴线
+    axes = ''
+    label_positions = ''
+    for i in range(n):
+        angle = -math.pi / 2 + i * 2 * math.pi / n
+        x = cx + r * math.cos(angle)
+        y = cy + r * math.sin(angle)
+        axes += f'<line x1="{cx}" y1="{cy}" x2="{x:.1f}" y2="{y:.1f}" stroke="#D0D0D0" stroke-width="1"/>'
 
-    # 添加图例注释
-    fig.add_annotation(x=0.01, y=0.95, xref='paper', yref='paper',
-                       text='<span style="color:#4ECDC4;">■</span> DC01班  <span style="color:#FF6B6B;">■</span> DC02班',
-                       showarrow=False, font=dict(size=12))
+        lx = cx + (r + 25) * math.cos(angle)
+        ly = cy + (r + 25) * math.sin(angle)
+        short_label = labels[i][:6]
+        label_positions += f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="middle" font-size="8" fill="#666">{short_label}</text>'
+        label_positions += f'<text x="{lx:.1f}" y="{ly+10:.1f}" text-anchor="middle" font-size="8" fill="#4ECDC4">{values[i]:.0f}%</text>'
 
-    return fig.to_html(full_html=False, include_plotlyjs=False, div_id='chart_student_dist')
+    polygon = f'<polygon points="{" ".join(points)}" fill="rgba(78,205,196,0.3)" stroke="#4ECDC4" stroke-width="2"/>'
+
+    # 数据点
+    dots = ''
+    for p in points:
+        x, y = p.split(',')
+        dots += f'<circle cx="{x}" cy="{y}" r="3" fill="#4ECDC4"/>'
+
+    return f'''
+    <div class="chart-box">
+        <h3>{title}</h3>
+        <svg width="320" height="340" style="display:block;margin:auto;">
+            {grid}
+            {axes}
+            {polygon}
+            {dots}
+            {label_positions}
+        </svg>
+    </div>'''
 
 
-def make_mastery_heatmap(mastery_matrix):
-    """5. 知识追踪掌握概率热力图"""
-    import plotly.graph_objects as go
+def heatmap_html(title, sids, indicators, matrix):
+    """生成CSS热力图（学生×指标掌握概率）"""
+    if not matrix:
+        return f'<div class="chart-box"><h3>{title}</h3><p>无数据</p></div>'
 
-    if not mastery_matrix:
-        return "<div>无数据</div>"
+    # 表头
+    header = '<th style="width:50px;">学生</th>'
+    for ind in indicators:
+        header += f'<th class="rotate">{ind}</th>'
 
-    sids = sorted(mastery_matrix.keys(),
-                  key=lambda s: sum(mastery_matrix[s].values()) / len(mastery_matrix[s]))
-
-    z = []
+    # 数据行
+    rows = ''
     for sid in sids:
-        row = [mastery_matrix[sid].get(ind, 0) * 100 for ind in INDICATORS]
-        z.append(row)
+        row_data = matrix.get(sid, {})
+        row = f'<td class="sid">{sid}</td>'
+        for ind in indicators:
+            val = row_data.get(ind, 0)
+            pct = val * 100
+            if pct >= 70:
+                color = '#2ECC71'
+            elif pct >= 40:
+                color = '#F39C12'
+            else:
+                color = '#E74C3C'
+            text_color = 'white' if pct < 70 else '#333'
+            row += f'<td class="heat-cell" style="background:{color};color:{text_color};">{pct:.0f}</td>'
+        rows += f'<tr>{row}</tr>'
 
-    fig = go.Figure(data=go.Heatmap(
-        z=z,
-        x=INDICATORS,
-        y=sids,
-        colorscale=[
-            [0, '#FF4444'],     # 0% - 红
-            [0.4, '#FFAA00'],   # 40% - 黄
-            [0.7, '#44AA44'],   # 70% - 绿
-            [1, '#006600']      # 100% - 深绿
-        ],
-        text=[[f'{v:.0f}%' for v in row] for row in z],
-        texttemplate='%{text}',
-        textfont={"size": 8},
-        colorbar=dict(title='掌握<br>概率')
-    ))
-
-    fig.update_layout(
-        title='学生×指标 掌握概率热力图（BKT模型）',
-        xaxis=dict(title='观察指标', tickangle=45),
-        yaxis=dict(title='学生编号'),
-        height=700
-    )
-    return fig.to_html(full_html=False, include_plotlyjs=False, div_id='chart_mastery')
-
-
-def make_error_type_pie(error_summary):
-    """6. 错误类型分布饼图"""
-    import plotly.graph_objects as go
-
-    by_type = error_summary.get('by_error_type', {})
-    if not by_type:
-        return "<div>无数据</div>"
-
-    type_names_cn = {
-        'C1': '概念误解', 'C2': '符号错误', 'C3': '计算失误',
-        'C4': '步骤遗漏', 'C5': '表达不规范', 'C6': '级联错误'
-    }
-
-    labels = [f"{code}({type_names_cn.get(code, code)})" for code in by_type.keys()]
-    values = [info['count'] for info in by_type.values()]
-    colors = ['#FF6B6B', '#FF9F43', '#FECA57', '#48DBFB', '#A29BFE', '#54A0FF']
-
-    fig = go.Figure(data=go.Pie(
-        labels=labels, values=values,
-        hole=0.4,
-        marker=dict(colors=colors),
-        textinfo='label+percent'
-    ))
-
-    fig.update_layout(
-        title='错误类型分布',
-        height=400
-    )
-    return fig.to_html(full_html=False, include_plotlyjs=False, div_id='chart_error_pie')
+    return f'''
+    <div class="chart-box" style="overflow-x:auto;">
+        <h3>{title}</h3>
+        <table class="heatmap-table">
+            <thead><tr>{header}</tr></thead>
+            <tbody>{rows}</tbody>
+        </table>
+        <div class="legend">
+            <span style="color:#E74C3C;">■</span> &lt;40%薄弱 &nbsp;
+            <span style="color:#F39C12;">■</span> 40-70%发展中 &nbsp;
+            <span style="color:#2ECC71;">■</span> &ge;70%已掌握
+        </div>
+    </div>'''
 
 
-def make_cross_node_chart(stats):
-    """7. 跨节点变化图"""
-    import plotly.graph_objects as go
+def pie_html(title, labels, values, colors):
+    """生成CSS饼图（用SVG conic-gradient替代）"""
+    if not labels:
+        return f'<div class="chart-box"><h3>{title}</h3><p>无数据</p></div>'
 
-    changes = stats.get('cross_node_changes', [])
-    if not changes:
-        return "<div>无数据</div>"
+    total = sum(values)
+    if total == 0:
+        return f'<div class="chart-box"><h3>{title}</h3><p>无数据</p></div>'
 
-    type_names = {
-        'improved': '进步',
-        'regressed': '退步',
-        'persistent_error': '顽固性错误',
-        'still_wrong': '仍错(答案变了)',
-        'both_correct': '都对'
-    }
+    # 计算每段的角度
+    segments = []
+    start_angle = 0
+    for i, (label, val) in enumerate(zip(labels, values)):
+        pct = val / total
+        angle = pct * 360
+        segments.append((label, val, pct, start_angle, start_angle + angle, colors[i % len(colors)]))
+        start_angle += angle
 
-    type_counter = Counter(c['change_type'] for c in changes)
+    # 用SVG画饼图
+    import math
+    cx, cy, r = 100, 100, 80
+    paths = ''
+    for label, val, pct, a1, a2, color in segments:
+        x1 = cx + r * math.cos(math.radians(a1 - 90))
+        y1 = cy + r * math.sin(math.radians(a1 - 90))
+        x2 = cx + r * math.cos(math.radians(a2 - 90))
+        y2 = cy + r * math.sin(math.radians(a2 - 90))
+        large = 1 if (a2 - a1) > 180 else 0
+        paths += f'<path d="M{cx},{cy} L{x1:.1f},{y1:.1f} A{r},{r} 0 {large} 1 {x2:.1f},{y2:.1f} Z" fill="{color}" stroke="white" stroke-width="2"/>'
 
-    fig = go.Figure(data=go.Bar(
-        x=[type_names.get(k, k) for k in type_counter.keys()],
-        y=list(type_counter.values()),
-        marker_color=['#2ECC71', '#E74C3C', '#E67E22', '#F39C12', '#3498DB'],
-        text=list(type_counter.values()),
-        textposition='outside'
-    ))
+    # 图例
+    legend = ''
+    for label, val, pct, _, _, color in segments:
+        legend += f'<div class="pie-legend-item"><span style="color:{color};">■</span> {label}: {val}条 ({pct*100:.1f}%)</div>'
 
-    fig.update_layout(
-        title='跨节点(N01→N02)学习变化分析',
-        xaxis=dict(title='变化类型'),
-        yaxis=dict(title='记录数'),
-        height=350
-    )
-    return fig.to_html(full_html=False, include_plotlyjs=False, div_id='chart_cross_node')
+    return f'''
+    <div class="chart-box">
+        <h3>{title}</h3>
+        <div style="display:flex;align-items:center;justify-content:center;gap:20px;">
+            <svg width="200" height="200">{paths}<circle cx="{cx}" cy="{cy}" r="35" fill="white"/><text x="{cx}" y="{cy+5}" text-anchor="middle" font-size="14" fill="#666">共{total}条</text></svg>
+            <div>{legend}</div>
+        </div>
+    </div>'''
 
 
-def make_critical_findings(error_summary):
-    """8. 关键发现列表（HTML卡片）"""
-    findings = error_summary.get('critical_findings', [])
+def findings_html(findings):
+    """关键发现卡片"""
     if not findings:
-        return "<div>无关键发现</div>"
+        return '<div class="chart-box"><h3>关键发现</h3><p>无关键发现</p></div>'
 
-    severity_colors = {
-        'critical': '#FF4444',
-        'high': '#FF8800',
-        'medium': '#FFAA00'
-    }
-    severity_labels = {
-        'critical': '严重',
-        'high': '高',
-        'medium': '中'
-    }
+    severity_colors = {'critical': '#E74C3C', 'high': '#E67E22', 'medium': '#F39C12'}
+    severity_labels = {'critical': '严重', 'high': '高', 'medium': '中'}
 
-    cards = []
+    cards = ''
     for f in findings:
         color = severity_colors.get(f.get('severity', 'medium'), '#999')
         label = severity_labels.get(f.get('severity', 'medium'), '?')
-        cards.append(f"""
-        <div style="border-left:4px solid {color};background:#FAFAFA;padding:10px;margin:5px 0;border-radius:3px;">
-            <span style="color:{color};font-weight:bold;">[{label}]</span>
-            {f.get('description', '')}
-        </div>
-        """)
+        cards += f'<div class="finding-card" style="border-left:4px solid {color};"><span style="color:{color};font-weight:bold;">[{label}]</span> {f.get("description", "")}</div>'
 
-    return f"""
-    <div style="margin:10px 0;">
-        <h3>关键发现（自动识别）</h3>
-        {''.join(cards)}
-    </div>
-    """
+    return f'<div class="chart-box"><h3>关键发现（自动识别）</h3>{cards}</div>'
 
 
 # ============================================================
-# 组装仪表盘HTML
+# 组装仪表盘
 # ============================================================
 
 def build_dashboard(data):
-    """组装完整的仪表盘页面"""
     stats = data.get('statistics', {})
     mastery = data.get('mastery_matrix', {})
     error_summary = data.get('error_pattern_summary', {})
+    profiles = data.get('student_profiles', {})
 
-    # 生成各图表
-    radar_html = make_radar_chart(stats)
-    class_bar_html = make_class_comparison_bar(stats)
-    heatmap_html = make_scoring_point_heatmap(stats)
-    student_dist_html = make_student_distribution(stats)
-    mastery_html = make_mastery_heatmap(mastery)
-    error_pie_html = make_error_type_pie(error_summary)
-    cross_node_html = make_cross_node_chart(stats)
-    findings_html = make_critical_findings(error_summary)
-
-    # 总体KPI
+    # --- KPI ---
     overall = stats.get('overall', {})
+    kpi_score = overall.get('score_rate_percent', '?')
+    kpi_records = overall.get('total_records', '?')
 
-    html = f"""<!DOCTYPE html>
+    # --- 图1: 雷达图 ---
+    radar_labels = [INDICATOR_NAMES[ind][:6] for ind in INDICATORS]
+    radar_values = [stats.get('by_indicator', {}).get(ind, {}).get('score_rate', 0) * 100
+                     for ind in INDICATORS]
+    chart_radar = radar_html('九指标得分率雷达图', radar_labels, radar_values)
+
+    # --- 图2: 班级对比 ---
+    themes = ['T01', 'T02', 'T03']
+    theme_names = ['代数式', '方程', '不等式']
+    dc01_rates = [stats.get('by_class_theme', {}).get(f"DC01-{t}", {}).get('score_rate', 0) * 100 for t in themes]
+    dc02_rates = [stats.get('by_class_theme', {}).get(f"DC02-{t}", {}).get('score_rate', 0) * 100 for t in themes]
+    chart_class = grouped_bar_html('班级×主题对比', theme_names, dc01_rates, dc02_rates, 'DC01', 'DC02')
+
+    # --- 图3: 评分点热力图 ---
+    point_stats = stats.get('by_scoring_point', {})
+    sorted_points = sorted(point_stats.items(), key=lambda x: x[1]['score_rate'])
+    point_labels = [pid[:6] for pid, _ in sorted_points if pid]
+    point_values = [info['score_rate'] * 100 for _, info in sorted_points if _]
+    point_colors = ['#E74C3C' if v < 30 else '#F39C12' if v < 50 else '#2ECC71' for v in point_values]
+    chart_points = bar_chart_html('评分点得分率（红色=重点关注）', point_labels, point_values, point_colors)
+
+    # --- 图4: 学生分布 ---
+    students = stats.get('by_student', {})
+    sorted_students = sorted(students.items(), key=lambda x: x[1]['score_rate'])
+    stu_labels = [s[0] for s in sorted_students]
+    stu_values = [s[1]['score_rate'] * 100 for s in sorted_students]
+    stu_colors = ['#4ECDC4' if s[1].get('class') == 'DC01' else '#FF6B6B' for s in sorted_students]
+    chart_students = bar_chart_html('学生得分率分布（青=DC01 红=DC02）', stu_labels, stu_values, stu_colors)
+
+    # --- 图5: 掌握概率热力图 ---
+    if mastery:
+        sorted_sids = sorted(mastery.keys(),
+                             key=lambda s: sum(mastery[s].values()) / len(mastery[s]))
+    else:
+        sorted_sids = []
+    chart_mastery = heatmap_html('BKT掌握概率热力图', sorted_sids, INDICATORS, mastery)
+
+    # --- 图6: 错误类型饼图 ---
+    by_type = error_summary.get('by_error_type', {})
+    type_names_cn = {'C1': '概念误解', 'C2': '符号错误', 'C3': '计算失误',
+                     'C4': '步骤遗漏', 'C5': '表达不规范', 'C6': '级联错误'}
+    pie_labels = [f"{code}({type_names_cn.get(code, code)})" for code in by_type.keys()]
+    pie_values = [info['count'] for info in by_type.values()]
+    pie_colors = ['#FF6B6B', '#FF9F43', '#FECA57', '#48DBFB', '#A29BFE', '#54A0FF']
+    chart_pie = pie_html('错误类型分布', pie_labels, pie_values, pie_colors)
+
+    # --- 图7: 跨节点变化 ---
+    changes = stats.get('cross_node_changes', [])
+    type_counter = Counter(c['change_type'] for c in changes)
+    type_names = {'improved': '进步', 'regressed': '退步', 'persistent_error': '顽固错误',
+                  'still_wrong': '仍错(答案变)', 'both_correct': '都对'}
+    change_labels = [type_names.get(k, k) for k in type_counter.keys()]
+    change_values = list(type_counter.values())
+    change_colors = ['#2ECC71', '#E74C3C', '#E67E22', '#F39C12', '#3498DB']
+    chart_changes = bar_chart_html('跨节点(N01→N02)学习变化', change_labels, change_values,
+                                    change_colors, max_val=max(change_values) if change_values else 1, unit='条')
+
+    # --- 图8: 关键发现 ---
+    chart_findings = findings_html(error_summary.get('critical_findings', []))
+
+    # --- 组装HTML ---
+    html = f'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智慧学伴 - 学情诊断仪表盘</title>
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <style>
-        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-        body {{ font-family: 'Microsoft YaHei', sans-serif; background: #F5F5F5; color: #333; }}
-        .header {{
-            background: linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%);
-            color: white; padding: 20px 30px; text-align: center;
-        }}
-        .header h1 {{ font-size: 24px; margin-bottom: 5px; }}
-        .header p {{ font-size: 13px; opacity: 0.9; }}
-        .kpi-row {{
-            display: flex; justify-content: center; gap: 20px;
-            padding: 20px; background: white; margin-bottom: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }}
-        .kpi-card {{
-            text-align: center; padding: 15px 25px;
-            border-radius: 8px; min-width: 150px;
-        }}
-        .kpi-card .value {{ font-size: 28px; font-weight: bold; }}
-        .kpi-card .label {{ font-size: 12px; color: #666; margin-top: 5px; }}
-        .section {{
-            background: white; margin: 10px; padding: 20px;
-            border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }}
-        .section h2 {{
-            font-size: 16px; color: #45B7D1;
-            border-bottom: 2px solid #E0E0E0; padding-bottom: 8px; margin-bottom: 15px;
-        }}
-        .chart-grid {{
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
-        }}
-        .chart-grid > div {{ }}
-        .footer {{
-            text-align: center; padding: 20px; color: #999; font-size: 12px;
-        }}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧学伴 - 学情诊断仪表盘</title>
+<style>
+* {{ margin:0; padding:0; box-sizing:border-box; }}
+body {{ font-family:'Microsoft YaHei','PingFang SC','Helvetica Neue',sans-serif;
+       background:#F5F5F5; color:#333; line-height:1.6; }}
+.header {{
+    background:linear-gradient(135deg,#4ECDC4 0%,#45B7D1 100%);
+    color:white; padding:25px 30px; text-align:center;
+}}
+.header h1 {{ font-size:24px; margin-bottom:5px; }}
+.header p {{ font-size:13px; opacity:0.9; }}
+.kpi-row {{
+    display:flex; justify-content:center; gap:15px;
+    padding:20px; flex-wrap:wrap;
+}}
+.kpi-card {{
+    text-align:center; padding:15px 25px; border-radius:8px; min-width:130px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.1);
+}}
+.kpi-card .value {{ font-size:26px; font-weight:bold; }}
+.kpi-card .label {{ font-size:12px; color:#666; margin-top:3px; }}
+.section {{
+    background:white; margin:10px; padding:20px; border-radius:8px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.1);
+}}
+.section h2 {{
+    font-size:16px; color:#45B7D1;
+    border-bottom:2px solid #E0E0E0; padding-bottom:8px; margin-bottom:15px;
+}}
+.chart-grid {{
+    display:grid; grid-template-columns:1fr 1fr; gap:15px;
+}}
+@media(max-width:768px) {{
+    .chart-grid {{ grid-template-columns:1fr; }}
+}}
+.chart-box {{
+    padding:10px; border:1px solid #EEE; border-radius:6px;
+}}
+.chart-box h3 {{
+    font-size:14px; color:#555; margin-bottom:10px; text-align:center;
+}}
+.bar-chart {{
+    display:flex; align-items:flex-end; justify-content:center;
+    gap:8px; height:240px; padding-bottom:30px; overflow-x:auto;
+}}
+.bar-item {{
+    display:flex; flex-direction:column; align-items:center;
+    min-width:40px; height:100%; justify-content:flex-end; position:relative;
+}}
+.bar-group {{
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+    height:100%; margin:0 2px;
+}}
+.bar-fill {{
+    width:24px; border-radius:3px 3px 0 0; transition:height 0.3s;
+    min-height:3px;
+}}
+.bar-value {{
+    font-size:9px; color:#666; margin-bottom:2px; white-space:nowrap;
+}}
+.bar-label {{
+    font-size:8px; color:#888; margin-top:4px; text-align:center;
+    white-space:nowrap; writing-mode:horizontal-tb;
+    position:absolute; bottom:-20px; transform:rotate(-30deg); transform-origin:left top;
+}}
+.legend {{
+    text-align:center; font-size:11px; color:#888; margin-bottom:10px;
+}}
+.heatmap-table {{
+    border-collapse:collapse; font-size:10px; margin:auto;
+}}
+.heatmap-table th {{
+    padding:8px 4px; color:#666; font-weight:normal;
+}}
+.heatmap-table th.rotate {{
+    writing-mode:vertical-rl; text-orientation:upright; height:60px;
+}}
+.heatmap-table td {{
+    padding:3px; text-align:center; border:1px solid #EEE;
+}}
+.heatmap-table td.sid {{
+    font-weight:bold; background:#F8F8F8; text-align:right; padding-right:8px;
+}}
+.heat-cell {{
+    width:40px; height:24px; font-size:9px;
+}}
+.finding-card {{
+    background:#FAFAFA; padding:10px 12px; margin:5px 0;
+    border-radius:3px; font-size:13px;
+}}
+.pie-legend-item {{
+    font-size:11px; margin:3px 0;
+}}
+.footer {{
+    text-align:center; padding:20px; color:#999; font-size:12px;
+}}
+</style>
 </head>
 <body>
-    <div class="header">
-        <h1>智慧学伴 · 学情诊断仪表盘</h1>
-        <p>七年级数学 | 3主题 9指标 54题 40学生 790条记录</p>
-    </div>
 
-    <div class="kpi-row">
-        <div class="kpi-card" style="background:#E8F5E9;">
-            <div class="value" style="color:#2E7D32;">{overall.get('score_rate_percent','?')}</div>
-            <div class="label">总体得分率</div>
-        </div>
-        <div class="kpi-card" style="background:#E3F2FD;">
-            <div class="value" style="color:#1565C0;">{overall.get('total_records','?')}</div>
-            <div class="label">已评分记录</div>
-        </div>
-        <div class="kpi-card" style="background:#FFF3E0;">
-            <div class="value" style="color:#E65100;">40</div>
-            <div class="label">学生人数</div>
-        </div>
-        <div class="kpi-card" style="background:#FCE4EC;">
-            <div class="value" style="color:#C62828;">{len(error_summary.get('by_error_type',{}))}</div>
-            <div class="label">错误类型</div>
-        </div>
-    </div>
+<div class="header">
+    <h1>智慧学伴 · 学情诊断仪表盘</h1>
+    <p>七年级数学 | 3主题 9指标 54题 40学生 {kpi_records}条记录 | 得分率{kpi_score}</p>
+</div>
 
-    {findings_html}
-
-    <div class="section">
-        <h2>九指标得分率雷达图 & 班级×主题对比</h2>
-        <div class="chart-grid">
-            <div>{radar_html}</div>
-            <div>{class_bar_html}</div>
-        </div>
+<div class="kpi-row">
+    <div class="kpi-card" style="background:#E8F5E9;">
+        <div class="value" style="color:#2E7D32;">{kpi_score}</div>
+        <div class="label">总体得分率</div>
     </div>
-
-    <div class="section">
-        <h2>评分点得分率 & 错误类型分布</h2>
-        <div class="chart-grid">
-            <div>{heatmap_html}</div>
-            <div>{error_pie_html}</div>
-        </div>
+    <div class="kpi-card" style="background:#E3F2FD;">
+        <div class="value" style="color:#1565C0;">{kpi_records}</div>
+        <div class="label">已评分记录</div>
     </div>
-
-    <div class="section">
-        <h2>学生得分率分布 & 跨节点变化</h2>
-        <div class="chart-grid">
-            <div>{student_dist_html}</div>
-            <div>{cross_node_html}</div>
-        </div>
+    <div class="kpi-card" style="background:#FFF3E0;">
+        <div class="value" style="color:#E65100;">40</div>
+        <div class="label">学生人数</div>
     </div>
-
-    <div class="section">
-        <h2>BKT知识追踪 - 掌握概率热力图</h2>
-        {mastery_html}
+    <div class="kpi-card" style="background:#FCE4EC;">
+        <div class="value" style="color:#C62828;">{len(by_type)}</div>
+        <div class="label">错误类型</div>
     </div>
+</div>
 
-    <div class="footer">
-        智慧学伴智能体系统 | 数据驱动学情诊断 | 生成时间: 2026-11
+{chart_findings}
+
+<div class="section">
+    <h2>九指标得分率 & 班级×主题对比</h2>
+    <div class="chart-grid">
+        {chart_radar}
+        {chart_class}
     </div>
+</div>
+
+<div class="section">
+    <h2>评分点得分率 & 错误类型分布</h2>
+    <div class="chart-grid">
+        {chart_points}
+        {chart_pie}
+    </div>
+</div>
+
+<div class="section">
+    <h2>学生得分率分布 & 跨节点变化</h2>
+    <div class="chart-grid">
+        {chart_students}
+        {chart_changes}
+    </div>
+</div>
+
+<div class="section">
+    <h2>BKT知识追踪 - 掌握概率热力图</h2>
+    {chart_mastery}
+</div>
+
+<div class="footer">
+    智慧学伴智能体系统 | 数据驱动学情诊断 | 生成时间: 2026-11
+</div>
+
 </body>
-</html>"""
+</html>'''
 
     output_path = os.path.join(OUTPUT_DIR, 'dashboard.html')
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html)
     print(f"  -> {output_path}")
+    print(f"  文件大小: {os.path.getsize(output_path)//1024}KB")
+    print(f"  用浏览器直接打开即可，不需要联网")
 
+
+# ============================================================
+# 主函数
+# ============================================================
 
 def main():
     print("\n" + "=" * 60)
-    print("  智慧学伴 - 模块6：学情可视化仪表盘")
+    print("  智慧学伴 - 模块6：学情可视化仪表盘（零依赖版）")
     print("=" * 60)
+    print("  ★ 无需安装任何第三方库，直接运行 ★")
 
-    check_dependencies()
     data = load_all_data()
     print(f"  数据加载完成")
 
@@ -499,7 +564,7 @@ def main():
 
     print("\n" + "=" * 60)
     print("  模块6 完成！")
-    print(f"  用浏览器打开 dashboard.html 即可查看仪表盘")
+    print("  用浏览器打开 dashboard.html 即可查看仪表盘")
     print("=" * 60)
 
 

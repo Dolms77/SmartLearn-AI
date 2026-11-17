@@ -41,7 +41,7 @@ from collections import defaultdict, Counter
 
 OUTPUT_DIR = os.environ.get("SS_OUT") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "output")
 # DeepSeek API配置（运行LLM层时需要）
-DEEPSEEK_API_KEY = ""  # 在这里填你的API Key，或通过命令行参数传入
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
 DEEPSEEK_MODEL = "deepseek-chat"
 

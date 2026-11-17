@@ -19,15 +19,11 @@ ui/
 ## 1. 安装
 
 ```powershell
-cd "D:\学习资料\AI竞赛\工作区"
-D:\python313\python.exe -m venv .venv-ui
-mkdir D:\tmp-pip 2>nul
-set TEMP=D:\tmp-pip
-set TMP=D:\tmp-pip
-.venv-ui\Scripts\python.exe -m pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements-ui.txt
+# From the repository root
+.\scripts\bootstrap.ps1
 ```
 
-> **注意**：工程路径含中文时 pip 解包会失败（`pip-unpack-xxx` 找不到）。把 `TEMP` 指到 ASCII 目录（`D:\tmp-pip`）即可；仍失败则把整个工程挪到 `D:\AIComp` 这类纯英文路径。
+Bootstrap creates `.venv-ui`, installs the UI and script dependencies from the repository manifests, and runs self-tests. It also redirects pip's temporary files into the repository.
 
 验证：
 
@@ -167,7 +163,7 @@ cd ui
 |---|---|
 | `output/cleaned_data.json` | 直接报错并提示先跑 `01_data_loader.py` |
 | `statistics.json` / `student_profiles.json` | 对应页面降级/报错，学生诊断仍可用 |
-| `task1_knowledge_structure.json`（B） | 用 `cleaned_data.knowledge_structure` 现组装，并标注"UI 组装版" |
+| `task1_knowledge_structure.json`（B） | 由 `09_task1_knowledge_structure.py` 正式生成；缺失时用 `cleaned_data.knowledge_structure` 现组装并标注"UI 组装版" |
 | `task3_recommendations.json`（B） | 建议区显示"待 B 交付"+ 只给排序依据 |
 | `knowledge_base.json`（A 的 04） | 本界面不依赖它，无需处理 |
 | DeepSeek Key | 全部功能可用，问答走离线模板 |

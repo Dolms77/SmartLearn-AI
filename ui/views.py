@@ -259,22 +259,39 @@ def _task3_for(bundle: dict, sid: str) -> dict | None:
                 return s
     if isinstance(data, dict) and sid in data:
         return data[sid]
+    if isinstance(data, dict):
+        for group in ("cases", "all_students"):
+            group_data = data.get(group)
+            if isinstance(group_data, dict) and sid in group_data:
+                return group_data[sid]
     return None
 
 
 def _render_task3(rec: dict) -> None:
     if rec.get("diagnosis_summary"):
         st.markdown(f"**诊断摘要**：{rec['diagnosis_summary']}")
+    if rec.get("level"):
+        st.caption(f"学情分层：{rec['level']}")
     for r in rec.get("recommendations", []):
         with st.expander(f"优先级 {r.get('priority', '-')}｜{r.get('indicator', '')}｜"
                          f"{r.get('reason', '')[:40]}", expanded=r.get("priority") == 1):
             st.markdown(f"**理由**：{r.get('reason', '')}")
             if r.get("recommended_questions"):
-                st.markdown("**推荐题目**：" + " → ".join(r["recommended_questions"]))
+                details = {
+                    item.get("question_id"): item.get("why_this")
+                    for item in r.get("question_details", [])
+                }
+                questions = []
+                for qid in r["recommended_questions"]:
+                    reason = details.get(qid)
+                    questions.append(f"{qid}（{reason}）" if reason else qid)
+                st.markdown("**推荐题目**：" + " → ".join(questions))
             for i, h in enumerate(r.get("step_hints", []), 1):
                 st.markdown(f"{i}. {h}")
             if r.get("follow_up_condition"):
                 st.info(f"调整条件：{r['follow_up_condition']}")
+            if r.get("human_review"):
+                st.caption(r["human_review"])
 
 
 # --------------------------------------------------------------------------

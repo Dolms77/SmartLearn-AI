@@ -25,6 +25,9 @@ import sys
 # ============================================================
 
 OUTPUT_DIR = os.environ.get("SS_OUT") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "output")
+DATA_DIR = os.environ.get("SS_DATA") or os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "赛题材料", "赛题数据",
+    "赛题资料包", "4_赛题数据", "模拟学情数据")
 CHROMA_DIR = os.path.join(OUTPUT_DIR, "chroma_db")
 
 # ============================================================
@@ -126,7 +129,7 @@ def build_documents(data_model):
     # 注意：学习卡在原始题目与材料表中，material_type='学习卡'
     # 我们需要额外读取原始CSV
     import csv
-    csv_path = "/data_agent/users/sessions/36527195/upload/题目与材料.csv"
+    csv_path = os.path.join(DATA_DIR, "题目与材料.csv")
     with open(csv_path, 'r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f)
         for row in reader:
