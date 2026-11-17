@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""把 01–06 产出里"界面还没用上"的部分接出来。
+"""把结构化产物里"界面还没用上"的部分接出来。
 
 覆盖：
   * statistics.by_scoring_point  → 评分点级薄弱清单（任务2 最硬的证据）
@@ -7,7 +7,7 @@
   * error_pattern_summary → 错误类型分布 / 关键发现 / 高频错题
   * mastery_matrix + 每人证据量 → 全班 40×9 热力图（证据不足的格子留白）
   * cleaned_data.test_nodes → 两个测验节点的口径说明
-  * 05/06 生成的 HTML、04 的 knowledge_base.json → 成果附件
+  * 05 生成的知识图谱 HTML、04 的 knowledge_base.json → 成果附件
 """
 from __future__ import annotations
 
@@ -141,11 +141,10 @@ def node_info(bundle: dict) -> list[dict]:
 
 
 def artifact_files(bundle: dict) -> list[dict]:
-    """01–06 生成、但界面尚未内联展示的成果文件，用于下载/外链。"""
+    """生成、但界面尚未内联展示的成果文件，用于下载/外链。"""
     d = bundle.get("output_dir", "")
     items = [
         ("knowledge_graph.html", "05 交互式知识图谱", "text/html"),
-        ("dashboard.html", "06 学情仪表盘（8 图）", "text/html"),
         ("bkt_summary.txt", "02 掌握度矩阵摘要", "text/plain"),
         ("statistics_summary.txt", "01 统计摘要", "text/plain"),
         ("error_diagnosis_summary.txt", "03 错因摘要", "text/plain"),

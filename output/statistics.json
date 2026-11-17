@@ -1988,6 +1988,2020 @@
       "score_rate_percent": "57.7%"
     }
   },
+  "by_class_question": {
+    "DC01": {
+      "Q001": {
+        "count": 10,
+        "score": 6,
+        "full": 10,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q002": {
+        "count": 13,
+        "score": 4,
+        "full": 13,
+        "score_rate": 0.3077,
+        "score_rate_percent": "30.8%"
+      },
+      "Q003": {
+        "count": 9,
+        "score": 8,
+        "full": 9,
+        "score_rate": 0.8889,
+        "score_rate_percent": "88.9%"
+      },
+      "Q004": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q005": {
+        "count": 10,
+        "score": 8,
+        "full": 10,
+        "score_rate": 0.8,
+        "score_rate_percent": "80.0%"
+      },
+      "Q006": {
+        "count": 15,
+        "score": 25,
+        "full": 45,
+        "score_rate": 0.5556,
+        "score_rate_percent": "55.6%"
+      },
+      "Q007": {
+        "count": 7,
+        "score": 4,
+        "full": 7,
+        "score_rate": 0.5714,
+        "score_rate_percent": "57.1%"
+      },
+      "Q008": {
+        "count": 8,
+        "score": 6,
+        "full": 8,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q009": {
+        "count": 10,
+        "score": 24,
+        "full": 30,
+        "score_rate": 0.8,
+        "score_rate_percent": "80.0%"
+      },
+      "Q010": {
+        "count": 6,
+        "score": 4,
+        "full": 6,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q011": {
+        "count": 12,
+        "score": 22,
+        "full": 36,
+        "score_rate": 0.6111,
+        "score_rate_percent": "61.1%"
+      },
+      "Q012": {
+        "count": 11,
+        "score": 5,
+        "full": 11,
+        "score_rate": 0.4545,
+        "score_rate_percent": "45.5%"
+      },
+      "Q013": {
+        "count": 10,
+        "score": 7,
+        "full": 10,
+        "score_rate": 0.7,
+        "score_rate_percent": "70.0%"
+      },
+      "Q014": {
+        "count": 14,
+        "score": 13,
+        "full": 42,
+        "score_rate": 0.3095,
+        "score_rate_percent": "31.0%"
+      },
+      "Q015": {
+        "count": 10,
+        "score": 20,
+        "full": 30,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q016": {
+        "count": 9,
+        "score": 6,
+        "full": 9,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q017": {
+        "count": 15,
+        "score": 8,
+        "full": 15,
+        "score_rate": 0.5333,
+        "score_rate_percent": "53.3%"
+      },
+      "Q018": {
+        "count": 11,
+        "score": 13,
+        "full": 33,
+        "score_rate": 0.3939,
+        "score_rate_percent": "39.4%"
+      },
+      "Q019": {
+        "count": 8,
+        "score": 5,
+        "full": 8,
+        "score_rate": 0.625,
+        "score_rate_percent": "62.5%"
+      },
+      "Q020": {
+        "count": 6,
+        "score": 5,
+        "full": 6,
+        "score_rate": 0.8333,
+        "score_rate_percent": "83.3%"
+      },
+      "Q021": {
+        "count": 7,
+        "score": 4,
+        "full": 7,
+        "score_rate": 0.5714,
+        "score_rate_percent": "57.1%"
+      },
+      "Q022": {
+        "count": 11,
+        "score": 21,
+        "full": 33,
+        "score_rate": 0.6364,
+        "score_rate_percent": "63.6%"
+      },
+      "Q023": {
+        "count": 8,
+        "score": 5,
+        "full": 8,
+        "score_rate": 0.625,
+        "score_rate_percent": "62.5%"
+      },
+      "Q024": {
+        "count": 10,
+        "score": 6,
+        "full": 10,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q025": {
+        "count": 8,
+        "score": 16,
+        "full": 24,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q026": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q027": {
+        "count": 10,
+        "score": 6,
+        "full": 10,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q028": {
+        "count": 5,
+        "score": 3,
+        "full": 15,
+        "score_rate": 0.2,
+        "score_rate_percent": "20.0%"
+      },
+      "Q029": {
+        "count": 13,
+        "score": 9,
+        "full": 13,
+        "score_rate": 0.6923,
+        "score_rate_percent": "69.2%"
+      },
+      "Q030": {
+        "count": 8,
+        "score": 6,
+        "full": 8,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q031": {
+        "count": 7,
+        "score": 14,
+        "full": 21,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q032": {
+        "count": 10,
+        "score": 5,
+        "full": 10,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q033": {
+        "count": 6,
+        "score": 4,
+        "full": 6,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q034": {
+        "count": 4,
+        "score": 8,
+        "full": 12,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q035": {
+        "count": 7,
+        "score": 6,
+        "full": 7,
+        "score_rate": 0.8571,
+        "score_rate_percent": "85.7%"
+      },
+      "Q036": {
+        "count": 7,
+        "score": 12,
+        "full": 21,
+        "score_rate": 0.5714,
+        "score_rate_percent": "57.1%"
+      },
+      "Q037": {
+        "count": 7,
+        "score": 2,
+        "full": 7,
+        "score_rate": 0.2857,
+        "score_rate_percent": "28.6%"
+      },
+      "Q039": {
+        "count": 6,
+        "score": 5,
+        "full": 6,
+        "score_rate": 0.8333,
+        "score_rate_percent": "83.3%"
+      },
+      "Q040": {
+        "count": 6,
+        "score": 13,
+        "full": 18,
+        "score_rate": 0.7222,
+        "score_rate_percent": "72.2%"
+      },
+      "Q041": {
+        "count": 8,
+        "score": 6,
+        "full": 8,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q042": {
+        "count": 6,
+        "score": 4,
+        "full": 6,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q043": {
+        "count": 4,
+        "score": 3,
+        "full": 12,
+        "score_rate": 0.25,
+        "score_rate_percent": "25.0%"
+      },
+      "Q044": {
+        "count": 7,
+        "score": 14,
+        "full": 7,
+        "score_rate": 2.0,
+        "score_rate_percent": "200.0%"
+      },
+      "Q045": {
+        "count": 6,
+        "score": 5,
+        "full": 6,
+        "score_rate": 0.8333,
+        "score_rate_percent": "83.3%"
+      },
+      "Q046": {
+        "count": 4,
+        "score": 7,
+        "full": 12,
+        "score_rate": 0.5833,
+        "score_rate_percent": "58.3%"
+      },
+      "Q047": {
+        "count": 4,
+        "score": 2,
+        "full": 4,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q048": {
+        "count": 3,
+        "score": 2,
+        "full": 3,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q049": {
+        "count": 7,
+        "score": 17,
+        "full": 21,
+        "score_rate": 0.8095,
+        "score_rate_percent": "81.0%"
+      },
+      "Q050": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q051": {
+        "count": 3,
+        "score": 1,
+        "full": 3,
+        "score_rate": 0.3333,
+        "score_rate_percent": "33.3%"
+      },
+      "Q052": {
+        "count": 6,
+        "score": 9,
+        "full": 18,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q053": {
+        "count": 6,
+        "score": 4,
+        "full": 6,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q054": {
+        "count": 5,
+        "score": 7,
+        "full": 15,
+        "score_rate": 0.4667,
+        "score_rate_percent": "46.7%"
+      }
+    },
+    "DC02": {
+      "Q001": {
+        "count": 11,
+        "score": 9,
+        "full": 11,
+        "score_rate": 0.8182,
+        "score_rate_percent": "81.8%"
+      },
+      "Q002": {
+        "count": 10,
+        "score": 7,
+        "full": 10,
+        "score_rate": 0.7,
+        "score_rate_percent": "70.0%"
+      },
+      "Q003": {
+        "count": 9,
+        "score": 7,
+        "full": 9,
+        "score_rate": 0.7778,
+        "score_rate_percent": "77.8%"
+      },
+      "Q004": {
+        "count": 8,
+        "score": 4,
+        "full": 8,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q005": {
+        "count": 9,
+        "score": 8,
+        "full": 9,
+        "score_rate": 0.8889,
+        "score_rate_percent": "88.9%"
+      },
+      "Q006": {
+        "count": 10,
+        "score": 17,
+        "full": 30,
+        "score_rate": 0.5667,
+        "score_rate_percent": "56.7%"
+      },
+      "Q007": {
+        "count": 9,
+        "score": 2,
+        "full": 9,
+        "score_rate": 0.2222,
+        "score_rate_percent": "22.2%"
+      },
+      "Q008": {
+        "count": 10,
+        "score": 7,
+        "full": 10,
+        "score_rate": 0.7,
+        "score_rate_percent": "70.0%"
+      },
+      "Q009": {
+        "count": 12,
+        "score": 26,
+        "full": 36,
+        "score_rate": 0.7222,
+        "score_rate_percent": "72.2%"
+      },
+      "Q010": {
+        "count": 10,
+        "score": 2,
+        "full": 10,
+        "score_rate": 0.2,
+        "score_rate_percent": "20.0%"
+      },
+      "Q011": {
+        "count": 7,
+        "score": 9,
+        "full": 21,
+        "score_rate": 0.4286,
+        "score_rate_percent": "42.9%"
+      },
+      "Q012": {
+        "count": 10,
+        "score": 4,
+        "full": 10,
+        "score_rate": 0.4,
+        "score_rate_percent": "40.0%"
+      },
+      "Q013": {
+        "count": 8,
+        "score": 6,
+        "full": 8,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q014": {
+        "count": 8,
+        "score": 7,
+        "full": 24,
+        "score_rate": 0.2917,
+        "score_rate_percent": "29.2%"
+      },
+      "Q015": {
+        "count": 6,
+        "score": 16,
+        "full": 18,
+        "score_rate": 0.8889,
+        "score_rate_percent": "88.9%"
+      },
+      "Q016": {
+        "count": 9,
+        "score": 4,
+        "full": 9,
+        "score_rate": 0.4444,
+        "score_rate_percent": "44.4%"
+      },
+      "Q017": {
+        "count": 11,
+        "score": 7,
+        "full": 11,
+        "score_rate": 0.6364,
+        "score_rate_percent": "63.6%"
+      },
+      "Q018": {
+        "count": 10,
+        "score": 20,
+        "full": 30,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q019": {
+        "count": 2,
+        "score": 1,
+        "full": 2,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q020": {
+        "count": 7,
+        "score": 3,
+        "full": 7,
+        "score_rate": 0.4286,
+        "score_rate_percent": "42.9%"
+      },
+      "Q021": {
+        "count": 5,
+        "score": 3,
+        "full": 5,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q022": {
+        "count": 4,
+        "score": 4,
+        "full": 12,
+        "score_rate": 0.3333,
+        "score_rate_percent": "33.3%"
+      },
+      "Q023": {
+        "count": 8,
+        "score": 3,
+        "full": 8,
+        "score_rate": 0.375,
+        "score_rate_percent": "37.5%"
+      },
+      "Q024": {
+        "count": 8,
+        "score": 3,
+        "full": 8,
+        "score_rate": 0.375,
+        "score_rate_percent": "37.5%"
+      },
+      "Q025": {
+        "count": 8,
+        "score": 10,
+        "full": 24,
+        "score_rate": 0.4167,
+        "score_rate_percent": "41.7%"
+      },
+      "Q026": {
+        "count": 10,
+        "score": 6,
+        "full": 10,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q027": {
+        "count": 7,
+        "score": 3,
+        "full": 7,
+        "score_rate": 0.4286,
+        "score_rate_percent": "42.9%"
+      },
+      "Q028": {
+        "count": 7,
+        "score": 15,
+        "full": 21,
+        "score_rate": 0.7143,
+        "score_rate_percent": "71.4%"
+      },
+      "Q029": {
+        "count": 7,
+        "score": 3,
+        "full": 7,
+        "score_rate": 0.4286,
+        "score_rate_percent": "42.9%"
+      },
+      "Q030": {
+        "count": 8,
+        "score": 5,
+        "full": 8,
+        "score_rate": 0.625,
+        "score_rate_percent": "62.5%"
+      },
+      "Q031": {
+        "count": 6,
+        "score": 9,
+        "full": 18,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q032": {
+        "count": 8,
+        "score": 2,
+        "full": 8,
+        "score_rate": 0.25,
+        "score_rate_percent": "25.0%"
+      },
+      "Q033": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q034": {
+        "count": 13,
+        "score": 22,
+        "full": 39,
+        "score_rate": 0.5641,
+        "score_rate_percent": "56.4%"
+      },
+      "Q035": {
+        "count": 11,
+        "score": 6,
+        "full": 11,
+        "score_rate": 0.5455,
+        "score_rate_percent": "54.5%"
+      },
+      "Q036": {
+        "count": 4,
+        "score": 4,
+        "full": 12,
+        "score_rate": 0.3333,
+        "score_rate_percent": "33.3%"
+      },
+      "Q037": {
+        "count": 4,
+        "score": 2,
+        "full": 4,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q038": {
+        "count": 7,
+        "score": 6,
+        "full": 7,
+        "score_rate": 0.8571,
+        "score_rate_percent": "85.7%"
+      },
+      "Q039": {
+        "count": 4,
+        "score": 3,
+        "full": 4,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q040": {
+        "count": 3,
+        "score": 5,
+        "full": 9,
+        "score_rate": 0.5556,
+        "score_rate_percent": "55.6%"
+      },
+      "Q041": {
+        "count": 3,
+        "score": 2,
+        "full": 3,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q042": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q043": {
+        "count": 5,
+        "score": 5,
+        "full": 15,
+        "score_rate": 0.3333,
+        "score_rate_percent": "33.3%"
+      },
+      "Q044": {
+        "count": 6,
+        "score": 5,
+        "full": 6,
+        "score_rate": 0.8333,
+        "score_rate_percent": "83.3%"
+      },
+      "Q045": {
+        "count": 5,
+        "score": 4,
+        "full": 5,
+        "score_rate": 0.8,
+        "score_rate_percent": "80.0%"
+      },
+      "Q046": {
+        "count": 2,
+        "score": 1,
+        "full": 6,
+        "score_rate": 0.1667,
+        "score_rate_percent": "16.7%"
+      },
+      "Q047": {
+        "count": 5,
+        "score": 4,
+        "full": 5,
+        "score_rate": 0.8,
+        "score_rate_percent": "80.0%"
+      },
+      "Q048": {
+        "count": 3,
+        "score": 2,
+        "full": 3,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q049": {
+        "count": 7,
+        "score": 14,
+        "full": 21,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q050": {
+        "count": 2,
+        "score": 1,
+        "full": 2,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q051": {
+        "count": 4,
+        "score": 2,
+        "full": 4,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q052": {
+        "count": 1,
+        "score": 0,
+        "full": 3,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q053": {
+        "count": 5,
+        "score": 4,
+        "full": 5,
+        "score_rate": 0.8,
+        "score_rate_percent": "80.0%"
+      },
+      "Q054": {
+        "count": 1,
+        "score": 1,
+        "full": 3,
+        "score_rate": 0.3333,
+        "score_rate_percent": "33.3%"
+      }
+    }
+  },
+  "by_class_scoring_point": {
+    "DC01": {
+      "Q001P1": {
+        "count": 10,
+        "score": 6,
+        "full": 10,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q002P1": {
+        "count": 13,
+        "score": 4,
+        "full": 13,
+        "score_rate": 0.3077,
+        "score_rate_percent": "30.8%"
+      },
+      "Q003P1": {
+        "count": 9,
+        "score": 8,
+        "full": 9,
+        "score_rate": 0.8889,
+        "score_rate_percent": "88.9%"
+      },
+      "Q004P1": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q005P1": {
+        "count": 10,
+        "score": 8,
+        "full": 10,
+        "score_rate": 0.8,
+        "score_rate_percent": "80.0%"
+      },
+      "Q006P1": {
+        "count": 15,
+        "score": 10,
+        "full": 15,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q006P2": {
+        "count": 15,
+        "score": 10,
+        "full": 15,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q006P3": {
+        "count": 15,
+        "score": 5,
+        "full": 15,
+        "score_rate": 0.3333,
+        "score_rate_percent": "33.3%"
+      },
+      "Q007P1": {
+        "count": 7,
+        "score": 4,
+        "full": 7,
+        "score_rate": 0.5714,
+        "score_rate_percent": "57.1%"
+      },
+      "Q008P1": {
+        "count": 8,
+        "score": 6,
+        "full": 8,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q009P1": {
+        "count": 10,
+        "score": 8,
+        "full": 10,
+        "score_rate": 0.8,
+        "score_rate_percent": "80.0%"
+      },
+      "Q009P2": {
+        "count": 10,
+        "score": 8,
+        "full": 10,
+        "score_rate": 0.8,
+        "score_rate_percent": "80.0%"
+      },
+      "Q009P3": {
+        "count": 10,
+        "score": 8,
+        "full": 10,
+        "score_rate": 0.8,
+        "score_rate_percent": "80.0%"
+      },
+      "Q010P1": {
+        "count": 6,
+        "score": 4,
+        "full": 6,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q011P1": {
+        "count": 12,
+        "score": 9,
+        "full": 12,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q011P2": {
+        "count": 12,
+        "score": 8,
+        "full": 12,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q011P3": {
+        "count": 12,
+        "score": 5,
+        "full": 12,
+        "score_rate": 0.4167,
+        "score_rate_percent": "41.7%"
+      },
+      "Q012P1": {
+        "count": 11,
+        "score": 5,
+        "full": 11,
+        "score_rate": 0.4545,
+        "score_rate_percent": "45.5%"
+      },
+      "Q013P1": {
+        "count": 10,
+        "score": 7,
+        "full": 10,
+        "score_rate": 0.7,
+        "score_rate_percent": "70.0%"
+      },
+      "Q014P1": {
+        "count": 14,
+        "score": 7,
+        "full": 14,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q014P2": {
+        "count": 14,
+        "score": 3,
+        "full": 14,
+        "score_rate": 0.2143,
+        "score_rate_percent": "21.4%"
+      },
+      "Q014P3": {
+        "count": 14,
+        "score": 3,
+        "full": 14,
+        "score_rate": 0.2143,
+        "score_rate_percent": "21.4%"
+      },
+      "Q015P1": {
+        "count": 10,
+        "score": 9,
+        "full": 10,
+        "score_rate": 0.9,
+        "score_rate_percent": "90.0%"
+      },
+      "Q015P2": {
+        "count": 10,
+        "score": 6,
+        "full": 10,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q015P3": {
+        "count": 10,
+        "score": 4,
+        "full": 10,
+        "score_rate": 0.4,
+        "score_rate_percent": "40.0%"
+      },
+      "Q016P1": {
+        "count": 9,
+        "score": 6,
+        "full": 9,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q017P1": {
+        "count": 15,
+        "score": 8,
+        "full": 15,
+        "score_rate": 0.5333,
+        "score_rate_percent": "53.3%"
+      },
+      "Q018P1": {
+        "count": 11,
+        "score": 7,
+        "full": 11,
+        "score_rate": 0.6364,
+        "score_rate_percent": "63.6%"
+      },
+      "Q018P2": {
+        "count": 11,
+        "score": 5,
+        "full": 11,
+        "score_rate": 0.4545,
+        "score_rate_percent": "45.5%"
+      },
+      "Q018P3": {
+        "count": 11,
+        "score": 1,
+        "full": 11,
+        "score_rate": 0.0909,
+        "score_rate_percent": "9.1%"
+      },
+      "Q019P1": {
+        "count": 8,
+        "score": 5,
+        "full": 8,
+        "score_rate": 0.625,
+        "score_rate_percent": "62.5%"
+      },
+      "Q020P1": {
+        "count": 6,
+        "score": 5,
+        "full": 6,
+        "score_rate": 0.8333,
+        "score_rate_percent": "83.3%"
+      },
+      "Q021P1": {
+        "count": 7,
+        "score": 4,
+        "full": 7,
+        "score_rate": 0.5714,
+        "score_rate_percent": "57.1%"
+      },
+      "Q022P1": {
+        "count": 11,
+        "score": 10,
+        "full": 11,
+        "score_rate": 0.9091,
+        "score_rate_percent": "90.9%"
+      },
+      "Q022P2": {
+        "count": 11,
+        "score": 7,
+        "full": 11,
+        "score_rate": 0.6364,
+        "score_rate_percent": "63.6%"
+      },
+      "Q022P3": {
+        "count": 11,
+        "score": 4,
+        "full": 11,
+        "score_rate": 0.3636,
+        "score_rate_percent": "36.4%"
+      },
+      "Q023P1": {
+        "count": 8,
+        "score": 5,
+        "full": 8,
+        "score_rate": 0.625,
+        "score_rate_percent": "62.5%"
+      },
+      "Q024P1": {
+        "count": 10,
+        "score": 6,
+        "full": 10,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q025P1": {
+        "count": 8,
+        "score": 7,
+        "full": 8,
+        "score_rate": 0.875,
+        "score_rate_percent": "87.5%"
+      },
+      "Q025P2": {
+        "count": 8,
+        "score": 5,
+        "full": 8,
+        "score_rate": 0.625,
+        "score_rate_percent": "62.5%"
+      },
+      "Q025P3": {
+        "count": 8,
+        "score": 4,
+        "full": 8,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q026P1": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q027P1": {
+        "count": 10,
+        "score": 6,
+        "full": 10,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q028P1": {
+        "count": 5,
+        "score": 3,
+        "full": 5,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q028P2": {
+        "count": 5,
+        "score": 0,
+        "full": 5,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q028P3": {
+        "count": 5,
+        "score": 0,
+        "full": 5,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q029P1": {
+        "count": 13,
+        "score": 9,
+        "full": 13,
+        "score_rate": 0.6923,
+        "score_rate_percent": "69.2%"
+      },
+      "Q030P1": {
+        "count": 8,
+        "score": 6,
+        "full": 8,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q031P1": {
+        "count": 7,
+        "score": 6,
+        "full": 7,
+        "score_rate": 0.8571,
+        "score_rate_percent": "85.7%"
+      },
+      "Q031P2": {
+        "count": 7,
+        "score": 6,
+        "full": 7,
+        "score_rate": 0.8571,
+        "score_rate_percent": "85.7%"
+      },
+      "Q031P3": {
+        "count": 7,
+        "score": 2,
+        "full": 7,
+        "score_rate": 0.2857,
+        "score_rate_percent": "28.6%"
+      },
+      "Q032P1": {
+        "count": 10,
+        "score": 5,
+        "full": 10,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q033P1": {
+        "count": 6,
+        "score": 4,
+        "full": 6,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q034P1": {
+        "count": 4,
+        "score": 4,
+        "full": 4,
+        "score_rate": 1.0,
+        "score_rate_percent": "100.0%"
+      },
+      "Q034P2": {
+        "count": 4,
+        "score": 3,
+        "full": 4,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q034P3": {
+        "count": 4,
+        "score": 1,
+        "full": 4,
+        "score_rate": 0.25,
+        "score_rate_percent": "25.0%"
+      },
+      "Q035P1": {
+        "count": 7,
+        "score": 6,
+        "full": 7,
+        "score_rate": 0.8571,
+        "score_rate_percent": "85.7%"
+      },
+      "Q036P1": {
+        "count": 7,
+        "score": 6,
+        "full": 7,
+        "score_rate": 0.8571,
+        "score_rate_percent": "85.7%"
+      },
+      "Q036P2": {
+        "count": 7,
+        "score": 3,
+        "full": 7,
+        "score_rate": 0.4286,
+        "score_rate_percent": "42.9%"
+      },
+      "Q036P3": {
+        "count": 7,
+        "score": 3,
+        "full": 7,
+        "score_rate": 0.4286,
+        "score_rate_percent": "42.9%"
+      },
+      "Q037P1": {
+        "count": 7,
+        "score": 2,
+        "full": 7,
+        "score_rate": 0.2857,
+        "score_rate_percent": "28.6%"
+      },
+      "Q039P1": {
+        "count": 6,
+        "score": 5,
+        "full": 6,
+        "score_rate": 0.8333,
+        "score_rate_percent": "83.3%"
+      },
+      "Q040P1": {
+        "count": 6,
+        "score": 5,
+        "full": 6,
+        "score_rate": 0.8333,
+        "score_rate_percent": "83.3%"
+      },
+      "Q040P2": {
+        "count": 6,
+        "score": 4,
+        "full": 6,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q040P3": {
+        "count": 6,
+        "score": 4,
+        "full": 6,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q041P1": {
+        "count": 8,
+        "score": 6,
+        "full": 8,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q042P1": {
+        "count": 6,
+        "score": 4,
+        "full": 6,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q043P1": {
+        "count": 4,
+        "score": 3,
+        "full": 4,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q043P2": {
+        "count": 4,
+        "score": 0,
+        "full": 4,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q043P3": {
+        "count": 4,
+        "score": 0,
+        "full": 4,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q044P1": {
+        "count": 7,
+        "score": 5,
+        "full": 7,
+        "score_rate": 0.7143,
+        "score_rate_percent": "71.4%"
+      },
+      "Q045P1": {
+        "count": 6,
+        "score": 5,
+        "full": 6,
+        "score_rate": 0.8333,
+        "score_rate_percent": "83.3%"
+      },
+      "Q046P1": {
+        "count": 4,
+        "score": 3,
+        "full": 4,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q046P2": {
+        "count": 4,
+        "score": 2,
+        "full": 4,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q046P3": {
+        "count": 4,
+        "score": 2,
+        "full": 4,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q047P1": {
+        "count": 4,
+        "score": 2,
+        "full": 4,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q048P1": {
+        "count": 3,
+        "score": 2,
+        "full": 3,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q049P1": {
+        "count": 7,
+        "score": 6,
+        "full": 7,
+        "score_rate": 0.8571,
+        "score_rate_percent": "85.7%"
+      },
+      "Q049P2": {
+        "count": 7,
+        "score": 7,
+        "full": 7,
+        "score_rate": 1.0,
+        "score_rate_percent": "100.0%"
+      },
+      "Q049P3": {
+        "count": 7,
+        "score": 4,
+        "full": 7,
+        "score_rate": 0.5714,
+        "score_rate_percent": "57.1%"
+      },
+      "Q050P1": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q051P1": {
+        "count": 3,
+        "score": 1,
+        "full": 3,
+        "score_rate": 0.3333,
+        "score_rate_percent": "33.3%"
+      },
+      "Q052P1": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q052P2": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q052P3": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q053P1": {
+        "count": 6,
+        "score": 4,
+        "full": 6,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q054P1": {
+        "count": 5,
+        "score": 3,
+        "full": 5,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q054P2": {
+        "count": 5,
+        "score": 3,
+        "full": 5,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q054P3": {
+        "count": 5,
+        "score": 1,
+        "full": 5,
+        "score_rate": 0.2,
+        "score_rate_percent": "20.0%"
+      }
+    },
+    "DC02": {
+      "Q001P1": {
+        "count": 11,
+        "score": 9,
+        "full": 11,
+        "score_rate": 0.8182,
+        "score_rate_percent": "81.8%"
+      },
+      "Q002P1": {
+        "count": 10,
+        "score": 7,
+        "full": 10,
+        "score_rate": 0.7,
+        "score_rate_percent": "70.0%"
+      },
+      "Q003P1": {
+        "count": 9,
+        "score": 7,
+        "full": 9,
+        "score_rate": 0.7778,
+        "score_rate_percent": "77.8%"
+      },
+      "Q004P1": {
+        "count": 8,
+        "score": 4,
+        "full": 8,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q005P1": {
+        "count": 9,
+        "score": 8,
+        "full": 9,
+        "score_rate": 0.8889,
+        "score_rate_percent": "88.9%"
+      },
+      "Q006P1": {
+        "count": 10,
+        "score": 7,
+        "full": 10,
+        "score_rate": 0.7,
+        "score_rate_percent": "70.0%"
+      },
+      "Q006P2": {
+        "count": 10,
+        "score": 7,
+        "full": 10,
+        "score_rate": 0.7,
+        "score_rate_percent": "70.0%"
+      },
+      "Q006P3": {
+        "count": 10,
+        "score": 3,
+        "full": 10,
+        "score_rate": 0.3,
+        "score_rate_percent": "30.0%"
+      },
+      "Q007P1": {
+        "count": 9,
+        "score": 2,
+        "full": 9,
+        "score_rate": 0.2222,
+        "score_rate_percent": "22.2%"
+      },
+      "Q008P1": {
+        "count": 10,
+        "score": 7,
+        "full": 10,
+        "score_rate": 0.7,
+        "score_rate_percent": "70.0%"
+      },
+      "Q009P1": {
+        "count": 12,
+        "score": 10,
+        "full": 12,
+        "score_rate": 0.8333,
+        "score_rate_percent": "83.3%"
+      },
+      "Q009P2": {
+        "count": 12,
+        "score": 9,
+        "full": 12,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q009P3": {
+        "count": 12,
+        "score": 7,
+        "full": 12,
+        "score_rate": 0.5833,
+        "score_rate_percent": "58.3%"
+      },
+      "Q010P1": {
+        "count": 10,
+        "score": 2,
+        "full": 10,
+        "score_rate": 0.2,
+        "score_rate_percent": "20.0%"
+      },
+      "Q011P1": {
+        "count": 7,
+        "score": 5,
+        "full": 7,
+        "score_rate": 0.7143,
+        "score_rate_percent": "71.4%"
+      },
+      "Q011P2": {
+        "count": 7,
+        "score": 4,
+        "full": 7,
+        "score_rate": 0.5714,
+        "score_rate_percent": "57.1%"
+      },
+      "Q011P3": {
+        "count": 7,
+        "score": 0,
+        "full": 7,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q012P1": {
+        "count": 10,
+        "score": 4,
+        "full": 10,
+        "score_rate": 0.4,
+        "score_rate_percent": "40.0%"
+      },
+      "Q013P1": {
+        "count": 8,
+        "score": 6,
+        "full": 8,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q014P1": {
+        "count": 8,
+        "score": 3,
+        "full": 8,
+        "score_rate": 0.375,
+        "score_rate_percent": "37.5%"
+      },
+      "Q014P2": {
+        "count": 8,
+        "score": 3,
+        "full": 8,
+        "score_rate": 0.375,
+        "score_rate_percent": "37.5%"
+      },
+      "Q014P3": {
+        "count": 8,
+        "score": 1,
+        "full": 8,
+        "score_rate": 0.125,
+        "score_rate_percent": "12.5%"
+      },
+      "Q015P1": {
+        "count": 6,
+        "score": 6,
+        "full": 6,
+        "score_rate": 1.0,
+        "score_rate_percent": "100.0%"
+      },
+      "Q015P2": {
+        "count": 6,
+        "score": 6,
+        "full": 6,
+        "score_rate": 1.0,
+        "score_rate_percent": "100.0%"
+      },
+      "Q015P3": {
+        "count": 6,
+        "score": 4,
+        "full": 6,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q016P1": {
+        "count": 9,
+        "score": 4,
+        "full": 9,
+        "score_rate": 0.4444,
+        "score_rate_percent": "44.4%"
+      },
+      "Q017P1": {
+        "count": 11,
+        "score": 7,
+        "full": 11,
+        "score_rate": 0.6364,
+        "score_rate_percent": "63.6%"
+      },
+      "Q018P1": {
+        "count": 10,
+        "score": 9,
+        "full": 10,
+        "score_rate": 0.9,
+        "score_rate_percent": "90.0%"
+      },
+      "Q018P2": {
+        "count": 10,
+        "score": 9,
+        "full": 10,
+        "score_rate": 0.9,
+        "score_rate_percent": "90.0%"
+      },
+      "Q018P3": {
+        "count": 10,
+        "score": 2,
+        "full": 10,
+        "score_rate": 0.2,
+        "score_rate_percent": "20.0%"
+      },
+      "Q019P1": {
+        "count": 2,
+        "score": 1,
+        "full": 2,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q020P1": {
+        "count": 7,
+        "score": 3,
+        "full": 7,
+        "score_rate": 0.4286,
+        "score_rate_percent": "42.9%"
+      },
+      "Q021P1": {
+        "count": 5,
+        "score": 3,
+        "full": 5,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q022P1": {
+        "count": 4,
+        "score": 3,
+        "full": 4,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q022P2": {
+        "count": 4,
+        "score": 1,
+        "full": 4,
+        "score_rate": 0.25,
+        "score_rate_percent": "25.0%"
+      },
+      "Q022P3": {
+        "count": 4,
+        "score": 0,
+        "full": 4,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q023P1": {
+        "count": 8,
+        "score": 3,
+        "full": 8,
+        "score_rate": 0.375,
+        "score_rate_percent": "37.5%"
+      },
+      "Q024P1": {
+        "count": 8,
+        "score": 3,
+        "full": 8,
+        "score_rate": 0.375,
+        "score_rate_percent": "37.5%"
+      },
+      "Q025P1": {
+        "count": 8,
+        "score": 5,
+        "full": 8,
+        "score_rate": 0.625,
+        "score_rate_percent": "62.5%"
+      },
+      "Q025P2": {
+        "count": 8,
+        "score": 4,
+        "full": 8,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q025P3": {
+        "count": 8,
+        "score": 1,
+        "full": 8,
+        "score_rate": 0.125,
+        "score_rate_percent": "12.5%"
+      },
+      "Q026P1": {
+        "count": 10,
+        "score": 6,
+        "full": 10,
+        "score_rate": 0.6,
+        "score_rate_percent": "60.0%"
+      },
+      "Q027P1": {
+        "count": 7,
+        "score": 3,
+        "full": 7,
+        "score_rate": 0.4286,
+        "score_rate_percent": "42.9%"
+      },
+      "Q028P1": {
+        "count": 7,
+        "score": 7,
+        "full": 7,
+        "score_rate": 1.0,
+        "score_rate_percent": "100.0%"
+      },
+      "Q028P2": {
+        "count": 7,
+        "score": 5,
+        "full": 7,
+        "score_rate": 0.7143,
+        "score_rate_percent": "71.4%"
+      },
+      "Q028P3": {
+        "count": 7,
+        "score": 3,
+        "full": 7,
+        "score_rate": 0.4286,
+        "score_rate_percent": "42.9%"
+      },
+      "Q029P1": {
+        "count": 7,
+        "score": 3,
+        "full": 7,
+        "score_rate": 0.4286,
+        "score_rate_percent": "42.9%"
+      },
+      "Q030P1": {
+        "count": 8,
+        "score": 5,
+        "full": 8,
+        "score_rate": 0.625,
+        "score_rate_percent": "62.5%"
+      },
+      "Q031P1": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q031P2": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q031P3": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q032P1": {
+        "count": 8,
+        "score": 2,
+        "full": 8,
+        "score_rate": 0.25,
+        "score_rate_percent": "25.0%"
+      },
+      "Q033P1": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q034P1": {
+        "count": 13,
+        "score": 10,
+        "full": 13,
+        "score_rate": 0.7692,
+        "score_rate_percent": "76.9%"
+      },
+      "Q034P2": {
+        "count": 13,
+        "score": 7,
+        "full": 13,
+        "score_rate": 0.5385,
+        "score_rate_percent": "53.8%"
+      },
+      "Q034P3": {
+        "count": 13,
+        "score": 4,
+        "full": 13,
+        "score_rate": 0.3077,
+        "score_rate_percent": "30.8%"
+      },
+      "Q035P1": {
+        "count": 11,
+        "score": 6,
+        "full": 11,
+        "score_rate": 0.5455,
+        "score_rate_percent": "54.5%"
+      },
+      "Q036P1": {
+        "count": 4,
+        "score": 2,
+        "full": 4,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q036P2": {
+        "count": 4,
+        "score": 1,
+        "full": 4,
+        "score_rate": 0.25,
+        "score_rate_percent": "25.0%"
+      },
+      "Q036P3": {
+        "count": 4,
+        "score": 1,
+        "full": 4,
+        "score_rate": 0.25,
+        "score_rate_percent": "25.0%"
+      },
+      "Q037P1": {
+        "count": 4,
+        "score": 2,
+        "full": 4,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q038P1": {
+        "count": 7,
+        "score": 6,
+        "full": 7,
+        "score_rate": 0.8571,
+        "score_rate_percent": "85.7%"
+      },
+      "Q039P1": {
+        "count": 4,
+        "score": 3,
+        "full": 4,
+        "score_rate": 0.75,
+        "score_rate_percent": "75.0%"
+      },
+      "Q040P1": {
+        "count": 3,
+        "score": 2,
+        "full": 3,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q040P2": {
+        "count": 3,
+        "score": 2,
+        "full": 3,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q040P3": {
+        "count": 3,
+        "score": 1,
+        "full": 3,
+        "score_rate": 0.3333,
+        "score_rate_percent": "33.3%"
+      },
+      "Q041P1": {
+        "count": 3,
+        "score": 2,
+        "full": 3,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q042P1": {
+        "count": 6,
+        "score": 3,
+        "full": 6,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q043P1": {
+        "count": 5,
+        "score": 5,
+        "full": 5,
+        "score_rate": 1.0,
+        "score_rate_percent": "100.0%"
+      },
+      "Q043P2": {
+        "count": 5,
+        "score": 0,
+        "full": 5,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q043P3": {
+        "count": 5,
+        "score": 0,
+        "full": 5,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q044P1": {
+        "count": 6,
+        "score": 5,
+        "full": 6,
+        "score_rate": 0.8333,
+        "score_rate_percent": "83.3%"
+      },
+      "Q045P1": {
+        "count": 5,
+        "score": 4,
+        "full": 5,
+        "score_rate": 0.8,
+        "score_rate_percent": "80.0%"
+      },
+      "Q046P1": {
+        "count": 2,
+        "score": 1,
+        "full": 2,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q046P2": {
+        "count": 2,
+        "score": 0,
+        "full": 2,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q046P3": {
+        "count": 2,
+        "score": 0,
+        "full": 2,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q047P1": {
+        "count": 5,
+        "score": 4,
+        "full": 5,
+        "score_rate": 0.8,
+        "score_rate_percent": "80.0%"
+      },
+      "Q048P1": {
+        "count": 3,
+        "score": 2,
+        "full": 3,
+        "score_rate": 0.6667,
+        "score_rate_percent": "66.7%"
+      },
+      "Q049P1": {
+        "count": 7,
+        "score": 7,
+        "full": 7,
+        "score_rate": 1.0,
+        "score_rate_percent": "100.0%"
+      },
+      "Q049P2": {
+        "count": 7,
+        "score": 5,
+        "full": 7,
+        "score_rate": 0.7143,
+        "score_rate_percent": "71.4%"
+      },
+      "Q049P3": {
+        "count": 7,
+        "score": 2,
+        "full": 7,
+        "score_rate": 0.2857,
+        "score_rate_percent": "28.6%"
+      },
+      "Q050P1": {
+        "count": 2,
+        "score": 1,
+        "full": 2,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q051P1": {
+        "count": 4,
+        "score": 2,
+        "full": 4,
+        "score_rate": 0.5,
+        "score_rate_percent": "50.0%"
+      },
+      "Q052P1": {
+        "count": 1,
+        "score": 0,
+        "full": 1,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q052P2": {
+        "count": 1,
+        "score": 0,
+        "full": 1,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q052P3": {
+        "count": 1,
+        "score": 0,
+        "full": 1,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q053P1": {
+        "count": 5,
+        "score": 4,
+        "full": 5,
+        "score_rate": 0.8,
+        "score_rate_percent": "80.0%"
+      },
+      "Q054P1": {
+        "count": 1,
+        "score": 1,
+        "full": 1,
+        "score_rate": 1.0,
+        "score_rate_percent": "100.0%"
+      },
+      "Q054P2": {
+        "count": 1,
+        "score": 0,
+        "full": 1,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      },
+      "Q054P3": {
+        "count": 1,
+        "score": 0,
+        "full": 1,
+        "score_rate": 0.0,
+        "score_rate_percent": "0.0%"
+      }
+    }
+  },
   "cross_node_changes": [
     {
       "student_id": "D01",
@@ -2002,7 +4016,8 @@
         "full": 1,
         "answer": "11"
       },
-      "change_type": "improved"
+      "change_type": "improved",
+      "change_type_label": "后续节点进步"
     },
     {
       "student_id": "D01",
@@ -2017,7 +4032,8 @@
         "full": 3,
         "answer": "3n+2"
       },
-      "change_type": "still_wrong"
+      "change_type": "still_wrong",
+      "change_type_label": "后续仍答错（最终答案变化）"
     },
     {
       "student_id": "D02",
@@ -2032,7 +4048,8 @@
         "full": 1,
         "answer": "5"
       },
-      "change_type": "improved"
+      "change_type": "improved",
+      "change_type_label": "后续节点进步"
     },
     {
       "student_id": "D02",
@@ -2047,7 +4064,8 @@
         "full": 3,
         "answer": "3n+1"
       },
-      "change_type": "persistent_error"
+      "change_type": "persistent_error",
+      "change_type_label": "同题持续答错（最终答案相同）"
     },
     {
       "student_id": "D03",
@@ -2062,7 +4080,8 @@
         "full": 3,
         "answer": "不对，结果是-3"
       },
-      "change_type": "persistent_error"
+      "change_type": "persistent_error",
+      "change_type_label": "同题持续答错（最终答案相同）"
     },
     {
       "student_id": "D04",
@@ -2077,7 +4096,8 @@
         "full": 3,
         "answer": "2x-3人"
       },
-      "change_type": "regressed"
+      "change_type": "regressed",
+      "change_type_label": "后续节点退步"
     },
     {
       "student_id": "D04",
@@ -2092,7 +4112,8 @@
         "full": 1,
         "answer": "3x²y"
       },
-      "change_type": "still_wrong"
+      "change_type": "still_wrong",
+      "change_type_label": "后续仍答错（最终答案变化）"
     },
     {
       "student_id": "D05",
@@ -2107,7 +4128,8 @@
         "full": 1,
         "answer": "14"
       },
-      "change_type": "persistent_error"
+      "change_type": "persistent_error",
+      "change_type_label": "同题持续答错（最终答案相同）"
     },
     {
       "student_id": "D06",
@@ -2122,7 +4144,8 @@
         "full": 1,
         "answer": "-2x+5"
       },
-      "change_type": "persistent_error"
+      "change_type": "persistent_error",
+      "change_type_label": "同题持续答错（最终答案相同）"
     },
     {
       "student_id": "D07",
@@ -2137,7 +4160,8 @@
         "full": 1,
         "answer": "3a+6"
       },
-      "change_type": "both_correct"
+      "change_type": "both_correct",
+      "change_type_label": "两个节点均答对"
     },
     {
       "student_id": "D07",
@@ -2152,7 +4176,8 @@
         "full": 3,
         "answer": "2x+3厘米"
       },
-      "change_type": "regressed"
+      "change_type": "regressed",
+      "change_type_label": "后续节点退步"
     },
     {
       "student_id": "D08",
@@ -2167,7 +4192,8 @@
         "full": 1,
         "answer": "B"
       },
-      "change_type": "both_correct"
+      "change_type": "both_correct",
+      "change_type_label": "两个节点均答对"
     },
     {
       "student_id": "D09",
@@ -2182,7 +4208,8 @@
         "full": 1,
         "answer": "-2x+9"
       },
-      "change_type": "improved"
+      "change_type": "improved",
+      "change_type_label": "后续节点进步"
     },
     {
       "student_id": "D10",
@@ -2197,7 +4224,8 @@
         "full": 3,
         "answer": "3n，是3的倍数"
       },
-      "change_type": "both_correct"
+      "change_type": "both_correct",
+      "change_type_label": "两个节点均答对"
     },
     {
       "student_id": "D11",
@@ -2212,7 +4240,8 @@
         "full": 3,
         "answer": "3x+6厘米"
       },
-      "change_type": "still_wrong"
+      "change_type": "still_wrong",
+      "change_type_label": "后续仍答错（最终答案变化）"
     },
     {
       "student_id": "D11",
@@ -2227,7 +4256,8 @@
         "full": 3,
         "answer": "4a-b"
       },
-      "change_type": "regressed"
+      "change_type": "regressed",
+      "change_type_label": "后续节点退步"
     },
     {
       "student_id": "D12",
@@ -2242,7 +4272,8 @@
         "full": 3,
         "answer": "4x+6"
       },
-      "change_type": "persistent_error"
+      "change_type": "persistent_error",
+      "change_type_label": "同题持续答错（最终答案相同）"
     },
     {
       "student_id": "D12",
@@ -2257,7 +4288,8 @@
         "full": 1,
         "answer": "-4a+6"
       },
-      "change_type": "both_correct"
+      "change_type": "both_correct",
+      "change_type_label": "两个节点均答对"
     },
     {
       "student_id": "D19",
@@ -2272,7 +4304,8 @@
         "full": 1,
         "answer": "14"
       },
-      "change_type": "regressed"
+      "change_type": "regressed",
+      "change_type_label": "后续节点退步"
     },
     {
       "student_id": "D19",
@@ -2287,7 +4320,8 @@
         "full": 1,
         "answer": "-3x²y"
       },
-      "change_type": "both_correct"
+      "change_type": "both_correct",
+      "change_type_label": "两个节点均答对"
     },
     {
       "student_id": "D19",
@@ -2302,7 +4336,8 @@
         "full": 3,
         "answer": "4x+3厘米"
       },
-      "change_type": "regressed"
+      "change_type": "regressed",
+      "change_type_label": "后续节点退步"
     },
     {
       "student_id": "D20",
@@ -2317,7 +4352,8 @@
         "full": 1,
         "answer": "9"
       },
-      "change_type": "still_wrong"
+      "change_type": "still_wrong",
+      "change_type_label": "后续仍答错（最终答案变化）"
     },
     {
       "student_id": "D21",
@@ -2332,7 +4368,8 @@
         "full": 3,
         "answer": "不对"
       },
-      "change_type": "persistent_error"
+      "change_type": "persistent_error",
+      "change_type_label": "同题持续答错（最终答案相同）"
     },
     {
       "student_id": "D22",
@@ -2347,7 +4384,8 @@
         "full": 3,
         "answer": "4x+6"
       },
-      "change_type": "still_wrong"
+      "change_type": "still_wrong",
+      "change_type_label": "后续仍答错（最终答案变化）"
     },
     {
       "student_id": "D22",
@@ -2362,7 +4400,8 @@
         "full": 1,
         "answer": "a+6"
       },
-      "change_type": "regressed"
+      "change_type": "regressed",
+      "change_type_label": "后续节点退步"
     },
     {
       "student_id": "D23",
@@ -2377,7 +4416,8 @@
         "full": 1,
         "answer": "-4a-6"
       },
-      "change_type": "still_wrong"
+      "change_type": "still_wrong",
+      "change_type_label": "后续仍答错（最终答案变化）"
     },
     {
       "student_id": "D24",
@@ -2392,7 +4432,8 @@
         "full": 1,
         "answer": "5x+4"
       },
-      "change_type": "regressed"
+      "change_type": "regressed",
+      "change_type_label": "后续节点退步"
     },
     {
       "student_id": "D29",
@@ -2407,7 +4448,8 @@
         "full": 1,
         "answer": "-2x+9"
       },
-      "change_type": "both_correct"
+      "change_type": "both_correct",
+      "change_type_label": "两个节点均答对"
     },
     {
       "student_id": "D29",
@@ -2422,7 +4464,8 @@
         "full": 1,
         "answer": "-4a+6"
       },
-      "change_type": "both_correct"
+      "change_type": "both_correct",
+      "change_type_label": "两个节点均答对"
     },
     {
       "student_id": "D30",
@@ -2437,7 +4480,8 @@
         "full": 1,
         "answer": "-3x²y"
       },
-      "change_type": "both_correct"
+      "change_type": "both_correct",
+      "change_type_label": "两个节点均答对"
     },
     {
       "student_id": "D30",
@@ -2452,7 +4496,8 @@
         "full": 3,
         "answer": "对"
       },
-      "change_type": "still_wrong"
+      "change_type": "still_wrong",
+      "change_type_label": "后续仍答错（最终答案变化）"
     },
     {
       "student_id": "D32",
@@ -2467,7 +4512,8 @@
         "full": 3,
         "answer": "7x-6"
       },
-      "change_type": "regressed"
+      "change_type": "regressed",
+      "change_type_label": "后续节点退步"
     },
     {
       "student_id": "D33",
@@ -2482,7 +4528,8 @@
         "full": 3,
         "answer": "4a-7b"
       },
-      "change_type": "both_correct"
+      "change_type": "both_correct",
+      "change_type_label": "两个节点均答对"
     },
     {
       "student_id": "D33",
@@ -2497,7 +4544,8 @@
         "full": 1,
         "answer": "-2"
       },
-      "change_type": "improved"
+      "change_type": "improved",
+      "change_type_label": "后续节点进步"
     },
     {
       "student_id": "D37",
@@ -2512,7 +4560,8 @@
         "full": 1,
         "answer": "9x-4"
       },
-      "change_type": "persistent_error"
+      "change_type": "persistent_error",
+      "change_type_label": "同题持续答错（最终答案相同）"
     },
     {
       "student_id": "D38",
@@ -2527,7 +4576,8 @@
         "full": 1,
         "answer": "2b"
       },
-      "change_type": "improved"
+      "change_type": "improved",
+      "change_type_label": "后续节点进步"
     },
     {
       "student_id": "D40",
@@ -2542,7 +4592,8 @@
         "full": 1,
         "answer": "4a+6"
       },
-      "change_type": "still_wrong"
+      "change_type": "still_wrong",
+      "change_type_label": "后续仍答错（最终答案变化）"
     }
   ]
 }

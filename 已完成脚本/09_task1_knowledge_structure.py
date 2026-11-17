@@ -110,7 +110,29 @@ def build_task1_structure(data):
                 "course_standard_ref": source_indicator.get("course_standard_ref", ""),
                 "course_standard": source_theme.get("course_standard", ""),
                 "textbook_pages": source_theme.get("textbook_pages", ""),
+                "curriculum_source": {
+                    "file": source_indicator.get("source_file", "课程要求.csv"),
+                    "row": source_indicator.get("source_row"),
+                    "standard_id": source_theme.get("course_standard", ""),
+                    "page_reference": source_indicator.get("course_standard_ref", ""),
+                    "full_text_available": False,
+                },
+                "textbook_source": {
+                    "file": source_theme.get("source_file", "课程要求.csv"),
+                    "source_rows": source_theme.get("source_rows", []),
+                    "page_reference": source_theme.get("textbook_pages", ""),
+                    "excerpt_available": False,
+                },
                 "question_ids": [question_id for question_id, _ in mapped_questions],
+                "question_references": [
+                    {
+                        "question_id": question_id,
+                        "source_file": question.get("source_file", "题目与材料.csv"),
+                        "source_row": question.get("source_row"),
+                        "material_source": question.get("source", ""),
+                    }
+                    for question_id, question in mapped_questions
+                ],
                 "question_count": question_count,
                 "question_type_counts": dict(sorted(question_types.items())),
                 "full_score": full_score,
@@ -123,6 +145,8 @@ def build_task1_structure(data):
             "theme_goal": source_theme.get("theme_goal", ""),
             "course_standard": source_theme.get("course_standard", ""),
             "textbook_pages": source_theme.get("textbook_pages", ""),
+            "source_file": source_theme.get("source_file", "课程要求.csv"),
+            "source_rows": source_theme.get("source_rows", []),
             "question_count": theme_question_count,
             "full_score": theme_full_score,
             "evidence_count": theme_evidence_count,
@@ -131,11 +155,16 @@ def build_task1_structure(data):
 
     return {
         "meta": {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "generated_by": "09_task1_knowledge_structure.py",
             "generation_method": "source_data_aggregation",
             "source_file": "cleaned_data.json",
+            "source_files": ["课程要求.csv", "题目与材料.csv", "作答记录.csv"],
             "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "source_coverage_note": (
+                "课程要求.csv 提供课标编号/页码引用和教材页码范围，"
+                "未提供课标原文或教材摘录；本产物不补造原文。"
+            ),
             "evidence_density_thresholds": {
                 "high": HIGH_EVIDENCE_THRESHOLD,
                 "medium": MEDIUM_EVIDENCE_THRESHOLD,

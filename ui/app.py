@@ -23,8 +23,19 @@ import shell             # noqa: E402
 import theme             # noqa: E402
 
 DEFAULT_OUTPUT = os.path.abspath(os.path.join(HERE, "..", "output"))
-DEFAULT_RAW = os.path.abspath(os.path.join(
-    HERE, "..", "赛题材料", "赛题数据", "赛题资料包", "4_赛题数据", "模拟学情数据"))
+BUNDLE_FILES = (
+    "cleaned_data.json",
+    "error_diagnosis.json",
+    "error_diagnosis_llm.json",
+    "statistics.json",
+    "student_profiles.json",
+    "mastery_matrix.json",
+    "error_pattern_summary.json",
+    "data_quality_report.json",
+    "knowledge_base.json",
+    "task1_knowledge_structure.json",
+    "task3_recommendations.json",
+)
 
 st.set_page_config(page_title="智慧学伴 · 学情诊断智能体", page_icon=(theme.icon_path() or "🤖"), layout="wide")
 theme.inject()
@@ -39,15 +50,29 @@ st.markdown("""
 
 
 @st.cache_data(show_spinner="智能体正在读取学情数据…")
-def cached_bundle(output_dir: str) -> dict:
+def cached_bundle(output_dir: str, file_signature: tuple) -> dict:
+    del file_signature
     return A.load_bundle(output_dir)
+
+
+def output_signature(output_dir: str) -> tuple:
+    signature = []
+    for name in BUNDLE_FILES:
+        path = os.path.join(output_dir, name)
+        try:
+            file_stat = os.stat(path)
+        except FileNotFoundError:
+            signature.append((name, None, None))
+        else:
+            signature.append((name, file_stat.st_mtime_ns, file_stat.st_size))
+    return tuple(signature)
 
 
 if not os.path.isdir(DEFAULT_OUTPUT):
     st.error(f"产物目录不存在：{DEFAULT_OUTPUT}\n请先运行 01–03 脚本。")
     st.stop()
 
-bundle = cached_bundle(DEFAULT_OUTPUT)
+bundle = cached_bundle(DEFAULT_OUTPUT, output_signature(DEFAULT_OUTPUT))
 if not bundle.get("records"):
     st.error("cleaned_data.json 缺失或为空，请先运行 01_data_loader.py。")
     st.stop()
@@ -59,7 +84,6 @@ key = llm.resolve_key(st.session_state.get("api_key_input") or None) if stt["pro
 llm_flag = ("api" if key else None) if stt["provider"] == "api" else ("local" if online else None)
 st.session_state["_key"] = llm_flag
 st.session_state["_cache"] = os.path.join(DEFAULT_OUTPUT, "llm_cache")
-st.session_state["_raw"] = DEFAULT_RAW
 
 # --------------------------------------------------------------------------
 # 路由：未登录走唤醒流程，已登录进主界面

@@ -68,6 +68,13 @@
       "note": "样本不足，分析结论置信度较低，不直接判定掌握情况"
     }
   ],
+  "process_coverage": {
+    "scored_record_count": 790,
+    "recorded_count": 260,
+    "not_recorded_count": 530,
+    "coverage_rate": 0.3291,
+    "note": "未记录表示源数据没有提供文字过程，不代表学生没有解题步骤。"
+  },
   "pending_records": [
     {
       "record_id": "DR0018",
@@ -148,5 +155,181 @@
       "node_id": "N01",
       "note": "未作答，不判定掌握情况"
     }
-  ]
+  ],
+  "source_quality_audit": {
+    "total_records": 806,
+    "rule_count": 8,
+    "checks": [
+      {
+        "rule_id": "R1",
+        "name": "得分超过满分",
+        "evaluated": true,
+        "hit_count": 2,
+        "record_ids": [
+          "DR0361",
+          "DR0535"
+        ],
+        "disposition": "保留原始得分并标记；未自动截断或重算，复核前相关统计含原始录入值。"
+      },
+      {
+        "rule_id": "R2",
+        "name": "评分点得分之和与总分不一致",
+        "evaluated": true,
+        "hit_count": 3,
+        "record_ids": [
+          "DR0133",
+          "DR0361",
+          "DR0535"
+        ],
+        "disposition": "保留原始总分及评分点并标记；未自动按评分点重算。"
+      },
+      {
+        "rule_id": "R3",
+        "name": "同一作答事件存在多个版本",
+        "evaluated": true,
+        "hit_count": 14,
+        "record_ids": [
+          "DR0018",
+          "DR0023",
+          "DR0076",
+          "DR0082",
+          "DR0199",
+          "DR0210",
+          "DR0236",
+          "DR0237",
+          "DR0263",
+          "DR0264",
+          "DR0437",
+          "DR0446",
+          "DR0555",
+          "DR0558"
+        ],
+        "disposition": "统计仅纳入最新的已评分版本；其他版本按状态隔离，全部记录编号保留在此报告。"
+      },
+      {
+        "rule_id": "R4",
+        "name": "评分状态为待评分",
+        "evaluated": true,
+        "hit_count": 6,
+        "record_ids": [
+          "DR0018",
+          "DR0199",
+          "DR0223",
+          "DR0275",
+          "DR0411",
+          "DR0532"
+        ],
+        "disposition": "不纳入已评分统计，记录编号及事件信息单独保留。"
+      },
+      {
+        "rule_id": "R5",
+        "name": "评分状态为未作答",
+        "evaluated": true,
+        "hit_count": 5,
+        "record_ids": [
+          "DR0017",
+          "DR0034",
+          "DR0332",
+          "DR0497",
+          "DR0744"
+        ],
+        "disposition": "不作为答错或掌握度证据，单独统计。"
+      },
+      {
+        "rule_id": "R6",
+        "name": "题目不在对应测验节点范围内",
+        "evaluated": true,
+        "hit_count": 1,
+        "record_ids": [
+          "DR0515"
+        ],
+        "disposition": "仅标记节点口径异常，不自动改节点或删除记录。"
+      },
+      {
+        "rule_id": "R7",
+        "name": "记录主题与题目主题不一致",
+        "evaluated": true,
+        "hit_count": 1,
+        "record_ids": [
+          "DR0081"
+        ],
+        "disposition": "保留原始主题并标记；未自动按题目表修正。"
+      },
+      {
+        "rule_id": "R8",
+        "name": "填空题答案与参考答案一致但得分为零",
+        "evaluated": true,
+        "hit_count": 1,
+        "record_ids": [
+          "DR0685"
+        ],
+        "disposition": "保留原始评分并标记为待复核；不自动改分。"
+      }
+    ],
+    "revision_event_groups": [
+      {
+        "event_id": "D01-N02-Q043",
+        "record_ids": [
+          "DR0018",
+          "DR0023"
+        ],
+        "latest_revision_record_id": "DR0023",
+        "latest_revision_status": "已评分"
+      },
+      {
+        "event_id": "D04-N01-Q015",
+        "record_ids": [
+          "DR0076",
+          "DR0082"
+        ],
+        "latest_revision_record_id": "DR0082",
+        "latest_revision_status": "已评分"
+      },
+      {
+        "event_id": "D10-N01-Q015",
+        "record_ids": [
+          "DR0199",
+          "DR0210"
+        ],
+        "latest_revision_record_id": "DR0210",
+        "latest_revision_status": "已评分"
+      },
+      {
+        "event_id": "D11-N02-Q001",
+        "record_ids": [
+          "DR0236",
+          "DR0237"
+        ],
+        "latest_revision_record_id": "DR0237",
+        "latest_revision_status": "已评分"
+      },
+      {
+        "event_id": "D12-N02-Q029",
+        "record_ids": [
+          "DR0263",
+          "DR0264"
+        ],
+        "latest_revision_record_id": "DR0264",
+        "latest_revision_status": "已评分"
+      },
+      {
+        "event_id": "D22-N01-Q025",
+        "record_ids": [
+          "DR0437",
+          "DR0446"
+        ],
+        "latest_revision_record_id": "DR0446",
+        "latest_revision_status": "已评分"
+      },
+      {
+        "event_id": "D27-N02-Q049",
+        "record_ids": [
+          "DR0555",
+          "DR0558"
+        ],
+        "latest_revision_record_id": "DR0558",
+        "latest_revision_status": "已评分"
+      }
+    ]
+  }
 }
