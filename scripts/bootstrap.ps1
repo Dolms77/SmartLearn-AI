@@ -1,7 +1,7 @@
 ﻿# 一键准备环境：建 venv + 装依赖 + 自检
 # 用法：
 #   .\scripts\bootstrap.ps1
-#   .\scripts\bootstrap.ps1 -Python "D:\python313\python.exe"
+#   .\scripts\bootstrap.ps1 -Python "path\to\python.exe"
 param(
     [string]$Python = "",
     [string]$Mirror = "https://pypi.tuna.tsinghua.edu.cn/simple"
@@ -11,7 +11,7 @@ $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
 function Find-Python {
-    foreach ($c in @($script:Python, "D:\python313\python.exe", "python", "py")) {
+    foreach ($c in @($script:Python, "python", "py")) {
         if (-not $c) { continue }
         try {
             $v = & $c -c "import sys;print(sys.version_info[0]*100+sys.version_info[1])" 2>$null
@@ -34,12 +34,19 @@ $venv = Join-Path $root ".venv-ui"
 if (-not (Test-Path (Join-Path $venv "Scripts\python.exe"))) {
     Write-Host "创建虚拟环境 .venv-ui ..."
     & $py -m venv $venv
+    if ($LASTEXITCODE -ne 0) { throw "创建虚拟环境失败（exit code $LASTEXITCODE）" }
 }
 $vpy = Join-Path $venv "Scripts\python.exe"
 
 Write-Host "安装依赖（镜像: $Mirror）..."
 & $vpy -m pip install --no-cache-dir -i $Mirror -r (Join-Path $root "requirements.txt")
+if ($LASTEXITCODE -ne 0) { throw "依赖安装失败（exit code $LASTEXITCODE）；请检查网络、Python 版本和 pip 输出" }
 
 Write-Host "`n自检：" -ForegroundColor Green
-& $vpy -c "import pandas,numpy,openpyxl,networkx,streamlit,plotly,openai;print('依赖 OK')"
+& $vpy -c "import pandas,numpy,openpyxl,networkx,pyvis,streamlit,plotly,openai;print('依赖 OK')"
+if ($LASTEXITCODE -ne 0) { throw "依赖导入自检失败（exit code $LASTEXITCODE）" }
+
 & $vpy (Join-Path $root "ui\selftest.py")
+if ($LASTEXITCODE -ne 0) { throw "UI 数据适配自检失败（exit code $LASTEXITCODE）" }
+
+Write-Host "`n环境准备完成。" -ForegroundColor Green

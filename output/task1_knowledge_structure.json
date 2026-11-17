@@ -1,0 +1,259 @@
+{
+  "meta": {
+    "schema_version": "1.0",
+    "generated_by": "09_task1_knowledge_structure.py",
+    "generation_method": "source_data_aggregation",
+    "source_file": "cleaned_data.json",
+    "generated_at": "2026-11-17T21:45:27+08:00",
+    "evidence_density_thresholds": {
+      "high": 150,
+      "medium": 60
+    }
+  },
+  "summary": {
+    "theme_count": 3,
+    "indicator_count": 9,
+    "question_count": 54,
+    "evidence_count": 790,
+    "evidence_density_counts": {
+      "中": 5,
+      "低": 3,
+      "高": 1
+    }
+  },
+  "themes": {
+    "T01": {
+      "theme_name": "代数式与整式运算",
+      "theme_goal": "能用代数式表示简单数量关系、代入求值，并进行整式加减与解释。",
+      "course_standard": "CR01",
+      "textbook_pages": "上册68—109",
+      "question_count": 18,
+      "full_score": 30,
+      "evidence_count": 353,
+      "indicators": {
+        "T01I1": {
+          "indicator_name": "表示数量关系并代入求值",
+          "course_standard_ref": "62／55",
+          "course_standard": "CR01",
+          "textbook_pages": "上册68—109",
+          "question_ids": [
+            "Q001",
+            "Q002",
+            "Q006",
+            "Q007",
+            "Q013",
+            "Q014"
+          ],
+          "question_count": 6,
+          "question_type_counts": {
+            "填空题": 4,
+            "解答题": 2
+          },
+          "full_score": 10,
+          "evidence_count": 125,
+          "evidence_density": "中"
+        },
+        "T01I2": {
+          "indicator_name": "识别同类项、去括号并化简",
+          "course_standard_ref": "62／55",
+          "course_standard": "CR01",
+          "textbook_pages": "上册68—109",
+          "question_ids": [
+            "Q003",
+            "Q004",
+            "Q005",
+            "Q008",
+            "Q009",
+            "Q010",
+            "Q012",
+            "Q015",
+            "Q016",
+            "Q017"
+          ],
+          "question_count": 10,
+          "question_type_counts": {
+            "填空题": 7,
+            "解答题": 2,
+            "选择题": 1
+          },
+          "full_score": 14,
+          "evidence_count": 188,
+          "evidence_density": "高"
+        },
+        "T01I3": {
+          "indicator_name": "用整式解释具体问题",
+          "course_standard_ref": "62／55",
+          "course_standard": "CR01",
+          "textbook_pages": "上册68—109",
+          "question_ids": [
+            "Q011",
+            "Q018"
+          ],
+          "question_count": 2,
+          "question_type_counts": {
+            "解答题": 2
+          },
+          "full_score": 6,
+          "evidence_count": 40,
+          "evidence_density": "低"
+        }
+      }
+    },
+    "T02": {
+      "theme_name": "方程与方程组",
+      "theme_goal": "能解一元一次方程和二元一次方程组，依据等量关系建立模型并检验答案。",
+      "course_standard": "CR02",
+      "textbook_pages": "上册110—148；下册87—119",
+      "question_count": 18,
+      "full_score": 30,
+      "evidence_count": 270,
+      "indicators": {
+        "T02I1": {
+          "indicator_name": "运用等式性质解一元一次方程",
+          "course_standard_ref": "63／56",
+          "course_standard": "CR02",
+          "textbook_pages": "上册110—148；下册87—119",
+          "question_ids": [
+            "Q019",
+            "Q020",
+            "Q021",
+            "Q022",
+            "Q023",
+            "Q024",
+            "Q025",
+            "Q026"
+          ],
+          "question_count": 8,
+          "question_type_counts": {
+            "填空题": 5,
+            "解答题": 2,
+            "选择题": 1
+          },
+          "full_score": 12,
+          "evidence_count": 116,
+          "evidence_density": "中"
+        },
+        "T02I2": {
+          "indicator_name": "用消元法解二元一次方程组",
+          "course_standard_ref": "63／56",
+          "course_standard": "CR02",
+          "textbook_pages": "上册110—148；下册87—119",
+          "question_ids": [
+            "Q028",
+            "Q029",
+            "Q030",
+            "Q031",
+            "Q032",
+            "Q035"
+          ],
+          "question_count": 6,
+          "question_type_counts": {
+            "填空题": 4,
+            "解答题": 2
+          },
+          "full_score": 10,
+          "evidence_count": 97,
+          "evidence_density": "中"
+        },
+        "T02I3": {
+          "indicator_name": "列方程或方程组解决简单实际问题并检验",
+          "course_standard_ref": "63／56",
+          "course_standard": "CR02",
+          "textbook_pages": "上册110—148；下册87—119",
+          "question_ids": [
+            "Q027",
+            "Q033",
+            "Q034",
+            "Q036"
+          ],
+          "question_count": 4,
+          "question_type_counts": {
+            "填空题": 2,
+            "解答题": 2
+          },
+          "full_score": 8,
+          "evidence_count": 57,
+          "evidence_density": "低"
+        }
+      }
+    },
+    "T03": {
+      "theme_name": "不等式与不等式组",
+      "theme_goal": "能解一元一次不等式及简单不等式组，表示解集，并解决范围约束问题。",
+      "course_standard": "CR03",
+      "textbook_pages": "下册120—145",
+      "question_count": 18,
+      "full_score": 30,
+      "evidence_count": 167,
+      "indicators": {
+        "T03I1": {
+          "indicator_name": "运用不等式性质求解，负数乘除时正确改变方向",
+          "course_standard_ref": "63／56",
+          "course_standard": "CR03",
+          "textbook_pages": "下册120—145",
+          "question_ids": [
+            "Q037",
+            "Q038",
+            "Q039",
+            "Q040",
+            "Q041",
+            "Q042",
+            "Q043"
+          ],
+          "question_count": 7,
+          "question_type_counts": {
+            "填空题": 5,
+            "解答题": 2
+          },
+          "full_score": 11,
+          "evidence_count": 69,
+          "evidence_density": "中"
+        },
+        "T03I2": {
+          "indicator_name": "求两个一元一次不等式解集的交集",
+          "course_standard_ref": "63／56",
+          "course_standard": "CR03",
+          "textbook_pages": "下册120—145",
+          "question_ids": [
+            "Q044",
+            "Q045",
+            "Q046",
+            "Q047",
+            "Q048",
+            "Q049",
+            "Q053"
+          ],
+          "question_count": 7,
+          "question_type_counts": {
+            "填空题": 4,
+            "解答题": 2,
+            "选择题": 1
+          },
+          "full_score": 11,
+          "evidence_count": 70,
+          "evidence_density": "中"
+        },
+        "T03I3": {
+          "indicator_name": "根据实际限制列不等式并解释取值范围",
+          "course_standard_ref": "63／56",
+          "course_standard": "CR03",
+          "textbook_pages": "下册120—145",
+          "question_ids": [
+            "Q050",
+            "Q051",
+            "Q052",
+            "Q054"
+          ],
+          "question_count": 4,
+          "question_type_counts": {
+            "填空题": 2,
+            "解答题": 2
+          },
+          "full_score": 8,
+          "evidence_count": 28,
+          "evidence_density": "低"
+        }
+      }
+    }
+  }
+}

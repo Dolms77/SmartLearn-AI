@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""产物校验：换一台机器跑完 01–06 后，用这里确认"跑对了"。
+"""产物校验：换一台机器跑完 01–09 后，用这里确认"跑对了"。
 
 用法：
     .venv-ui\\Scripts\\python.exe scripts\\verify.py
-    .venv-ui\\Scripts\\python.exe scripts\\verify.py --output-dir D:\\other\\output
+    .venv-ui\\Scripts\\python.exe scripts\\verify.py --output-dir <output-directory>
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ except Exception:  # noqa: BLE001
     pass
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_OUT = os.path.abspath(os.path.join(HERE, "..", "output"))
+DEFAULT_OUT = os.environ.get("SS_OUT") or os.path.abspath(os.path.join(HERE, "..", "output"))
 
 REQUIRED = {
     "cleaned_data.json": "清洗后数据（01）",
@@ -28,14 +28,14 @@ REQUIRED = {
     "student_profiles.json": "学生画像（02）",
     "error_diagnosis.json": "错因诊断（03）",
     "error_pattern_summary.json": "错因汇总（03）",
+    "task3_recommendations.json": "任务3建议（08）",
+    "task1_knowledge_structure.json": "任务1知识结构（09）",
 }
 OPTIONAL = {
     "knowledge_base.json": "RAG 知识库（04，可选）",
     "knowledge_graph.html": "知识图谱（05）",
     "dashboard.html": "学情仪表盘（06）",
     "error_diagnosis_llm.json": "LLM 诊断（llm_upgrade.py，可选）",
-    "task1_knowledge_structure.json": "任务1 成果（B 提供，可选）",
-    "task3_recommendations.json": "任务3 建议（B 提供，可选）",
 }
 
 
@@ -70,15 +70,36 @@ def main() -> int:
         stats = load(os.path.join(d, "statistics.json"))
         diag = load(os.path.join(d, "error_diagnosis.json"))
         prof = load(os.path.join(d, "student_profiles.json"))
+        task3 = load(os.path.join(d, "task3_recommendations.json"))
+        task1 = load(os.path.join(d, "task1_knowledge_structure.json"))
         recs = cleaned.get("records") or []
+        task3_cases = task3.get("cases") or {}
+        task3_all_students = task3.get("all_students") or {}
+        task3_students = set(task3_cases) | set(task3_all_students)
+        task1_themes = task1.get("themes") or {}
+        task1_indicator_count = sum(
+            len((theme.get("indicators") or {}))
+            for theme in task1_themes.values()
+        )
+        task1_question_count = sum(
+            indicator.get("question_count", 0)
+            for theme in task1_themes.values()
+            for indicator in (theme.get("indicators") or {}).values()
+        )
         checks = [
             ("有效作答记录 = 790", len(recs) == 790, len(recs)),
             ("学生数 = 40", len(prof) == 40, len(prof)),
             ("指标数 = 9", len({r.get("indicator_id") for r in recs}) == 9,
              len({r.get("indicator_id") for r in recs})),
             ("错因诊断 = 385", len(diag) == 385, len(diag)),
+            ("任务3覆盖全部学生", task3_students == set(prof)
+             and len(task3_cases) + len(task3_all_students) == len(prof),
+             len(task3_students)),
             ("总得分率 ≈ 57.9%", abs(stats["overall"]["score_rate"] - 0.5794) < 0.001,
              stats["overall"]["score_rate"]),
+            ("任务1主题 = 3", len(task1_themes) == 3, len(task1_themes)),
+            ("任务1指标 = 9", task1_indicator_count == 9, task1_indicator_count),
+            ("任务1题目映射 = 54", task1_question_count == 54, task1_question_count),
         ]
         print("\n关键数字：")
         for label, ok, val in checks:

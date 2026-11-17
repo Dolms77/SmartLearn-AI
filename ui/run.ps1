@@ -12,10 +12,15 @@ $root = Split-Path -Parent $PSScriptRoot
 $py = Join-Path $root ".venv-ui\Scripts\python.exe"
 
 if (-not (Test-Path $py)) {
-    Write-Host "venv not found: $py" -ForegroundColor Red
-    Write-Host "Run first:" -ForegroundColor Yellow
-    Write-Host '  D:\python313\python.exe -m venv .venv-ui'
-    Write-Host '  $env:TEMP="D:\tmp-pip"; .venv-ui\Scripts\python.exe -m pip install -r requirements-ui.txt'
+    Write-Host "Virtual environment not found: $py" -ForegroundColor Red
+    Write-Host "Run 1_一键安装.bat from the repository root first." -ForegroundColor Yellow
+    exit 1
+}
+
+& $py -c "import streamlit" 2>$null
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Streamlit is missing from .venv-ui." -ForegroundColor Red
+    Write-Host "Run 1_一键安装.bat from the repository root, then retry." -ForegroundColor Yellow
     exit 1
 }
 
@@ -36,7 +41,9 @@ $env:TEMP = $tmp
 $env:TMP = $tmp
 
 $appPath = Join-Path $PSScriptRoot "app.py"
-$all = @("--server.headless=true", "--browser.gatherUsageStats=false") + $args
+$all = @("--server.address=127.0.0.1", "--server.headless=true", "--browser.gatherUsageStats=false") + $args
 
 Write-Host "Starting: http://localhost:8501" -ForegroundColor Green
 & $py -m streamlit run $appPath @all
+$streamlitExit = $LASTEXITCODE
+if ($streamlitExit -ne 0) { exit $streamlitExit }

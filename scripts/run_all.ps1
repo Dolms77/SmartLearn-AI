@@ -1,23 +1,31 @@
-# Run pipeline 01..06 in order, then verify artifacts.
+# Run pipeline 01..09 in order, then verify artifacts.
 # Usage:
-#   .\scripts\run_all.ps1              # 01,02,03,06 (+05 if pyvis installed); skips 04
-#   .\scripts\run_all.ps1 -WithRag     # also run 04 (needs requirements-rag.txt)
-#   .\scripts\run_all.ps1 -WithUI      # launch UI when done
+#   .\scripts\run_all.ps1                         # use the repository .venv-ui
+#   .\scripts\run_all.ps1 -Python (Get-Command python).Source
+#   .\scripts\run_all.ps1 -WithRag                # also run 04 (needs requirements-rag.txt)
+#   .\scripts\run_all.ps1 -WithUI                 # launch UI when done
 # NOTE: keep this file ASCII-only (no BOM); Chinese text breaks Windows PowerShell 5.1 parsing.
 param(
     [switch]$WithRag,
-    [switch]$WithUI
+    [switch]$WithUI,
+    [string]$Python = ""
 )
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
-$vpy = Join-Path $root ".venv-ui\Scripts\python.exe"
+if ($Python) {
+    $pythonCommand = Get-Command $Python -ErrorAction SilentlyContinue
+    if (-not $pythonCommand) { throw "Python interpreter not found: $Python" }
+    $vpy = $pythonCommand.Source
+} else {
+    $vpy = Join-Path $root ".venv-ui\Scripts\python.exe"
+}
 # Locate the script folder without typing non-ASCII names (keeps this file ASCII-only).
 $src = (Get-ChildItem $root -Directory |
         Where-Object { Test-Path (Join-Path $_.FullName "01_data_loader.py") } |
         Select-Object -First 1).FullName
 if (-not $src) { throw "script folder (01_data_loader.py) not found under $root" }
 
-if (-not (Test-Path $vpy)) { throw "venv not found. Run scripts\bootstrap.ps1 first." }
+if (-not (Test-Path $vpy)) { throw "Python interpreter not found. Run scripts\bootstrap.ps1 or pass -Python." }
 
 # SS_DATA / SS_OUT are optional overrides. When unset, each script resolves paths
 # relative to its own folder (..\output and ..\CSV data folder), so moving the whole
@@ -33,7 +41,10 @@ $steps = @(
     @{ n = "03_error_diagnosis"; f = "03_error_diagnosis.py" },
     @{ n = "04_rag_knowledge";   f = "04_rag_knowledge.py"; optional = $true },
     @{ n = "05_knowledge_graph"; f = "05_knowledge_graph.py"; optional = $true },
-    @{ n = "06_dashboard";       f = "06_dashboard.py" }
+    @{ n = "06_dashboard";       f = "06_dashboard.py" },
+    @{ n = "07_multi_agent";     f = "07_multi_agent.py" },
+    @{ n = "08_task3_generator"; f = "08_task3_generator.py"; args = @("--all-students") },
+    @{ n = "09_task1_knowledge_structure"; f = "09_task1_knowledge_structure.py" }
 )
 
 foreach ($s in $steps) {
@@ -44,11 +55,13 @@ foreach ($s in $steps) {
     $t0 = Get-Date
     Write-Host "=== $($s.n) ===" -ForegroundColor Cyan
     $code = 0
-    & $vpy (Join-Path $src $s.f)
+    $stepArgs = @()
+    if ($s.ContainsKey("args")) { $stepArgs = $s.args }
+    & $vpy (Join-Path $src $s.f) @stepArgs
     $code = $LASTEXITCODE
     if ($code -ne 0) {
         if ($s.optional) {
-            Write-Host "  WARN $($s.n) failed (optional, continue). Missing deps? see requirements-rag.txt / pyvis." -ForegroundColor Yellow
+            Write-Host "  WARN $($s.n) failed (optional, continue). See requirements-rag.txt / requirements-scripts.txt." -ForegroundColor Yellow
             continue
         }
         throw "$($s.n) failed with exit code $code"

@@ -25,10 +25,13 @@ import os
 from collections import Counter, defaultdict
 
 # ============================================================
-# 配置区（改这两行路径就行）
+# 配置区（可通过 SS_OUT 覆盖输出目录）
 # ============================================================
 
-OUTPUT_DIR = os.environ.get("SS_OUT") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "output")
+OUTPUT_DIR = os.environ.get("SS_OUT") or os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "output"
+)
+
 INDICATOR_NAMES = {
     'T01I1': '表示数量关系并代入求值',
     'T01I2': '识别同类项去括号并化简',

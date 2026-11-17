@@ -24,6 +24,9 @@ import sys
 # ============================================================
 
 OUTPUT_DIR = os.environ.get("SS_OUT") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "output")
+DATA_DIR = os.environ.get("SS_DATA") or os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "赛题材料", "赛题数据",
+    "赛题资料包", "4_赛题数据", "模拟学情数据")
 def check_dependencies():
     missing = []
     try:
@@ -112,7 +115,7 @@ def build_knowledge_graph(data_model, stats):
 
     # 学习卡节点（从原始CSV读取）
     import csv
-    csv_path = "/data_agent/users/sessions/36527195/upload/题目与材料.csv"
+    csv_path = os.path.join(DATA_DIR, "题目与材料.csv")
     with open(csv_path, 'r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -137,7 +140,7 @@ def build_knowledge_graph(data_model, stats):
     net = Network(
         height='800px', width='100%',
         bgcolor='#FAFAFA', font_color='#333333',
-        directed=True, notebook=False
+        directed=True, notebook=False, cdn_resources='in_line'
     )
 
     # 物理布局设置
@@ -190,11 +193,7 @@ def build_knowledge_graph(data_model, stats):
     """
 
     output_path = os.path.join(OUTPUT_DIR, 'knowledge_graph.html')
-    net.save_graph(output_path)
-
-    # 在HTML中插入图例
-    with open(output_path, 'r', encoding='utf-8') as f:
-        html = f.read()
+    html = net.generate_html(notebook=False)
     html = html.replace('</body>', f'{legend_html}</body>')
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html)

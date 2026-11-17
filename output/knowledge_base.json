@@ -1,0 +1,717 @@
+[
+  {
+    "content_preview": "【课程要求】\n主题：代数式与整式运算\n主题目标：能用代数式表示简单数量关系、代入求值，并进行整式加减与解释。\n观察指标：T01I1 - 表示数量关系并代入求值\n课标编号：CR01\n课标位置：62／55\n教材页码：上册68—109\n",
+    "metadata": {
+      "type": "course_requirement",
+      "theme_id": "T01",
+      "indicator_id": "T01I1",
+      "source": "课程要求"
+    }
+  },
+  {
+    "content_preview": "【课程要求】\n主题：代数式与整式运算\n主题目标：能用代数式表示简单数量关系、代入求值，并进行整式加减与解释。\n观察指标：T01I2 - 识别同类项、去括号并化简\n课标编号：CR01\n课标位置：62／55\n教材页码：上册68—109\n",
+    "metadata": {
+      "type": "course_requirement",
+      "theme_id": "T01",
+      "indicator_id": "T01I2",
+      "source": "课程要求"
+    }
+  },
+  {
+    "content_preview": "【课程要求】\n主题：代数式与整式运算\n主题目标：能用代数式表示简单数量关系、代入求值，并进行整式加减与解释。\n观察指标：T01I3 - 用整式解释具体问题\n课标编号：CR01\n课标位置：62／55\n教材页码：上册68—109\n",
+    "metadata": {
+      "type": "course_requirement",
+      "theme_id": "T01",
+      "indicator_id": "T01I3",
+      "source": "课程要求"
+    }
+  },
+  {
+    "content_preview": "【课程要求】\n主题：方程与方程组\n主题目标：能解一元一次方程和二元一次方程组，依据等量关系建立模型并检验答案。\n观察指标：T02I1 - 运用等式性质解一元一次方程\n课标编号：CR02\n课标位置：63／56\n教材页码：上册110—148；下册87—119\n",
+    "metadata": {
+      "type": "course_requirement",
+      "theme_id": "T02",
+      "indicator_id": "T02I1",
+      "source": "课程要求"
+    }
+  },
+  {
+    "content_preview": "【课程要求】\n主题：方程与方程组\n主题目标：能解一元一次方程和二元一次方程组，依据等量关系建立模型并检验答案。\n观察指标：T02I2 - 用消元法解二元一次方程组\n课标编号：CR02\n课标位置：63／56\n教材页码：上册110—148；下册87—119\n",
+    "metadata": {
+      "type": "course_requirement",
+      "theme_id": "T02",
+      "indicator_id": "T02I2",
+      "source": "课程要求"
+    }
+  },
+  {
+    "content_preview": "【课程要求】\n主题：方程与方程组\n主题目标：能解一元一次方程和二元一次方程组，依据等量关系建立模型并检验答案。\n观察指标：T02I3 - 列方程或方程组解决简单实际问题并检验\n课标编号：CR02\n课标位置：63／56\n教材页码：上册110—148；下册87—119\n",
+    "metadata": {
+      "type": "course_requirement",
+      "theme_id": "T02",
+      "indicator_id": "T02I3",
+      "source": "课程要求"
+    }
+  },
+  {
+    "content_preview": "【课程要求】\n主题：不等式与不等式组\n主题目标：能解一元一次不等式及简单不等式组，表示解集，并解决范围约束问题。\n观察指标：T03I1 - 运用不等式性质求解，负数乘除时正确改变方向\n课标编号：CR03\n课标位置：63／56\n教材页码：下册120—145\n",
+    "metadata": {
+      "type": "course_requirement",
+      "theme_id": "T03",
+      "indicator_id": "T03I1",
+      "source": "课程要求"
+    }
+  },
+  {
+    "content_preview": "【课程要求】\n主题：不等式与不等式组\n主题目标：能解一元一次不等式及简单不等式组，表示解集，并解决范围约束问题。\n观察指标：T03I2 - 求两个一元一次不等式解集的交集\n课标编号：CR03\n课标位置：63／56\n教材页码：下册120—145\n",
+    "metadata": {
+      "type": "course_requirement",
+      "theme_id": "T03",
+      "indicator_id": "T03I2",
+      "source": "课程要求"
+    }
+  },
+  {
+    "content_preview": "【课程要求】\n主题：不等式与不等式组\n主题目标：能解一元一次不等式及简单不等式组，表示解集，并解决范围约束问题。\n观察指标：T03I3 - 根据实际限制列不等式并解释取值范围\n课标编号：CR03\n课标位置：63／56\n教材页码：下册120—145\n",
+    "metadata": {
+      "type": "course_requirement",
+      "theme_id": "T03",
+      "indicator_id": "T03I3",
+      "source": "课程要求"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q001\n题型：填空题\n指标：T01I1\n题干：每支笔x元，买3支笔另付2元包装费，共需多少元？用代数式表示。\n参考答案：3x+2\n参考解析：三支笔共3x元，再加2元。\n评分点：\nQ001P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q001",
+      "theme_id": "T01",
+      "indicator_id": "T01I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q002\n题型：填空题\n指标：T01I1\n题干：x=4时，代数式2x+3的值是多少？\n参考答案：11\n参考解析：代入x=4，2×4+3=11。\n评分点：\nQ002P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q002",
+      "theme_id": "T01",
+      "indicator_id": "T01I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q003\n题型：选择题\n指标：T01I2\n题干：下列哪一组是同类项？\n选项：\nA. 3x与3x²\nB. 3x与-2x\nC. x与xy\nD. 2与2x\n参考答案：B\n参考解析：3x与-2x的字母及其指数相同。\n评分点：\nQ003P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q003",
+      "theme_id": "T01",
+      "indicator_id": "T01I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q004\n题型：填空题\n指标：T01I2\n题干：化简5x-2x+2x-4。\n参考答案：5x-4\n参考解析：同类项系数5-2+2=5。\n评分点：\nQ004P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q004",
+      "theme_id": "T01",
+      "indicator_id": "T01I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q005\n题型：填空题\n指标：T01I2\n题干：去括号：3(a+2)=？\n参考答案：3a+6\n参考解析：3分别乘括号内两项。\n评分点：\nQ005P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q005",
+      "theme_id": "T01",
+      "indicator_id": "T01I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q006\n题型：解答题\n指标：T01I1\n题干：长方形的长为(x+3)厘米，宽为x厘米，用含x的整式表示它的周长。\n参考答案：4x+6厘米\n参考解析：周长是长与宽之和的2倍；C=2[(x+3)+x]=2(2x+3)；C=4x+6厘米。\n评分点：\nQ006P1 写出周长关系 1分\nQ006P2 正确列出周长算式 1分\nQ006P3 合并同类项并写单位 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q006",
+      "theme_id": "T01",
+      "indicator_id": "T01I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q007\n题型：填空题\n指标：T01I1\n题干：x=-2时，x²+3x的值是多少？\n参考答案：-2\n参考解析：(-2)²+3×(-2)=4-6=-2。\n评分点：\nQ007P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q007",
+      "theme_id": "T01",
+      "indicator_id": "T01I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q008\n题型：填空题\n指标：T01I2\n题干：4m与-3m是否为同类项？回答“是”或“否”。\n参考答案：是\n参考解析：字母及指数相同。\n评分点：\nQ008P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q008",
+      "theme_id": "T01",
+      "indicator_id": "T01I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q009\n题型：解答题\n指标：T01I2\n题干：化简：2(3x-1)-(x+4)。\n参考答案：5x-6\n参考解析：去括号得6x-2-x-4；6x-x=5x，-2-4=-6；结果为5x-6。\n评分点：\nQ009P1 按法则去括号 1分\nQ009P2 合并同类项 1分\nQ009P3 写出正确化简结果 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q009",
+      "theme_id": "T01",
+      "indicator_id": "T01I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q010\n题型：填空题\n指标：T01I2\n题干：去括号：-2(2a-3)=？\n参考答案：-4a+6\n参考解析：-2乘-3应得+6。\n评分点：\nQ010P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q010",
+      "theme_id": "T01",
+      "indicator_id": "T01I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q011\n题型：解答题\n指标：T01I3\n题干：设n为整数，求三个连续整数n-1、n、n+1的和，并说明这个和与3有什么关系。\n参考答案：3n，是3的倍数\n参考解析：和为(n-1)+n+(n+1)；合并得3n；n为整数，所以和是3的倍数。\n评分点：\nQ011P1 列出三个数的和 1分\nQ011P2 正确化简 1分\nQ011P3 由n为整数解释倍数关系 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q011",
+      "theme_id": "T01",
+      "indicator_id": "T01I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q012\n题型：填空题\n指标：T01I2\n题干：化简3x+2-5x+7。\n参考答案：-2x+9\n参考解析：x项得-2x，常数项得9。\n评分点：\nQ012P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q012",
+      "theme_id": "T01",
+      "indicator_id": "T01I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q013\n题型：填空题\n指标：T01I1\n题干：a=2，b=-1时，2a-b的值是多少？\n参考答案：5\n参考解析：2×2-(-1)=5。\n评分点：\nQ013P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q013",
+      "theme_id": "T01",
+      "indicator_id": "T01I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q014\n题型：解答题\n指标：T01I1\n题干：某班男生有x人，女生人数比男生人数的2倍少3人。用含x的整式表示全班人数。\n参考答案：3x-3人\n参考解析：女生人数是2x-3人；全班人数=x+(2x-3)；合并得3x-3人。\n评分点：\nQ014P1 表示女生人数 1分\nQ014P2 列出全班人数之和 1分\nQ014P3 合并同类项并写单位 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q014",
+      "theme_id": "T01",
+      "indicator_id": "T01I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q015\n题型：解答题\n指标：T01I2\n题干：化简：3(2a-b)-2(a+2b)。\n参考答案：4a-7b\n参考解析：去括号得6a-3b-2a-4b；a项6a-2a=4a；b项-3b-4b=-7b；结果为4a-7b。\n评分点：\nQ015P1 正确去两个括号 1分\nQ015P2 分别合并a项和b项 1分\nQ015P3 写出正确结果 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q015",
+      "theme_id": "T01",
+      "indicator_id": "T01I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q016\n题型：填空题\n指标：T01I2\n题干：化简(a+b)-(a-b)。\n参考答案：2b\n参考解析：去括号后a+b-a+b=2b。\n评分点：\nQ016P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q016",
+      "theme_id": "T01",
+      "indicator_id": "T01I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q017\n题型：填空题\n指标：T01I2\n题干：化简2x²y-5x²y。\n参考答案：-3x²y\n参考解析：相同字母部分保留，系数2-5=-3。\n评分点：\nQ017P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q017",
+      "theme_id": "T01",
+      "indicator_id": "T01I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q018\n题型：解答题\n指标：T01I3\n题干：小明说：“无论x取什么值，代数式2(x-3)-3(x+1)+x的值都等于-9。”他的说法对吗？请说明理由。\n参考答案：对；化简结果为-9，与x的取值无关\n参考解析：去括号得2x-6-3x-3+x；合并同类项得-9；结果不含x，所以无论x取何值，代数式的值都是-9，说法正确。\n评分点：\nQ018P1 正确去括号 1分\nQ018P2 合并",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q018",
+      "theme_id": "T01",
+      "indicator_id": "T01I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q019\n题型：填空题\n指标：T02I1\n题干：解方程x+7=12，x=？\n参考答案：5\n参考解析：等式两边减7，x=5。\n评分点：\nQ019P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q019",
+      "theme_id": "T02",
+      "indicator_id": "T02I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q020\n题型：填空题\n指标：T02I1\n题干：解方程3x=18，x=？\n参考答案：6\n参考解析：等式两边除以3。\n评分点：\nQ020P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q020",
+      "theme_id": "T02",
+      "indicator_id": "T02I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q021\n题型：选择题\n指标：T02I1\n题干：方程2(x-1)=8去括号后正确的是哪项？\n选项：\nA. 2x-1=8\nB. 2x-2=8\nC. 2x+2=8\nD. x-2=8\n参考答案：B\n参考解析：2乘括号内的x和-1。\n评分点：\nQ021P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q021",
+      "theme_id": "T02",
+      "indicator_id": "T02I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q022\n题型：解答题\n指标：T02I1\n题干：解方程：3(x-2)=2x+5。\n参考答案：x=11\n参考解析：去括号得3x-6=2x+5；移项得3x-2x=5+6；x=11，代回两边均为27。\n评分点：\nQ022P1 正确去括号 1分\nQ022P2 移项并合并同类项 1分\nQ022P3 求解并核对 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q022",
+      "theme_id": "T02",
+      "indicator_id": "T02I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q023\n题型：填空题\n指标：T02I1\n题干：解方程2x-5=9，x=？\n参考答案：7\n参考解析：2x=14，所以x=7。\n评分点：\nQ023P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q023",
+      "theme_id": "T02",
+      "indicator_id": "T02I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q024\n题型：填空题\n指标：T02I1\n题干：解方程x/3+2=5，x=？\n参考答案：9\n参考解析：x/3=3，所以x=9。\n评分点：\nQ024P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q024",
+      "theme_id": "T02",
+      "indicator_id": "T02I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q025\n题型：解答题\n指标：T02I1\n题干：解方程：(x-1)/2+(x+1)/3=4。\n参考答案：x=5\n参考解析：同乘6得3(x-1)+2(x+1)=24；展开得5x-1=24；5x=25，x=5。\n评分点：\nQ025P1 正确去分母 1分\nQ025P2 去括号并合并 1分\nQ025P3 求解并检验 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q025",
+      "theme_id": "T02",
+      "indicator_id": "T02I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q026\n题型：填空题\n指标：T02I1\n题干：x=3是否为方程2x+1=7的解？回答“是”或“否”。\n参考答案：是\n参考解析：代入左边得7，与右边相等。\n评分点：\nQ026P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q026",
+      "theme_id": "T02",
+      "indicator_id": "T02I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q027\n题型：填空题\n指标：T02I3\n题干：某数的2倍再加5等于17，这个数是多少？\n参考答案：6\n参考解析：设x，2x+5=17，x=6。\n评分点：\nQ027P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q027",
+      "theme_id": "T02",
+      "indicator_id": "T02I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q028\n题型：解答题\n指标：T02I2\n题干：解方程组：x+y=9，x-y=3。\n参考答案：x=6，y=3\n参考解析：两式相加得2x=12；x=6，代入x+y=9得y=3；解为x=6，y=3，两式均成立。\n评分点：\nQ028P1 正确选择消元关系 1分\nQ028P2 求出一个未知数并回代 1分\nQ028P3 给出并核验两个解 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q028",
+      "theme_id": "T02",
+      "indicator_id": "T02I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q029\n题型：填空题\n指标：T02I2\n题干：方程组x+y=7，x-y=1中的x是多少？\n参考答案：4\n参考解析：两式相加得2x=8。\n评分点：\nQ029P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q029",
+      "theme_id": "T02",
+      "indicator_id": "T02I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q030\n题型：填空题\n指标：T02I2\n题干：方程组x+2y=8、x=2中的y是多少？\n参考答案：3\n参考解析：代入2+2y=8，y=3。\n评分点：\nQ030P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q030",
+      "theme_id": "T02",
+      "indicator_id": "T02I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q031\n题型：解答题\n指标：T02I2\n题干：解方程组：2x+y=11，x-y=1。\n参考答案：x=4，y=3\n参考解析：由x-y=1得y=x-1；代入2x+y=11得3x-1=11，x=4；y=3，原方程组成立。\n评分点：\nQ031P1 正确建立消元步骤 1分\nQ031P2 求出x 1分\nQ031P3 回代求y并核验 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q031",
+      "theme_id": "T02",
+      "indicator_id": "T02I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q032\n题型：填空题\n指标：T02I2\n题干：方程组x+y=12、x=2y中的y是多少？\n参考答案：4\n参考解析：3y=12，所以y=4。\n评分点：\nQ032P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q032",
+      "theme_id": "T02",
+      "indicator_id": "T02I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q033\n题型：填空题\n指标：T02I3\n题干：钢笔每支x元，练习本每本y元。买两支钢笔和三本练习本共用17元，列出x、y满足的等量关系式。\n参考答案：2x+3y=17\n参考解析：总价为数量乘单价后相加。\n评分点：\nQ033P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q033",
+      "theme_id": "T02",
+      "indicator_id": "T02I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q034\n题型：解答题\n指标：T02I3\n题干：两张成人票和一张学生票共80元，一张成人票和两张学生票共70元。成人票、学生票的单价各是多少元？\n参考答案：成人票30元，学生票20元\n参考解析：设成人票x元、学生票y元，2x+y=80，x+2y=70；消元得x=30，y=20；成人票30元，学生票20元，代回均符合。\n评分点：\nQ034P1 设未知数并列出两式 1分\nQ034P2 ",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q034",
+      "theme_id": "T02",
+      "indicator_id": "T02I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q035\n题型：填空题\n指标：T02I2\n题干：方程组x+y=5，2x+y=8中的y是多少？\n参考答案：2\n参考解析：两式相减得x=3，代入x+y=5得y=2。\n评分点：\nQ035P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q035",
+      "theme_id": "T02",
+      "indicator_id": "T02I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q036\n题型：解答题\n指标：T02I3\n题干：笼中鸡和兔共10只，共有26只脚。鸡和兔各有多少只？\n参考答案：鸡7只，兔3只\n参考解析：设鸡x只、兔y只，x+y=10，2x+4y=26；由方程组得y=3，x=7；鸡7只兔3只，脚数14+12=26。\n评分点：\nQ036P1 设未知数并列数量关系 1分\nQ036P2 消元求两种数量 1分\nQ036P3 检验实际意义 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q036",
+      "theme_id": "T02",
+      "indicator_id": "T02I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q037\n题型：填空题\n指标：T03I1\n题干：解不等式x+4>9，写出解集。\n参考答案：x>5\n参考解析：两边减4。\n评分点：\nQ037P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q037",
+      "theme_id": "T03",
+      "indicator_id": "T03I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q038\n题型：填空题\n指标：T03I1\n题干：解不等式2x≤10，写出解集。\n参考答案：x≤5\n参考解析：两边除以正数2，方向不变。\n评分点：\nQ038P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q038",
+      "theme_id": "T03",
+      "indicator_id": "T03I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q039\n题型：填空题\n指标：T03I1\n题干：解不等式x-3<2，写出解集。\n参考答案：x<5\n参考解析：两边加3。\n评分点：\nQ039P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q039",
+      "theme_id": "T03",
+      "indicator_id": "T03I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q040\n题型：解答题\n指标：T03I1\n题干：解不等式3x-2≤10，并说明解集在数轴上如何表示。\n参考答案：x≤4，4处实心点向左\n参考解析：两边加2得3x≤12；两边除以3得x≤4；数轴上4处实心点，向左表示。\n评分点：\nQ040P1 正确移项 1分\nQ040P2 求出解集 1分\nQ040P3 正确说明端点与方向 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q040",
+      "theme_id": "T03",
+      "indicator_id": "T03I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q041\n题型：填空题\n指标：T03I1\n题干：解不等式-2x>6，写出解集。\n参考答案：x<-3\n参考解析：除以负数-2，不等号方向改变。\n评分点：\nQ041P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q041",
+      "theme_id": "T03",
+      "indicator_id": "T03I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q042\n题型：填空题\n指标：T03I1\n题干：已知a<b，则-a与-b之间应填“>”“<”还是“=”？\n参考答案：>\n参考解析：两边乘-1，不等号方向改变。\n评分点：\nQ042P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q042",
+      "theme_id": "T03",
+      "indicator_id": "T03I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q043\n题型：解答题\n指标：T03I1\n题干：解不等式：-2x+3<11。\n参考答案：x>-4\n参考解析：两边减3得-2x<8；两边除以-2，不等号反向；解集为x>-4；取x=0可检验。\n评分点：\nQ043P1 正确移项 1分\nQ043P2 除以负数时反向 1分\nQ043P3 写出并核对解集 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q043",
+      "theme_id": "T03",
+      "indicator_id": "T03I1",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q044\n题型：选择题\n指标：T03I2\n题干：不等式组x≥-2，x<1的解集在数轴上应如何表示？\n选项：\nA. -2处空心点、1处实心点，取两点之间\nB. -2处实心点、1处空心点，取两点之间\nC. -2处实心点向左、1处空心点向右\nD. -2处空心点、1处空心点，取两点之间\n参考答案：B\n参考解析：x≥-2含端点-2，x<1不含端点1，公共部分在两点之间。\n评分点：\nQ044P",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q044",
+      "theme_id": "T03",
+      "indicator_id": "T03I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q045\n题型：填空题\n指标：T03I2\n题干：同时满足x>1、x<5，写出公共解集。\n参考答案：1<x<5\n参考解析：取两个解集交集。\n评分点：\nQ045P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q045",
+      "theme_id": "T03",
+      "indicator_id": "T03I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q046\n题型：解答题\n指标：T03I2\n题干：解不等式组：x+1>3，2x≤10。\n参考答案：2<x≤5\n参考解析：由x+1>3得x>2；由2x≤10得x≤5；交集为2<x≤5。\n评分点：\nQ046P1 分别解出两个不等式 1分\nQ046P2 取两个解集交集 1分\nQ046P3 正确写出开闭端点 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q046",
+      "theme_id": "T03",
+      "indicator_id": "T03I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q047\n题型：填空题\n指标：T03I2\n题干：同时满足x≥-1、x<4，写出公共解集。\n参考答案：-1≤x<4\n参考解析：左端点含-1，右端点不含4。\n评分点：\nQ047P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q047",
+      "theme_id": "T03",
+      "indicator_id": "T03I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q048\n题型：填空题\n指标：T03I2\n题干：不等式组x>3、x<2的解集是什么？\n参考答案：无解\n参考解析：两个范围没有交集。\n评分点：\nQ048P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q048",
+      "theme_id": "T03",
+      "indicator_id": "T03I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q049\n题型：解答题\n指标：T03I2\n题干：解不等式组：2x-1≥3，3-x>0。\n参考答案：2≤x<3\n参考解析：2x-1≥3得x≥2；3-x>0得x<3；交集为2≤x<3。\n评分点：\nQ049P1 正确求第一个解集 1分\nQ049P2 正确求第二个解集 1分\nQ049P3 取交集并说明端点 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q049",
+      "theme_id": "T03",
+      "indicator_id": "T03I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q050\n题型：填空题\n指标：T03I3\n题干：每张票5元，买x张的费用不超过30元，应列什么不等式？\n参考答案：5x≤30\n参考解析：费用为5x，“不超过”对应≤。\n评分点：\nQ050P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q050",
+      "theme_id": "T03",
+      "indicator_id": "T03I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q051\n题型：填空题\n指标：T03I3\n题干：一件商品原价x元，优惠5元后价格不超过30元，应列什么不等式？\n参考答案：x-5≤30\n参考解析：优惠后为x-5。\n评分点：\nQ051P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q051",
+      "theme_id": "T03",
+      "indicator_id": "T03I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q052\n题型：解答题\n指标：T03I3\n题干：班级计划至少收集60本书，现已有18本，其余由x名同学每人捐3本。至少还需要多少名同学捐书？\n参考答案：14人\n参考解析：列出18+3x≥60；得3x≥42，x≥14；人数为整数，至少还需14人。\n评分点：\nQ052P1 正确列出至少关系 1分\nQ052P2 解不等式 1分\nQ052P3 结合人数取整数并解释 1分\n满分：3\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q052",
+      "theme_id": "T03",
+      "indicator_id": "T03I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q053\n题型：填空题\n指标：T03I2\n题干：解复合不等式-3≤2x+1<7，写出解集。\n参考答案：-2≤x<3\n参考解析：各部分同时减1再除以2。\n评分点：\nQ053P1 答案正确 1分\n满分：1\n",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q053",
+      "theme_id": "T03",
+      "indicator_id": "T03I2",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【题目】\n编号：Q054\n题型：解答题\n指标：T03I3\n题干：某商品成本为20元，售价为x元。要求每件至少获利5元，且售价不超过30元，求售价x的取值范围。\n参考答案：25≤x≤30元\n参考解析：至少获利5元，x-20≥5，即x≥25；售价不超过30元，所以x≤30；两条件同时满足：25≤x≤30元。\n评分点：\nQ054P1 根据利润列下界 1分\nQ054P2 根据售价列上界 1分\nQ054P3",
+    "metadata": {
+      "type": "question",
+      "question_id": "Q054",
+      "theme_id": "T03",
+      "indicator_id": "T03I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【学习卡】\n编号：L01\n主题：T01\n内容：代数式与整式运算：先看数量关系；代入时连同负号加括号；去括号注意括号前的符号，最后合并同类项。\n对应指标：T01I1、T01I2、T01I3\n",
+    "metadata": {
+      "type": "learning_card",
+      "card_id": "L01",
+      "theme_id": "T01",
+      "indicator_id": "T01I1、T01I2、T01I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【学习卡】\n编号：L02\n主题：T02\n内容：方程与方程组：保持等式两边同变；一元一次方程逐步化简；二元一次方程组选择代入或加减消元，并代回原题。\n对应指标：T02I1、T02I2、T02I3\n",
+    "metadata": {
+      "type": "learning_card",
+      "card_id": "L02",
+      "theme_id": "T02",
+      "indicator_id": "T02I1、T02I2、T02I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【学习卡】\n编号：L03\n主题：T03\n内容：不等式与不等式组：两边乘除负数须反向；不等式组取公共解集；注意端点能否取到及现实数量限制。\n对应指标：T03I1、T03I2、T03I3\n",
+    "metadata": {
+      "type": "learning_card",
+      "card_id": "L03",
+      "theme_id": "T03",
+      "indicator_id": "T03I1、T03I2、T03I3",
+      "source": "题目与材料"
+    }
+  },
+  {
+    "content_preview": "【教材切片】\n编号：B01\n内容：七年级下册 第八章 实数\n来源文件：5_课程标准及相关教学资源/B01_相关资料切片.pdf\n",
+    "metadata": {
+      "type": "textbook",
+      "textbook_id": "B01",
+      "source": "教材切片"
+    }
+  },
+  {
+    "content_preview": "【教材切片】\n编号：B02\n内容：七年级下册 第十一章 不等式与不等式组\n来源文件：5_课程标准及相关教学资源/B02_相关资料切片.pdf\n",
+    "metadata": {
+      "type": "textbook",
+      "textbook_id": "B02",
+      "source": "教材切片"
+    }
+  },
+  {
+    "content_preview": "【教材切片】\n编号：B03\n内容：七年级下册 第十二章 数据的收集、整理与描述\n来源文件：5_课程标准及相关教学资源/B03_相关资料切片.pdf\n",
+    "metadata": {
+      "type": "textbook",
+      "textbook_id": "B03",
+      "source": "教材切片"
+    }
+  },
+  {
+    "content_preview": "【教材切片】\n编号：B04\n内容：七年级上册 第六章 几何图形初步\n来源文件：5_课程标准及相关教学资源/B04_相关资料切片.pdf\n",
+    "metadata": {
+      "type": "textbook",
+      "textbook_id": "B04",
+      "source": "教材切片"
+    }
+  },
+  {
+    "content_preview": "【教材切片】\n编号：B05\n内容：七年级上册 第三章 代数式；第四章 整式的加减\n来源文件：5_课程标准及相关教学资源/B05_相关资料切片.pdf\n",
+    "metadata": {
+      "type": "textbook",
+      "textbook_id": "B05",
+      "source": "教材切片"
+    }
+  },
+  {
+    "content_preview": "【教材切片】\n编号：B06\n内容：七年级上册 第五章 一元一次方程；七年级下册 第十章 二元一次方程组\n来源文件：5_课程标准及相关教学资源/B06_相关资料切片.pdf\n",
+    "metadata": {
+      "type": "textbook",
+      "textbook_id": "B06",
+      "source": "教材切片"
+    }
+  },
+  {
+    "content_preview": "【教材切片】\n编号：B07\n内容：七年级上册 第二章 有理数的运算\n来源文件：5_课程标准及相关教学资源/B07_相关资料切片.pdf\n",
+    "metadata": {
+      "type": "textbook",
+      "textbook_id": "B07",
+      "source": "教材切片"
+    }
+  },
+  {
+    "content_preview": "【教材切片】\n编号：B08\n内容：七年级下册 第七章 相交线与平行线\n来源文件：5_课程标准及相关教学资源/B08_相关资料切片.pdf\n",
+    "metadata": {
+      "type": "textbook",
+      "textbook_id": "B08",
+      "source": "教材切片"
+    }
+  }
+]

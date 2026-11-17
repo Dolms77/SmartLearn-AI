@@ -1,24 +1,27 @@
 # -*- coding: utf-8 -*-
-"""agent_bridge.py — 把 07 多智能体编排层接进 Streamlit（按 07 的真实 API 适配）
+"""agent_bridge.py — 把 07V2 多智能体编排层接进 Streamlit
 
-07 的实际接口（本文件据此编写，不再假设 trace/results 结构）：
-    mod.DataBundle(output_dir)
-    mod.Coordinator(output_dir).route(question, student_id=None) -> dict
-        dict 含 agent / routing / validation，以及该 Agent 自己的字段
+07V2 的真实接口（本文件据此编写）：
+    mod.Bundle(output_dir)
+    mod.Coordinator(bundle).run(question) -> {
+        'question', 'routing': {question, intents, student_id, detail},
+        'results': [ {agent, ...}, ... ],        # 可能多个（复合意图级联）
+        'trace': {'steps': [{step, time, agent, action, detail, output}]},
+        'trace_text': str,
+    }
 
-本模块提供：
-    load_coordinator()     缓存 Coordinator（同一会话复用）
-    ask()                  调 route()，异常兜底返回 {"error": ...}
-    render_chain()         由 routing + validation 还原"处理链路"时间线
-    render_result()        按 Agent 类型渲染
-    render_agent_page()    整页对话（学生上下文 + 快捷问题 + 链路 + 结果）
-
-设计原则：不修改 07；07 不可用时界面只报错不崩。
+提供：
+    load_coordinator()   缓存 Coordinator（同一会话复用 → 多轮记忆生效）
+    ask()                调 run()，异常兜底
+    render_trace()       执行轨迹时间线（直接读 trace.steps）
+    render_result()      按 Agent 类型渲染（诊断 / 建议 / 讲评 / 班级）
+    render_agent_page()  整页对话：历史 + 快捷问题 + 轨迹 + 结构化结果
 """
 from __future__ import annotations
 
 import importlib.util
 import os
+import re
 import sys
 import traceback
 
@@ -33,9 +36,11 @@ AGENT_META = {
     "Coordinator": ("🧭", "协调器", "#4ECDC4"),
     "DiagnosisAgent": ("🔍", "诊断", "#45B7D1"),
     "RecommendationAgent": ("📚", "建议", "#9B59B6"),
-    "QaAgent": ("💬", "答疑", "#95A5FC"),
+    "LectureAgent": ("👩‍🏫", "讲评", "#E67E22"),
+    "ClassAgent": ("🏫", "班级", "#3498DB"),
     "ValidatorAgent": ("🛡️", "校验", "#2ECC71"),
 }
+CLASS_HINTS = ("班", "全班", "对比", "DC01", "DC02")
 
 
 # ---------------------------------------------------------------------------
@@ -54,16 +59,39 @@ def _load_module(script_path: str = AGENT_SCRIPT):
 
 @st.cache_resource(show_spinner="正在装载学情数据…")
 def load_coordinator(output_dir: str = DEFAULT_OUTPUT):
+    """缓存 Coordinator：同一会话内复用，多轮指代（"他呢？"）才能生效。
+
+    另外补一个 07V2 的意图缺口：'下周这个班该怎么讲？' 里只有「怎么」命中诊断词，
+    「讲评」类词库没有「怎么讲/该讲」，会被误路由到诊断。这里子类覆写 parse()，
+    在不点名具体学生时把这类问题强制归到 lecture（讲评是班级级任务）。
+    """
     mod = _load_module(AGENT_SCRIPT)
     if not os.path.exists(os.path.join(output_dir, "cleaned_data.json")):
         raise RuntimeError(f"{output_dir} 缺少 cleaned_data.json，请先运行 01 脚本")
-    return mod.Coordinator(output_dir)
+
+    return _build_coordinator(mod, output_dir)
 
 
-def ask(question: str, student_id: str | None = None,
-        output_dir: str = DEFAULT_OUTPUT) -> dict:
+def _build_coordinator(mod, output_dir: str):
+    """构造带 lecture 路由修正的 Coordinator（selftest 与界面共用）。"""
+    lecture_cues = ("讲评", "怎么讲", "该讲", "讲什么", "上课", "备课", "课堂")
+
+    class _Patched(mod.Coordinator):
+        def parse(self, question: str) -> dict:
+            r = super().parse(question)
+            if (any(k in question for k in lecture_cues)
+                    and not re.search(r"D\d{2}", question)
+                    and "lecture" not in r["intents"]):
+                r["intents"] = ["lecture"]
+            return r
+
+    return _Patched(mod.Bundle(output_dir))
+
+
+def ask(question: str, output_dir: str | None = None) -> dict:
     try:
-        return load_coordinator(output_dir).route(question, student_id)
+        coord = load_coordinator(output_dir or DEFAULT_OUTPUT)
+        return coord.run(question)
     except Exception as e:  # noqa: BLE001
         return {"error": f"{type(e).__name__}: {e}",
                 "traceback": traceback.format_exc(limit=3)}
@@ -80,9 +108,9 @@ def list_students(output_dir: str = DEFAULT_OUTPUT) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# 链路可视化（由结果字段还原，不伪造步骤）
+# 执行轨迹
 # ---------------------------------------------------------------------------
-_CHAIN_CSS = """
+_TRACE_CSS = """
 <style>
 .sa-trace {margin:.35rem 0 .7rem; font-size:.86rem;}
 .sa-step {display:flex; align-items:flex-start; gap:8px; padding:3px 0; position:relative;}
@@ -90,141 +118,141 @@ _CHAIN_CSS = """
   content:""; position:absolute; left:13px; top:26px; bottom:-5px; width:2px;
   background:linear-gradient(#cfd8dc, #eceff1); border-radius:1px;}
 .sa-ico {width:28px; height:28px; border-radius:50%; display:flex; align-items:center;
-  justify-content:center; font-size:14px; background:#fff; border:2px solid; flex:none; z-index:1;}
-.sa-body {flex:1; padding-top:3px;}
+  justify-content:center; font-size:13px; background:#fff; border:2px solid; flex:none; z-index:1;}
+.sa-body {flex:1; padding-top:2px;}
 .sa-t {font-weight:600; color:#37474f;}
+.sa-t small {color:#90a4ae; font-weight:400; margin-left:6px;}
 .sa-d {color:#607d8b; font-size:.8rem; line-height:1.5;}
 </style>
 """
 
 
-def render_chain(result: dict, expanded: bool = True) -> None:
-    routing = result.get("routing") or {}
-    agent = result.get("agent", "")
-    validation = result.get("validation") or {}
-    if not agent and not routing:
+def render_trace(result: dict, expanded: bool = True, compact: bool = True) -> None:
+    steps = (result.get("trace") or {}).get("steps") or []
+    if not steps:
         return
+    agents = [s.get("agent") for s in steps if s.get("agent") != "Coordinator"]
+    label = f"🤖 执行轨迹（{len(steps)} 步 · {len(agents)} 个专职 Agent）"
+    passed = all((r.get("validation") or {}).get("passed", True)
+                 for r in result.get("results", []) or [])
 
-    scores = routing.get("intent_scores") or {}
-    hit = "、".join(f"{k}×{v}" for k, v in scores.items() if v) or "无关键词命中"
-    steps = [
-        ("Coordinator", "解析意图", f"命中的意图词：{hit}"),
-    ]
-    if agent:
-        steps.append((agent, "执行任务", _agent_desc(result)))
-    if validation:
-        passed = validation.get("passed")
-        steps.append(("ValidatorAgent", "输出校验",
-                      "通过" if passed else "拦截：" + "；".join(validation.get("issues", [])[:3])))
-
-    with st.expander(f"🤖 处理链路（{len(steps)} 步 · 可复核）", expanded=expanded):
-        st.markdown(_CHAIN_CSS, unsafe_allow_html=True)
+    with st.expander(label, expanded=expanded):
+        st.markdown(_TRACE_CSS, unsafe_allow_html=True)
         html = ['<div class="sa-trace">']
-        for name, action, detail in steps:
-            icon, cn, color = AGENT_META.get(name, ("⚙️", name, "#90A4AE"))
-            if name == "ValidatorAgent":
-                color = "#2ECC71" if (validation.get("passed") is True) else "#E74C3C"
+        for s in steps:
+            icon, cn, color = AGENT_META.get(s.get("agent", ""), ("⚙️", s.get("agent", "?"), "#90A4AE"))
+            detail = ""
+            if not compact:
+                if s.get("detail"):
+                    detail += f'<div class="sa-d">输入：{str(s["detail"])[:70]}</div>'
+                if s.get("output"):
+                    detail += f'<div class="sa-d">输出：{str(s["output"])[:70]}</div>'
             html.append(
                 f'<div class="sa-step"><div class="sa-ico" style="border-color:{color};'
                 f'color:{color};">{icon}</div><div class="sa-body">'
-                f'<div class="sa-t">{cn} · {action}</div>'
-                f'<div class="sa-d">{str(detail)[:120]}</div></div></div>')
+                f'<div class="sa-t">{cn} · {s.get("action", "")}'
+                f'<small>{s.get("time", "")}</small></div>{detail}</div></div>')
         html.append("</div>")
         st.markdown("".join(html), unsafe_allow_html=True)
-        st.caption("链路由 route() 的路由打分与校验结果还原，不是编造的日志。")
-
-
-def _agent_desc(result: dict) -> str:
-    a = result.get("agent")
-    if a == "DiagnosisAgent":
-        return f"生成 {result.get('student_id', '')} 的掌握度与错因摘要"
-    if a == "RecommendationAgent":
-        return f"生成 {len(result.get('recommendations', []))} 条分层建议"
-    if a == "QaAgent":
-        return "返回受白名单约束的事实集合"
-    return "完成"
+        st.caption(("✅ 校验通过：结论均带证据、提示未泄露答案。" if passed
+                    else "⚠️ 校验拦截：存在需要人工复核的结论。") +
+                   " 轨迹由 Trace 逐步记录，可复核。")
 
 
 # ---------------------------------------------------------------------------
 # 结果渲染
 # ---------------------------------------------------------------------------
-def render_result(result: dict) -> None:
-    agent = result.get("agent", "")
+def render_result(res: dict) -> None:
+    agent = res.get("agent", "")
     if agent == "DiagnosisAgent":
-        _render_diagnosis(result)
+        _render_diagnosis(res)
     elif agent == "RecommendationAgent":
-        _render_recommendation(result)
-    elif agent == "QaAgent":
-        _render_qa(result)
+        _render_recommendation(res)
+    elif agent == "LectureAgent":
+        _render_lecture(res)
+    elif agent == "ClassAgent":
+        _render_class(res)
     else:
-        st.json(result)
+        st.json(res)
 
 
 def _render_diagnosis(res: dict) -> None:
     if res.get("summary"):
         st.markdown(res["summary"])
-    inds = (res.get("mastery") or {}).get("indicators") or []
-    weak = [i for i in inds if i.get("band") in ("weak", "developing") and i.get("mastery") is not None]
+    inds = res.get("indicators") or []
+    weak = [i for i in inds if i.get("band") in ("weak", "developing")
+            and i.get("mastery") is not None]
     insuf = [i for i in inds if i.get("band") == "insufficient"]
-
     if weak:
         st.markdown("**需关注指标**")
-        st.dataframe(
-            [{"指标": i["indicator"], "观察指标": i.get("name", ""),
-              "掌握度": f"{i['mastery']:.0%}", "证据": f"n={i.get('evidence_n', 0)}"}
-             for i in weak[:5]], width="stretch", hide_index=True)
-    changes = res.get("cross_node_changes") or []
-    stubborn = [c for c in changes if c.get("change_type") == "still_wrong"]
-    improved = [c for c in changes if c.get("change_type") == "improved"]
-    if stubborn:
-        st.warning("🔴 顽固性错误：" + "、".join(c["question_id"] for c in stubborn[:6])
-                   + "（两次同错，建议面谈追问）")
+        st.dataframe([{"指标": i.get("indicator"), "观察指标": i.get("name", ""),
+                       "掌握度": f"{i['mastery']:.0%}", "证据": f"n={i.get('n', 0)}"}
+                      for i in weak[:5]], width="stretch", hide_index=True)
+    persistent = res.get("persistent_errors") or []
+    improved = res.get("improved") or []
+    if persistent:
+        st.warning("🔴 顽固性错误：" + "、".join(c["question_id"] for c in persistent[:6])
+                   + "（两次同答案同错，建议面谈追问）")
     if improved:
         st.success("🟢 进步信号：" + "、".join(c["question_id"] for c in improved[:6]))
     if insuf:
-        st.info(f"⚪ 证据不足（n<3 不下结论）：{'、'.join(i['indicator'] for i in insuf)}")
+        st.info(f"⚪ 证据不足（n<3 不下结论）：{'、'.join(i.get('indicator', '') for i in insuf)}")
 
 
 def _render_recommendation(res: dict) -> None:
     if res.get("diagnosis_summary"):
         st.markdown(f"**诊断摘要**：{res['diagnosis_summary']}")
+    if res.get("diagnosis_link"):
+        st.caption(f"↳ 已自动衔接上一步诊断：{res['diagnosis_link'][:60]}")
+    if res.get("source"):
+        st.caption(f"来源：{res['source']}")
     for r in res.get("recommendations", []):
-        with st.expander(
-                f"优先级{r.get('priority')}｜{r.get('indicator')} {r.get('indicator_name', '')[:14]}"
-                f"｜掌握度 {r.get('mastery', 0):.0%}" if r.get("mastery") is not None else
-                f"优先级{r.get('priority')}｜{r.get('indicator')}", expanded=r.get("priority") == 1):
+        m = r.get("mastery")
+        label = (f"优先级{r.get('priority')}｜{r.get('indicator')} "
+                 f"{r.get('indicator_name', '')[:14]}")
+        with st.expander(label, expanded=r.get("priority") == 1):
             st.markdown(r.get("reason", ""))
             if r.get("recommended_questions"):
                 st.markdown("**推荐题目**：" + "、".join(f"`{q}`" for q in r["recommended_questions"]))
-            st.markdown("**分步提示**（不含答案）")
-            for i, h in enumerate(r.get("step_hints", []), 1):
-                st.markdown(f"{i}. {h}")
+            hints = r.get("step_hints") or []
+            if hints:
+                st.markdown("**分步提示**（不含答案）")
+                for i, h in enumerate(hints, 1):
+                    st.markdown(f"{i}. {h}")
             if r.get("follow_up_condition"):
                 st.caption(f"🔄 {r['follow_up_condition']}")
 
 
-def _render_qa(res: dict) -> None:
-    facts = res.get("facts_whitelist") or {}
-    m = facts.get("mastery") or {}
-    if m.get("overall_mastery") is not None:
-        st.markdown(f"**整体掌握度**：{m['overall_mastery']:.0%}")
-    inds = [i for i in (m.get("indicators") or []) if i.get("band") in ("weak", "developing")]
-    if inds:
-        st.markdown("**最薄弱**：" + "；".join(
-            f"{i['indicator']}（{i.get('mastery', 0):.0%}，n={i.get('evidence_n', 0)}）"
-            for i in inds[:3]))
-    comp = facts.get("class_comparison") or {}
-    if comp:
-        rows = []
-        for cls, themes in comp.items():
-            for t, v in themes.items():
-                if v.get("rate") is not None:
-                    rows.append({"班级": cls, "主题": t, "得分率": f"{v['rate']:.0%}",
-                                 "记录数": v.get("n")})
-        if rows:
-            st.dataframe(rows, width="stretch", hide_index=True)
-    if res.get("note"):
-        st.caption(res["note"])
+def _render_lecture(res: dict) -> None:
+    st.markdown(f"**{res.get('title', '讲评建议')}**")
+    must = res.get("must_teach") or []
+    if must:
+        st.markdown("**必讲评分点**（按全班得分率排序）")
+        for m in must:
+            point = m.get("point") or m.get("point_id") or ""
+            st.markdown(f"- `{point}` 得分率 {m.get('rate_note', m.get('rate', '—'))}")
+    for g in res.get("class_gaps") or []:
+        st.markdown(f"- 两班差异：{g.get('theme', '')} 相差 {g.get('gap', '')}"
+                    f"（{g.get('weaker', '')} 班较弱）")
+    if res.get("teaching_suggestion"):
+        st.info(f"💡 {res['teaching_suggestion']}")
+    if res.get("warning"):
+        st.caption(f"⚠️ {res['warning']}")
+
+
+def _render_class(res: dict) -> None:
+    comp = res.get("comparison") or {}
+    if not comp:
+        st.info("暂无班级对比数据")
+        return
+    rows = []
+    for cls, themes in comp.items():
+        for t, v in (themes or {}).items():
+            if isinstance(v, dict) and v.get("rate") is not None:
+                rows.append({"班级": cls, "主题": t, "得分率": f"{v['rate']:.0%}",
+                             "记录数": v.get("n")})
+    if rows:
+        st.dataframe(rows, width="stretch", hide_index=True)
 
 
 # ---------------------------------------------------------------------------
@@ -237,8 +265,8 @@ SID_KEY = "agent_bridge_student"
 def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
                       quick_questions: list[str] | None = None) -> None:
     st.subheader("🤖 多智能体协同 · 对话")
-    st.caption("协调器按规则识别意图，调度诊断 / 建议 / 答疑 Agent，再由校验 Agent 过一遍；"
-               "全程零联网、链路可复核。")
+    st.caption("协调器识别意图后调度诊断 / 建议 / 讲评 / 班级 Agent，可复合级联；"
+               "每一步都记进执行轨迹，并由校验 Agent 过一遍。")
 
     students = list_students(output_dir)
     c1, c2 = st.columns([1, 3])
@@ -247,28 +275,30 @@ def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
                               if students and st.session_state.get(SID_KEY, "D01") in students else 0),
                        key="ab_sid")
     st.session_state[SID_KEY] = sid
-    c2.caption("提问里带上学生编号（如 D03）会自动切换；只问「他呢？」则沿用当前学生。")
+    c2.caption("问句里带 Dxx 会自动切换学生；只说「他呢？」沿用上一位（多轮记忆）。")
 
     hist = st.session_state.setdefault(CHAT_KEY, [])
     if not hist:
         hist.append({"role": "assistant", "content":
-                     "你好，我是智慧学伴的多智能体系统。可以问我：\n\n"
-                     f"- **{sid} 哪里最薄弱？**（诊断链）\n"
-                     f"- **给 {sid} 一个这周能做完的计划**（建议链）\n"
+                     "你好，我是智慧学伴的多智能体系统。可以直接问我：\n\n"
+                     f"- **{sid} 哪里最薄弱？**（诊断）\n"
+                     f"- **{sid} 哪里薄弱，顺便说说该练什么**（诊断→建议 级联）\n"
+                     "- **下周这个班该怎么讲？**（讲评稿）\n"
                      "- **两个班差在哪？**（班级对比）\n"
-                     "- **为什么说他薄弱？依据呢？**（答疑 + 证据）"})
+                     "- **他呢？**（沿用上一位学生）"})
 
     for m in hist:
         with st.chat_message(m["role"], avatar="🧑‍🎓" if m["role"] == "user" else "🤖"):
             st.markdown(m["content"])
             if m.get("result"):
-                render_result(m["result"])
-                render_chain(m["result"], expanded=False)
+                for r in m["result"].get("results", []) or []:
+                    render_result(r)
+                render_trace(m["result"], expanded=False)
 
     chips = quick_questions or [
         f"{sid}哪里最薄弱？",
-        f"给{sid}一个这周能做完的计划",
-        "两个班差在哪？",
+        f"{sid}哪里薄弱，顺便说说该练什么",
+        "下周这个班该怎么讲？",
         "他呢？",
     ]
     cols = st.columns(len(chips))
@@ -282,13 +312,9 @@ def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
     if not question:
         return
 
-    # 学生上下文：问题里出现 Dxx 就切；只说"他呢"就沿用
-    import re
-
-    hit = re.search(r"D\d{2}", question)
-    if hit:
-        sid = hit.group(0)
-        st.session_state[SID_KEY] = sid
+    # 没有学生编号、也不是班级类问题时，补上当前学生，避免落进"班级"分支
+    if not re.search(r"D\d{2}", question) and not any(k in question for k in CLASS_HINTS):
+        question = f"{sid} {question}"
 
     hist.append({"role": "user", "content": question})
     with st.chat_message("user", avatar="🧑‍🎓"):
@@ -296,9 +322,14 @@ def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
 
     with st.chat_message("assistant", avatar="🤖"):
         with st.status("🧭 协调器正在识别意图…", expanded=False) as status:
-            result = ask(question, sid, output_dir)
-            agent = result.get("agent", "—")
-            status.update(label=f"✅ 完成：{agent}", state="complete", expanded=False)
+            result = ask(question, output_dir)
+            if result.get("error"):
+                status.update(label="⚠️ 执行出错", state="error", expanded=False)
+            else:
+                intents = (result.get("routing") or {}).get("intents") or []
+                status.update(label=f"✅ 调度完成：{' → '.join(intents)}"
+                                    f"（{len(result.get('results', []))} 个结果）",
+                              state="complete", expanded=False)
 
         if result.get("error"):
             st.error(f"智能体执行出错：{result['error']}")
@@ -306,13 +337,17 @@ def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
             hist.append({"role": "assistant", "content": f"⚠️ 执行出错：{result['error']}"})
             return
 
-        render_chain(result, expanded=True)
-        head = f"**[{result.get('agent', '')}]** " + (result.get("summary")
-                                                     or result.get("diagnosis_summary")
-                                                     or result.get("note") or "")
-        st.markdown(head)
-        render_result(result)
-        hist.append({"role": "assistant", "content": head, "result": result})
+        render_trace(result, expanded=True, compact=False)
+        parts = []
+        for r in result.get("results", []) or []:
+            head = f"**[{r.get('agent')}]**"
+            body = r.get("summary") or r.get("diagnosis_summary") or r.get("title") or ""
+            parts.append(f"{head} {body}".strip())
+        answer_md = "\n\n".join(parts) or "（无结构化输出）"
+        st.markdown(answer_md)
+        for r in result.get("results", []) or []:
+            render_result(r)
+        hist.append({"role": "assistant", "content": answer_md, "result": result})
 
     with st.sidebar:
         if st.button("🗑 清空智能体对话", width="stretch", key="ab_clear"):
@@ -326,17 +361,19 @@ def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
 def _selftest(output_dir: str = DEFAULT_OUTPUT) -> None:
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    except Exception:
+    except Exception:  # noqa: BLE001
         pass
     mod = _load_module(AGENT_SCRIPT)
-    coord = mod.Coordinator(output_dir)
-    print("[OK] 07 加载成功（DataBundle / Coordinator.route）")
-    cases = ["D01哪里最薄弱？", "给D01一个这周能做完的计划",
-             "两个班差在哪？", "为什么说他薄弱？依据呢？"]
-    for q in cases:
-        r = coord.route(q, "D01")
-        v = r.get("validation") or {}
-        print(f"[OK] [{q}] → {r.get('agent')} | 校验 {'通过' if v.get('passed') else '拦截'}")
+    coord = _build_coordinator(mod, output_dir)
+    print("[OK] 07V2 加载成功（Bundle / Coordinator.run）")
+
+    for q in ["D01哪里最薄弱？", "D01哪里薄弱，顺便说说该练什么",
+              "下周这个班该怎么讲？", "两个班差在哪？", "他呢？"]:
+        r = coord.run(q)
+        agents = [x.get("agent") for x in r.get("results", [])]
+        steps = len((r.get("trace") or {}).get("steps") or [])
+        ok = all((x.get("validation") or {}).get("passed", True) for x in r.get("results", []))
+        print(f"[OK] [{q}] → {agents} | {steps} 步 | 校验{'通过' if ok else '拦截'}")
     print("\n全部自检通过")
 
 

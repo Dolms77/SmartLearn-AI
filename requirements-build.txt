@@ -1,0 +1,4 @@
+# Dependencies for creating the single-file Windows executable
+networkx>=3.2,<4
+pyvis>=0.3.2,<1
+pyinstaller>=6.10,<7
