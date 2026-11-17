@@ -36,7 +36,9 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=120, help="本次最多调用多少条")
     ap.add_argument("--only", default="解答题", choices=["解答题", "全部"], help="只处理解答题可显著省时省钱")
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--sleep", type=float, default=0.3, help="每次调用后的间隔秒数，避免触发限流")
+    ap.add_argument("--sleep", type=float, default=0.0, help="每条之间的间隔秒数（本地模型可设 0）")
+    ap.add_argument("--model", default=None, help="指定本地模型名，如 deepseek-r1:8b")
+    ap.add_argument("--think", action="store_true", help="开启 R1 思考链（更慢，约 6 倍）")
     a = ap.parse_args()
 
     cleaned = load_json(os.path.join(a.output_dir, "cleaned_data.json"), {})
@@ -52,7 +54,12 @@ def main() -> None:
     errs.sort(key=lambda r: (float(r.get("score") or 0) / max(float(r.get("full_score") or 1), 1),
                              r.get("record_id", "")))
 
-    key = llm.resolve_key(a.api_key)
+    if a.model:
+        llm.OLLAMA_MODEL_ENV = a.model
+    if a.think:
+        llm.OLLAMA_THINK = True
+    stt = llm.status()
+    key = llm.resolve_key(a.api_key) if stt["provider"] == "api" else None
     cache_dir = os.path.join(a.output_dir, "llm_cache")
     out_path = os.path.join(a.output_dir, "error_diagnosis_llm.json")
     result = load_json(out_path, {})
@@ -66,18 +73,25 @@ def main() -> None:
         for r in todo[:10]:
             print(f"  - {r['record_id']} {r['question_id']} {r['indicator_id']} "
                   f"{r['score']}/{r['full_score']}")
-        print("（dry-run，未调用 API）")
+        print(f"（dry-run，未调用模型；当前后端：{stt['label']}）")
         return
 
-    if not key:
-        print("未找到 API Key（--api-key / DEEPSEEK_API_KEY / api.txt）。已中止。")
+    if not stt["online"]:
+        print(f"模型不可用：{stt['label']}（{stt['reason']}）")
+        print("本地模式请先启动 Ollama 并拉取模型：ollama pull deepseek-r1:8b")
         return
+    print(f"后端：{stt['label']} | 思考链：{'开' if llm.OLLAMA_THINK else '关'} | 间隔 {a.sleep}s")
 
     todo = todo[: a.limit]
     ok = fail = 0
     t0 = time.time()
+    # 规则引擎初判：作为"复核对象"喂给模型，让分歧可解释
+    rule_map = {d.get("record_id"): d for d in rule if d.get("record_id")}
     for i, r in enumerate(todo, 1):
-        got = llm.diagnose_record(r, key, cache_dir)
+        rd = rule_map.get(r.get("record_id")) or {}
+        hint = (f"{rd.get('error_type_code')} {rd.get('error_type')}"
+                f"（依据：{rd.get('error_description', '评分点模式')}）") if rd else ""
+        got = llm.diagnose_record(r, key, cache_dir, rule_hint=hint)
         if got and "error" not in got:
             result[r["record_id"]] = got
             ok += 1

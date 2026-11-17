@@ -71,7 +71,7 @@ def _teacher_offline(facts: dict) -> str:
     if ind:
         lines.append("最薄弱指标：" + "；".join(
             f"{i['indicator']}（{i['rate']:.0%}）" for i in ind[:3]))
-    lines.append("接入 DeepSeek 后这些数字会被整理成讲评话术；当前回答纯来自统计。")
+    lines.append("接入本地模型后这些数字会被整理成讲评话术；当前回答纯来自统计。")
     return "\n\n".join(lines)
 
 
@@ -88,7 +88,7 @@ def _answer(question: str, role: str, ident: str, bundle: dict, key: str | None,
             return llm.answer_question(question, facts, key, cache_dir)
         except Exception as e:  # noqa: BLE001 - 网络/额度问题一律降级
             base = llm.offline_answer(question, facts) if role == "student" else _teacher_offline(facts)
-            return base + f"\n\n（DeepSeek 调用失败：{type(e).__name__}，已回退离线回答）"
+            return base + f"\n\n（本地模型调用失败：{type(e).__name__}，已回退离线回答）"
     return llm.offline_answer(question, facts) if role == "student" else _teacher_offline(facts)
 
 
@@ -140,4 +140,4 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
     with st.chat_message("assistant"):
         st.markdown(answer)
     st.caption("回答依据：结构化统计 + 证据白名单；" +
-               ("已接入 DeepSeek 改写。" if key else "当前为离线模板，接入 API 后会更自然。"))
+               ("已由本地模型改写。" if key else "当前为离线模板，启动本地模型后会更自然。"))

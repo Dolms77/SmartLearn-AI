@@ -135,7 +135,7 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
                 st.caption("⚠ 该指标证据未达门槛，以上仅作线索，不作结论。")
 
     # ---- AI 深度诊断（双源对比）----
-    st.markdown("##### 错因诊断：规则引擎 vs DeepSeek")
+    st.markdown("##### 错因诊断：规则引擎 vs 本地模型")
     err_ids = [e.get("record_id") for e in v["errors"]]
     if not err_ids:
         st.caption("该生没有错误记录，无需诊断。")
@@ -156,18 +156,31 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
             st.markdown(f"- 说明：{rule.get('error_description', '—')}")
             st.caption(f"置信度 {rule.get('confidence', '—')}｜来源 {rule.get('diagnosis_source', '—')}")
         with right:
-            st.markdown("**DeepSeek（可解释）**")
+            st.markdown("**本地模型（复核初判 / 可解释）**")
             if cached_llm:
+                verdict = cached_llm.get("agree_with_rule")
+                if verdict is True:
+                    st.success("✅ 与规则初判一致", icon="✅")
+                elif verdict is False:
+                    st.warning(f"🔁 改判：规则初判 {rule.get('error_type_code') or '—'}"
+                               f" → 本地模型 {cached_llm.get('error_type_code')}", icon="🔁")
                 st.markdown(f"- 类型：`{cached_llm.get('error_type_code')}` {cached_llm.get('error_type')}")
+                if cached_llm.get("reason"):
+                    st.markdown(f"- 判断理由：{cached_llm.get('reason')}")
                 st.markdown(f"- 出错位置：{cached_llm.get('error_location') or '—'}")
                 st.markdown(f"- 思维误区：{cached_llm.get('root_cause') or '—'}")
                 st.markdown(f"- 补救提示：{cached_llm.get('remediation_hint') or '—'}")
-                st.caption(f"关联指标 {cached_llm.get('related_indicator') or '—'}｜来源 llm/{cached_llm.get('model', '')}")
+                st.caption(f"关联指标 {cached_llm.get('related_indicator') or '—'}｜"
+                           f"模型 {cached_llm.get('model', '')}")
             else:
-                st.caption("尚未生成。点击下方按钮调用（无 Key 时不可用）。")
-        if st.button("🤖 调用 DeepSeek 生成深度诊断", disabled=not key, key=f"ai_{rid}"):
-            with st.spinner("请求中…"):
-                got = llm.diagnose_record(detail, key, cache_dir)
+                st.caption("尚未生成。点击下方按钮调用；模型不可用时会提示。")
+        if st.button("🤖 让本地模型复核这条诊断", disabled=not key, key=f"ai_{rid}"):
+            with st.spinner("本地模型思考中…"):
+                got = llm.diagnose_record(
+                    detail, key, cache_dir,
+                    rule_hint=(f"{rule.get('error_type_code')} {rule.get('error_type')}"
+                               f"（依据：{rule.get('error_description', '评分点模式')}）")
+                    if rule else "")
             if not got or got.get("error"):
                 st.error(f"调用失败：{(got or {}).get('error', '返回为空')}")
             else:
@@ -197,7 +210,7 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
             st.caption("待补充观察：" + "、".join(x["code"] for x in v["insufficient"]))
 
     # ---- 问答 ----
-    st.markdown("##### 问答（可接入 DeepSeek）")
+    st.markdown("##### 问答（本地模型）")
     facts = llm.build_facts(v, stats, A.class_view(bundle)["class_theme"])
     presets = [
         "这个学生最需要先补什么？为什么？",
@@ -211,7 +224,7 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
     question = (custom or "").strip() or q
     if col2.button("提问", width="stretch", key=f"qa_btn_{sid}"):
         if key:
-            with st.spinner("正在请求 DeepSeek…"):
+            with st.spinner("本地模型思考中…"):
                 try:
                     st.session_state[f"qa_{sid}"] = llm.answer_question(question, facts, key, cache_dir)
                 except Exception as e:  # noqa: BLE001
@@ -223,7 +236,7 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
     if st.session_state.get(f"qa_{sid}"):
         st.markdown(f"> **问**：{st.session_state.get(f'qa_q_{sid}', '')}")
         st.success(st.session_state[f"qa_{sid}"])
-        st.caption(f"数据来源：结构化统计 + {'DeepSeek 改写' if key else '离线模板'}；"
+        st.caption(f"数据来源：结构化统计 + {'本地模型改写' if key else '离线模板'}；"
                    f"事实白名单已限定，不包含任何编造数字。")
 
     # ---- 导出 ----

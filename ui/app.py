@@ -52,8 +52,12 @@ if not bundle.get("records"):
     st.error("cleaned_data.json 缺失或为空，请先运行 01_data_loader.py。")
     st.stop()
 
-key = llm.resolve_key(st.session_state.get("api_key_input") or None)
-st.session_state["_key"] = key
+stt = llm.status()
+online = bool(stt["online"])
+key = llm.resolve_key(st.session_state.get("api_key_input") or None) if stt["provider"] == "api" else None
+# views/chat 只判断"模型是否可用"，因此本地模式传一个真值哨兵
+llm_flag = ("api" if key else None) if stt["provider"] == "api" else ("local" if online else None)
+st.session_state["_key"] = llm_flag
 st.session_state["_cache"] = os.path.join(DEFAULT_OUTPUT, "llm_cache")
 st.session_state["_raw"] = DEFAULT_RAW
 
@@ -63,7 +67,7 @@ st.session_state["_raw"] = DEFAULT_RAW
 ident = shell.current()
 if ident:
     role, who = ident
-    shell.render_app(bundle, role, who, key, st.session_state["_cache"])
+    shell.render_app(bundle, role, who, llm_flag, st.session_state["_cache"])
 else:
     stage = st.session_state.get("stage", "landing")
     if stage == "role":
@@ -74,14 +78,27 @@ else:
         shell.landing()
 
 # --------------------------------------------------------------------------
-# 侧栏页脚：接入设置（放在最后，保证出现在导航下方）
+# 侧栏页脚：模型与数据（放在最后，保证出现在导航下方）
 # --------------------------------------------------------------------------
 with st.sidebar:
     st.divider()
-    with st.expander("⚙ 接入与数据", expanded=False):
-        st.text_input("DeepSeek API Key（可选）", type="password", key="api_key_input",
-                      help="留空则自动读环境变量 / api.txt；不填也能用，对话走离线模板")
-        stt = llm.status(key)
-        st.caption(("✅ 已就绪：" + stt["key"]) if stt["online"] else f"⚠️ 离线：{stt['reason']}")
+    st.caption(("🟢 本地模型已就绪：" if online else "🟠 模型未就绪：") + stt["label"])
+    with st.expander("⚙ 模型与数据", expanded=False):
+        if online:
+            st.success(f"{stt['label']} 已就绪", icon="✅")
+            if stt["provider"] == "ollama":
+                st.caption("推理全程在本机完成，不联网、不上传。")
+                if stt.get("models"):
+                    st.caption("本机模型：" + "、".join(stt["models"]))
+        else:
+            st.warning(stt["reason"] or "模型不可用", icon="⚠️")
+            if stt["provider"] == "ollama":
+                st.code("ollama pull deepseek-r1:8b", language="powershell")
+                st.caption("拉取后无需重启界面，点右上角 Rerun 即可。")
+
+        with st.expander("切回云端 API（可选）", expanded=False):
+            st.text_input("DeepSeek API Key", type="password", key="api_key_input",
+                          help="设置环境变量 SA_LLM_PROVIDER=api 后才会使用")
+            st.caption("当前后端：" + stt["provider"])
         st.caption(f"产物目录：`{DEFAULT_OUTPUT}`")
         st.caption("数据仅用于本赛题演示；不写入、不上传任何学生个人信息。")

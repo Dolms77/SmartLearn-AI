@@ -73,29 +73,47 @@ Set-Content "$env:USERPROFILE\.streamlit\credentials.toml" "[general]`nemail = `
 
 ---
 
-## 3. 接入 DeepSeek（可选，不接也能用）
+## 3. 本地模型（Ollama，默认） / 云端 API（可选回退）
 
-三种方式任选：
+**默认走本机 Ollama，不联网、不需要 API Key、不上传任何数据。**
 
-1. 侧栏直接填 Key（仅存在当前会话内存）；
-2. 环境变量：`set DEEPSEEK_API_KEY=sk-xxx`；
-3. 工程根目录放 `api.txt`（内容只有 Key 一行）—— 本项目已支持自动读取。
+```powershell
+# 一次性准备（已装过可跳过）
+ollama pull deepseek-r1:8b        # ≈5.2 GB；也可用 deepseek-r1:7b
+ollama list                       # 确认模型在列表里
+```
 
-**注意：`api.txt` 不要提交、不要出现在录屏里。**
+界面启动后侧栏「⚙ 模型与数据」会显示 `✅ 本地 · deepseek-r1:8b 已就绪`。
+模型名字不用改代码：`llm.status()` 会自动在 `deepseek-r1:8b → 7b → 任意 deepseek-r1 → 第一个模型` 里挑。
 
-有了 Key 以后有两处增强：
+| 环境变量 | 默认 | 作用 |
+|---|---|---|
+| `SA_LLM_PROVIDER` | `ollama` | 设成 `api` 才走云端 DeepSeek |
+| `SA_OLLAMA_MODEL` | 自动探测 | 指定模型名 |
+| `SA_OLLAMA_THINK` | `0` | 设 `1` 打开 R1 思考链（更慢，约 6 倍） |
+| `SA_OLLAMA_NUM_CTX` | `4096` | 上下文窗口；8 GB 显存不够就降到 `2048` |
+| `SA_OLLAMA_TIMEOUT` | `180` | 单次调用超时（秒），冷启动需要 |
 
-- **学生诊断页 → 错因诊断**：点「调用 DeepSeek 生成深度诊断」，右侧栏出现 AI 版错因（思维误区 + 补救提示）；
-- **学生诊断页 → 问答**：预设 4 个问题或自定义提问，答案受"事实白名单"约束（只允许使用结构化统计里的数字）。
+两处增强：
 
-批量预生成（演示时就不用现场联网）：
+- **学生诊断页 → 错因诊断**：点「让本地模型复核这条诊断」，右栏显示模型是**同意**还是**改判**（改判会写明"规则 C1 → 模型 C2"及理由）；
+- **对话窗口**：预设问题或自定义提问，答案受"事实白名单"约束（只允许使用结构化统计里的数字）。
+
+批量预生成（演示时不用现场等）：
 
 ```powershell
 cd ui
-..\.venv-ui\Scripts\python.exe llm_upgrade.py --limit 120
+..\.venv-ui\Scripts\python.exe llm_upgrade.py --limit 173     # 约 11 分钟，本地零费用
+..\.venv-ui\Scripts\python.exe llm_upgrade.py --limit 5 --think   # 打开思考链对比效果
 ```
 
-它只写 `output/error_diagnosis_llm.json`（**不覆盖** A 的 `error_diagnosis.json`），支持断点续跑；界面会自动读取并与规则结果并排展示。
+实测（本机 4060 8 GB，`deepseek-r1:8b`，`think=0`）：**173/173 成功、约 3.9 秒/条、总计 11 分钟**；
+模型对规则初判 **同意 148 条（86%）、改判 25 条（14%）**，改判均附具体理由。
+
+只写 `output/error_diagnosis_llm.json`（**不覆盖** A 的 `error_diagnosis.json`），支持断点续跑；界面自动读取并与规则结果并排展示。
+
+> **回退到云端**：`$env:SA_LLM_PROVIDER="api"` + 配置 `DEEPSEEK_API_KEY`（或根目录 `api.txt`）。
+> 代码里两套通道都保留，切换只改环境变量，不改代码。
 
 ---
 
