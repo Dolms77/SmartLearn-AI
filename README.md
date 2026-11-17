@@ -41,4 +41,4 @@
 
 ## 环境
 
-Python ≥ 3.10；运行时依赖（界面 + 脚本）见 `requirements.txt`，RAG 可选依赖见 `requirements-rag.txt`，打包 exe 见 `requirements-build.txt`。
+Python ≥ 3.10；运行时依赖（界面 + 脚本）见 `requirements.txt`，RAG 可选依赖见 `requirements-rag.txt`。
