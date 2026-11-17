@@ -236,7 +236,7 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
     if st.session_state.get(f"qa_{sid}"):
         st.markdown(f"> **问**：{st.session_state.get(f'qa_q_{sid}', '')}")
         st.success(st.session_state[f"qa_{sid}"])
-        st.caption(f"数据来源：结构化统计 + {'本地模型改写' if key else '离线模板'}；"
+        st.caption(f"数据来源：结构化统计" + ("（已由本地模型改写）" if key else "（离线模板）") + "；"
                    f"事实白名单已限定，不包含任何编造数字。")
 
     # ---- 导出 ----

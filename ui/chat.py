@@ -140,4 +140,4 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
     with st.chat_message("assistant"):
         st.markdown(answer)
     st.caption("回答依据：结构化统计 + 证据白名单；" +
-               ("已由本地模型改写。" if key else "当前为离线模板，启动本地模型后会更自然。"))
+               "数字与结论来自结构化统计，口吻由本地模型改写；模型不可用时自动回退模板。")

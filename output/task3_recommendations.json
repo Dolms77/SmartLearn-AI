@@ -1,0 +1,1368 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generated_by": "08_task3_generator.py",
+    "evidence_threshold": 3,
+    "safety": "分步提示已做答案泄露检测；建议均基于证据充分的指标。"
+  },
+  "cases": {
+    "D37": {
+      "student_id": "D37",
+      "class_id": "DC02",
+      "overall_mastery": 0.3594,
+      "overall_status": "low",
+      "diagnosis_summary": "整体掌握度 36%，需干预指标 1 个（证据充分口径），证据不足指标 8 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I2",
+          "indicator_name": "识别同类项、去括号并化简",
+          "reason": "掌握度 29%（证据 n=4，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q003",
+            "Q005",
+            "Q008"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I3",
+        "T02I1",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I3、T02I1、T02I2、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。",
+      "case_type": "困难型（基础重建型建议）"
+    },
+    "D15": {
+      "student_id": "D15",
+      "class_id": "DC01",
+      "overall_mastery": 0.9475,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 95%，需干预指标 0 个（证据充分口径），证据不足指标 4 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I3",
+        "T03I1",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I3、T03I1、T03I3 因记录不足未纳入判定，建议安排补充观察。",
+      "case_type": "优秀型（拓展挑战型建议）"
+    },
+    "D24": {
+      "student_id": "D24",
+      "class_id": "DC02",
+      "overall_mastery": 0.566,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 57%，需干预指标 2 个（证据充分口径），证据不足指标 6 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 36%（证据 n=3，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q002",
+            "Q006",
+            "Q014"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T01I2",
+          "indicator_name": "识别同类项、去括号并化简",
+          "reason": "掌握度 29%（证据 n=7，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q003",
+            "Q005",
+            "Q008"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I2、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。",
+      "case_type": "中等型（定向巩固型建议）"
+    }
+  },
+  "all_students": {
+    "D01": {
+      "student_id": "D01",
+      "class_id": "DC01",
+      "overall_mastery": 0.5684,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 57%，需干预指标 3 个（证据充分口径），证据不足指标 5 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I3",
+          "indicator_name": "用整式解释具体问题",
+          "reason": "掌握度 29%（证据 n=3，判定 weak），该指标下主要错误类型为 C5",
+          "recommended_questions": [
+            "Q011",
+            "Q018"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T02I1",
+          "indicator_name": "运用等式性质解一元一次方程",
+          "reason": "掌握度 50%（证据 n=5，判定 developing），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q020",
+            "Q023",
+            "Q026"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I2",
+        "T02I2",
+        "T02I3",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I2、T02I2、T02I3、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D02": {
+      "student_id": "D02",
+      "class_id": "DC01",
+      "overall_mastery": 0.5582,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 56%，需干预指标 0 个（证据充分口径），证据不足指标 5 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I1",
+        "T02I3",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I1、T02I3、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D03": {
+      "student_id": "D03",
+      "class_id": "DC01",
+      "overall_mastery": 0.3835,
+      "overall_status": "low",
+      "diagnosis_summary": "整体掌握度 38%，需干预指标 2 个（证据充分口径），证据不足指标 6 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 29%（证据 n=3，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q001",
+            "Q002",
+            "Q006"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T01I2",
+          "indicator_name": "识别同类项、去括号并化简",
+          "reason": "掌握度 34%（证据 n=4，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q005",
+            "Q008",
+            "Q010"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I1",
+        "T02I2",
+        "T02I3",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I1、T02I2、T02I3、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D04": {
+      "student_id": "D04",
+      "class_id": "DC01",
+      "overall_mastery": 0.5892,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 59%，需干预指标 2 个（证据充分口径），证据不足指标 5 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 36%（证据 n=5，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q007",
+            "Q013"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T01I2",
+          "indicator_name": "识别同类项、去括号并化简",
+          "reason": "掌握度 29%（证据 n=8，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q008",
+            "Q009",
+            "Q016"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I2",
+        "T02I3",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I2、T02I3、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D05": {
+      "student_id": "D05",
+      "class_id": "DC01",
+      "overall_mastery": 0.5027,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 50%，需干预指标 1 个（证据充分口径），证据不足指标 7 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 29%（证据 n=6，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q007"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I1",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I1、T02I2、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D06": {
+      "student_id": "D06",
+      "class_id": "DC01",
+      "overall_mastery": 0.4568,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 46%，需干预指标 1 个（证据充分口径），证据不足指标 7 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T02I1",
+          "indicator_name": "运用等式性质解一元一次方程",
+          "reason": "掌握度 45%（证据 n=4，判定 developing），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q019",
+            "Q020",
+            "Q022"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I3",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I3、T02I2、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D07": {
+      "student_id": "D07",
+      "class_id": "DC01",
+      "overall_mastery": 0.7249,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 72%，需干预指标 1 个（证据充分口径），证据不足指标 6 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T02I2",
+          "indicator_name": "用消元法解二元一次方程组",
+          "reason": "掌握度 67%（证据 n=4，判定 developing），该指标下主要错误类型为 C4",
+          "recommended_questions": [
+            "Q028",
+            "Q030"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I1",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I1、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D08": {
+      "student_id": "D08",
+      "class_id": "DC01",
+      "overall_mastery": 0.7196,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 72%，需干预指标 2 个（证据充分口径），证据不足指标 5 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 32%（证据 n=4，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q006",
+            "Q007"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T02I2",
+          "indicator_name": "用消元法解二元一次方程组",
+          "reason": "掌握度 48%（证据 n=3，判定 developing），该指标下主要错误类型为 C4",
+          "recommended_questions": [
+            "Q028",
+            "Q029",
+            "Q032"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D09": {
+      "student_id": "D09",
+      "class_id": "DC01",
+      "overall_mastery": 0.516,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 52%，需干预指标 2 个（证据充分口径），证据不足指标 6 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T02I1",
+          "indicator_name": "运用等式性质解一元一次方程",
+          "reason": "掌握度 29%（证据 n=4，判定 weak），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q019",
+            "Q021",
+            "Q025"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T03I1",
+          "indicator_name": "运用不等式性质求解",
+          "reason": "掌握度 29%（证据 n=3，判定 weak），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q038",
+            "Q041",
+            "Q042"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I3",
+        "T02I2",
+        "T02I3",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I3、T02I2、T02I3、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D10": {
+      "student_id": "D10",
+      "class_id": "DC01",
+      "overall_mastery": 0.8868,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 89%，需干预指标 0 个（证据充分口径），证据不足指标 4 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I2",
+        "T03I1",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I2、T03I1、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D11": {
+      "student_id": "D11",
+      "class_id": "DC01",
+      "overall_mastery": 0.8102,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 81%，需干预指标 0 个（证据充分口径），证据不足指标 6 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I1",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I1、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D12": {
+      "student_id": "D12",
+      "class_id": "DC01",
+      "overall_mastery": 0.7888,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 79%，需干预指标 0 个（证据充分口径），证据不足指标 4 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I1",
+        "T02I3",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I1、T02I3、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D13": {
+      "student_id": "D13",
+      "class_id": "DC01",
+      "overall_mastery": 0.6362,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 64%，需干预指标 1 个（证据充分口径），证据不足指标 6 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T03I2",
+          "indicator_name": "求两个不等式解集的交集",
+          "reason": "掌握度 33%（证据 n=4，判定 weak），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q046",
+            "Q048",
+            "Q049"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I3",
+        "T02I1",
+        "T02I3",
+        "T03I1",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I3、T02I1、T02I3、T03I1、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D14": {
+      "student_id": "D14",
+      "class_id": "DC01",
+      "overall_mastery": 0.9347,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 93%，需干预指标 0 个（证据充分口径），证据不足指标 5 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D16": {
+      "student_id": "D16",
+      "class_id": "DC01",
+      "overall_mastery": 0.6079,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 61%，需干预指标 1 个（证据充分口径），证据不足指标 5 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 36%（证据 n=3，判定 weak），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q001",
+            "Q002",
+            "Q013"
+          ],
+          "step_hints": [
+            "把题目中的数量关系用自己的话复述一遍，确认每个量分别代表什么。",
+            "设未知量为一个具体数字（比如男生10人），算出对应的结果，验证你的理解是否成立。",
+            "再回到字母表达式，对比参考解析的第一步，找出理解偏差在哪里。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I2",
+        "T02I3",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I2、T02I3、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D17": {
+      "student_id": "D17",
+      "class_id": "DC01",
+      "overall_mastery": 0.6596,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 66%，需干预指标 0 个（证据充分口径），证据不足指标 9 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I2",
+        "T01I3",
+        "T02I1",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I2、T01I3、T02I1、T02I2、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D18": {
+      "student_id": "D18",
+      "class_id": "DC01",
+      "overall_mastery": 0.7814,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 78%，需干预指标 0 个（证据充分口径），证据不足指标 7 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I1",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I1、T02I2、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D19": {
+      "student_id": "D19",
+      "class_id": "DC01",
+      "overall_mastery": 0.6248,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 62%，需干预指标 2 个（证据充分口径），证据不足指标 5 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 46%（证据 n=6，判定 developing），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q013",
+            "Q014"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T02I1",
+          "indicator_name": "运用等式性质解一元一次方程",
+          "reason": "掌握度 29%（证据 n=3，判定 weak），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q020",
+            "Q021",
+            "Q022"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D20": {
+      "student_id": "D20",
+      "class_id": "DC01",
+      "overall_mastery": 0.4978,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 50%，需干预指标 1 个（证据充分口径），证据不足指标 7 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 47%（证据 n=3，判定 developing），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q006",
+            "Q007",
+            "Q013"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I2",
+        "T01I3",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I2、T01I3、T02I2、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D21": {
+      "student_id": "D21",
+      "class_id": "DC01",
+      "overall_mastery": 0.609,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 61%，需干预指标 0 个（证据充分口径），证据不足指标 9 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I2",
+        "T01I3",
+        "T02I1",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I2、T01I3、T02I1、T02I2、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D22": {
+      "student_id": "D22",
+      "class_id": "DC02",
+      "overall_mastery": 0.61,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 61%，需干预指标 3 个（证据充分口径），证据不足指标 6 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 36%（证据 n=5，判定 weak），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q002",
+            "Q007"
+          ],
+          "step_hints": [
+            "把题目中的数量关系用自己的话复述一遍，确认每个量分别代表什么。",
+            "设未知量为一个具体数字（比如男生10人），算出对应的结果，验证你的理解是否成立。",
+            "再回到字母表达式，对比参考解析的第一步，找出理解偏差在哪里。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T01I2",
+          "indicator_name": "识别同类项、去括号并化简",
+          "reason": "掌握度 47%（证据 n=6，判定 developing），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q003",
+            "Q004",
+            "Q010"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I2、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D23": {
+      "student_id": "D23",
+      "class_id": "DC02",
+      "overall_mastery": 0.5754,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 58%，需干预指标 2 个（证据充分口径），证据不足指标 6 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I2",
+          "indicator_name": "识别同类项、去括号并化简",
+          "reason": "掌握度 29%（证据 n=3，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q003",
+            "Q005",
+            "Q008"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T03I3",
+          "indicator_name": "根据实际限制列不等式",
+          "reason": "掌握度 29%（证据 n=3，判定 weak），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q054"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I1",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I1、T02I2、T02I3、T03I1、T03I2 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D25": {
+      "student_id": "D25",
+      "class_id": "DC02",
+      "overall_mastery": 0.596,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 60%，需干预指标 2 个（证据充分口径），证据不足指标 4 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I2",
+          "indicator_name": "识别同类项、去括号并化简",
+          "reason": "掌握度 32%（证据 n=5，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q004",
+            "Q008",
+            "Q009"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T03I2",
+          "indicator_name": "求两个不等式解集的交集",
+          "reason": "掌握度 49%（证据 n=3，判定 developing），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q044",
+            "Q045",
+            "Q046"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I1",
+        "T02I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I1、T02I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D26": {
+      "student_id": "D26",
+      "class_id": "DC02",
+      "overall_mastery": 0.6985,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 70%，需干预指标 2 个（证据充分口径），证据不足指标 5 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T02I2",
+          "indicator_name": "用消元法解二元一次方程组",
+          "reason": "掌握度 38%（证据 n=3，判定 weak），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q028",
+            "Q030",
+            "Q031"
+          ],
+          "step_hints": [
+            "回顾解二元一次方程组的两种基本方法：代入消元和加减消元，本题哪种更简便？",
+            "先把其中一个方程变形，用含一个未知数的式子表示另一个未知数。",
+            "求出一个未知数后，记得代回方程求出另一个，并检验两式是否都成立。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T03I1",
+          "indicator_name": "运用不等式性质求解",
+          "reason": "掌握度 38%（证据 n=3，判定 weak），该指标下主要错误类型为 C2",
+          "recommended_questions": [
+            "Q037",
+            "Q039",
+            "Q040"
+          ],
+          "step_hints": [
+            "回忆不等式性质3：两边同时乘或除以一个负数时，不等号方向会发生什么变化？",
+            "观察这一步，两边除以的数是正数还是负数？中间的符号应该保持不变还是改变？",
+            "写出你的解集，然后取一个满足解集的具体数字代回原不等式，验证方向是否正确。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I1",
+        "T02I3",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I1、T02I3、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D27": {
+      "student_id": "D27",
+      "class_id": "DC02",
+      "overall_mastery": 0.705,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 70%，需干预指标 0 个（证据充分口径），证据不足指标 7 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I2",
+        "T01I3",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I2、T01I3、T02I2、T02I3、T03I1、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D28": {
+      "student_id": "D28",
+      "class_id": "DC02",
+      "overall_mastery": 0.5781,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 58%，需干预指标 0 个（证据充分口径），证据不足指标 7 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I3",
+        "T02I1",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I3、T02I1、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D29": {
+      "student_id": "D29",
+      "class_id": "DC02",
+      "overall_mastery": 0.7483,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 75%，需干预指标 1 个（证据充分口径），证据不足指标 3 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 58%（证据 n=4，判定 developing），该指标下主要错误类型为 C5",
+          "recommended_questions": [
+            "Q001",
+            "Q007"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I3",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I3、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D30": {
+      "student_id": "D30",
+      "class_id": "DC02",
+      "overall_mastery": 0.525,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 52%，需干预指标 3 个（证据充分口径），证据不足指标 4 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 29%（证据 n=3，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q001",
+            "Q002",
+            "Q013"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T01I3",
+          "indicator_name": "用整式解释具体问题",
+          "reason": "掌握度 29%（证据 n=3，判定 weak），该指标下主要错误类型为 C4",
+          "recommended_questions": [
+            "Q011",
+            "Q018"
+          ],
+          "step_hints": [
+            "题目不仅要求算出结果，还要求你解释或说明，想想你的过程缺了哪一步。",
+            "检查你的最终结论：它是否回答了题目提出的所有问题（比如'说明关系'）？",
+            "在结论后面补一句解释：为什么会有这样的结果？"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T02I2、T02I3、T03I1、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D31": {
+      "student_id": "D31",
+      "class_id": "DC02",
+      "overall_mastery": 0.5322,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 53%，需干预指标 0 个（证据充分口径），证据不足指标 8 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I3",
+        "T02I1",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I3、T02I1、T02I2、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D32": {
+      "student_id": "D32",
+      "class_id": "DC02",
+      "overall_mastery": 0.7848,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 78%，需干预指标 0 个（证据充分口径），证据不足指标 4 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D33": {
+      "student_id": "D33",
+      "class_id": "DC02",
+      "overall_mastery": 0.7901,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 79%，需干预指标 0 个（证据充分口径），证据不足指标 6 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I2、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D34": {
+      "student_id": "D34",
+      "class_id": "DC02",
+      "overall_mastery": 0.5371,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 54%，需干预指标 2 个（证据充分口径），证据不足指标 5 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 32%（证据 n=4，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q006",
+            "Q013"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T02I3",
+          "indicator_name": "列方程或方程组解决实际问题",
+          "reason": "掌握度 29%（证据 n=3，判定 weak），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q033"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I1",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I1、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D35": {
+      "student_id": "D35",
+      "class_id": "DC02",
+      "overall_mastery": 0.6505,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 65%，需干预指标 0 个（证据充分口径），证据不足指标 8 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I3",
+        "T02I1",
+        "T02I2",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I3、T02I1、T02I2、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D36": {
+      "student_id": "D36",
+      "class_id": "DC02",
+      "overall_mastery": 0.831,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 83%，需干预指标 0 个（证据充分口径），证据不足指标 5 个",
+      "recommendations": [],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I3",
+        "T02I3",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I3、T02I3、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D38": {
+      "student_id": "D38",
+      "class_id": "DC02",
+      "overall_mastery": 0.7512,
+      "overall_status": "high",
+      "diagnosis_summary": "整体掌握度 75%，需干预指标 1 个（证据充分口径），证据不足指标 5 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T03I1",
+          "indicator_name": "运用不等式性质求解",
+          "reason": "掌握度 30%（证据 n=4，判定 weak），该指标下主要错误类型为 C2",
+          "recommended_questions": [
+            "Q037",
+            "Q039",
+            "Q040"
+          ],
+          "step_hints": [
+            "回忆不等式性质3：两边同时乘或除以一个负数时，不等号方向会发生什么变化？",
+            "观察这一步，两边除以的数是正数还是负数？中间的符号应该保持不变还是改变？",
+            "写出你的解集，然后取一个满足解集的具体数字代回原不等式，验证方向是否正确。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T02I2",
+        "T02I3",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T02I2、T02I3、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D39": {
+      "student_id": "D39",
+      "class_id": "DC02",
+      "overall_mastery": 0.476,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 48%，需干预指标 4 个（证据充分口径），证据不足指标 4 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "reason": "掌握度 32%（证据 n=4，判定 weak），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q013",
+            "Q014"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T02I1",
+          "indicator_name": "运用等式性质解一元一次方程",
+          "reason": "掌握度 29%（证据 n=4，判定 weak），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q019",
+            "Q022",
+            "Q024"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    },
+    "D40": {
+      "student_id": "D40",
+      "class_id": "DC02",
+      "overall_mastery": 0.4652,
+      "overall_status": "medium",
+      "diagnosis_summary": "整体掌握度 47%，需干预指标 3 个（证据充分口径），证据不足指标 6 个",
+      "recommendations": [
+        {
+          "priority": 1,
+          "indicator": "T01I2",
+          "indicator_name": "识别同类项、去括号并化简",
+          "reason": "掌握度 59%（证据 n=5，判定 developing），该指标下主要错误类型为 C3",
+          "recommended_questions": [
+            "Q003",
+            "Q004",
+            "Q005"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        },
+        {
+          "priority": 2,
+          "indicator": "T02I1",
+          "indicator_name": "运用等式性质解一元一次方程",
+          "reason": "掌握度 45%（证据 n=4，判定 developing），该指标下主要错误类型为 C1",
+          "recommended_questions": [
+            "Q019",
+            "Q021",
+            "Q022"
+          ],
+          "step_hints": [
+            "先独立重读题目，用笔标出已知条件和要求的问题。",
+            "尝试写出第一步（列式或列出等量关系），先不追求算到最后。",
+            "完成后再对照参考解析，找出你的思路与标准思路的第一个分歧点。"
+          ],
+          "follow_up_condition": "完成本组练习后：正确率≥80%则进入下一优先级；仍错误则重做分步提示并建议教师一对一面批。"
+        }
+      ],
+      "follow_up_observe": [
+        "T01I1",
+        "T01I3",
+        "T02I3",
+        "T03I1",
+        "T03I2",
+        "T03I3"
+      ],
+      "evidence_note": "本建议仅基于证据≥3条的指标；T01I1、T01I3、T02I3、T03I1、T03I2、T03I3 因记录不足未纳入判定，建议安排补充观察。"
+    }
+  },
+  "class_advice": [
+    {
+      "theme": "T02",
+      "finding": "T02主题：DC02班得分率比DC01班低 11.8 个百分点",
+      "suggestion": "建议DC02班在T02主题增加一次专题复习课，重点讲解该主题下得分率最低的2个评分点；DC01班可加快进度，转向应用题拓展。"
+    },
+    {
+      "theme": "T03",
+      "finding": "T03主题：DC02班得分率比DC01班低 8.2 个百分点",
+      "suggestion": "建议DC02班在T03主题增加一次专题复习课，重点讲解该主题下得分率最低的2个评分点；DC01班可加快进度，转向应用题拓展。"
+    }
+  ]
+}

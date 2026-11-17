@@ -11,8 +11,8 @@ import insights as I
 import theme
 import views
 
-STUDENT_PAGES = ["对话", "我的学情", "学习建议", "知识地图", "成果文件"]
-TEACHER_PAGES = ["对话", "班级概览", "学生名单", "数据质量", "成果文件"]
+STUDENT_PAGES = ["对话", "智能体", "我的学情", "学习建议", "知识地图", "成果文件"]
+TEACHER_PAGES = ["对话", "智能体", "班级概览", "学生名单", "数据质量", "成果文件"]
 
 
 # --------------------------------------------------------------------------
@@ -219,5 +219,9 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
         render_students_list(bundle)
     elif page == "数据质量":
         views.render_quality(bundle, st.session_state.get("_raw", ""))
+    elif page == "智能体":
+        import agent_bridge as AB
+
+        AB.render_agent_page()
     else:
         views.render_artifacts(bundle)

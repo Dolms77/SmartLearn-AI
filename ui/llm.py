@@ -168,9 +168,13 @@ def read_cache(cache_dir: str, kind: str, ident: str):
     if os.path.exists(p):
         try:
             with open(p, encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
         except (OSError, json.JSONDecodeError):
             return None
+        # 旧版本可能把整段思考链缓存了，命中这类脏数据就当作没有
+        if kind == "qa" and _looks_like_thought(str(data.get("answer") or "")):
+            return None
+        return data
     return None
 
 
@@ -219,15 +223,26 @@ C6 级联错误：前一步错导致后续步骤全部不得分
   "remediation_hint": "补救提示，1-2 句，不直接给出最终答案"
 }}"""
 
-QA_PROMPT = """你是"智慧学伴"助教。只允许使用下面【事实】中的信息回答，禁止编造任何数字、题号或结论。
-若【事实】不足以回答，就明确说"当前数据不足以回答"。
+QA_PROMPT = """你就是"智慧学伴"，一个陪七年级学生看学情的学伴。用第二人称，口语化，像老师课间跟学生说话。
 
-【事实】
+【事实】（唯一可用的数据，不得编造其他数字）
 {facts}
 
-【问题】{question}
+【学生问】{question}
 
-要求：不超过 150 字；若引用了指标或题目，请写出编号；不要给最终答案。"""
+硬性要求：
+1. 直接回答。**不要**复述问题，**不要**写"首先/用户问/我需要/根据事实/让我分析"这类过程，**不要**输出思考链。
+2. 不超过 4 句、120 字以内；必要时用短横线列 2–3 点。
+3. 每个结论后面带依据（指标编号 + 证据条数 n）。
+4. 事实里没有的，就说"这个我还看不出来"，不要猜。
+5. 不要给出任何题目的答案。
+
+直接输出答案正文："""
+
+# 模型（尤其是 R1 蒸馏版）会把"我先分析一下问题"整段写进正文，这里做兜底清洗
+_COT_MARKERS = ("首先", "用户的问题", "用户问", "用户要求", "我需要", "让我", "分析一下",
+                "根据事实", "【事实】", "let me", "First,", "The user")
+_ANSWER_MARKERS = ("直接回答", "答案：", "答：", "回答：", "结论：")
 
 
 # --------------------------------------------------------------------------
@@ -401,14 +416,183 @@ def diagnose_record(record: dict, key: str | None, cache_dir: str, use_cache: bo
     return payload
 
 
+def _looks_like_thought(text: str) -> bool:
+    """判断模型是不是把思考过程当答案交上来了。"""
+    head = text.strip()[:160]
+    if any(m in head for m in _COT_MARKERS):
+        return True
+    if text.count("用户") >= 2 and len(text) > 200:
+        return True
+    return len(text) > 500
+
+
+def _clean_answer(text: str) -> str:
+    """去掉思考链、代码围栏与"答："之前的铺垫，只留正文；不合格就返回空串交给模板。"""
+    t = _strip_fences(text or "")
+    for marker in _ANSWER_MARKERS:
+        if marker in t:
+            t = t.rsplit(marker, 1)[-1]
+    kept = []
+    for line in t.splitlines():
+        s = line.strip()
+        if not s:
+            continue
+        if any(s.startswith(m) for m in _COT_MARKERS):
+            continue
+        if s.startswith("【") and "】" in s:      # 复述标题
+            continue
+        kept.append(s)
+    # 最后一行常被截断，若不以句末标点收尾就丢掉
+    while kept and not kept[-1].rstrip().endswith(("。", "！", "？", "）", ")", "”", ".", "…")):
+        kept.pop()
+    out = "\n".join(kept).strip()
+    if not out or len(out) < 20 or len(out) > 320:
+        return ""
+    if out.count("（") != out.count("）") or out.count("**") % 2:
+        return ""                                  # 括号/加粗不配对 → 视为残缺
+    if _looks_like_thought(out):
+        return ""
+    return out
+
+
+def _teacher_answer(question: str, facts: dict) -> str:
+    """教师视角：用班级事实拼一段讲评话术。"""
+    cls = facts.get("class", "这个班")
+    n = facts.get("students")
+    ov = facts.get("overall")
+    qs = facts.get("weakest_questions") or []
+    inds = facts.get("weakest_indicators") or []
+    q = question or ""
+
+    if any(k in q for k in ("讲", "讲评", "上课", "安排")):
+        parts = []
+        if qs:
+            parts.append("先讲 " + "、".join(
+                f"{x['question']}（得分率 {x['rate']:.0%}，{x['n']} 人作答）" for x in qs[:3]))
+        if inds:
+            parts.append("再补 " + "、".join(
+                f"{x['indicator']}（{x['rate']:.0%}）" for x in inds[:2]))
+        if not parts:
+            return f"{cls} 暂时没有足够数据支持讲评排序。"
+        return ("建议这样排：" + "；".join(parts) +
+                "。每题先让学生说思路，再对照评分点讲丢分的那一步，最后当堂做一道同类型变式。")
+
+    if any(k in q for k in ("关注", "学生", "谁")):
+        if not inds:
+            return f"{cls} 目前没有证据充分的共性薄弱指标。"
+        return (f"{cls} 的共性薄弱点是 " + "、".join(
+            f"{x['indicator']}（{x['rate']:.0%}）" for x in inds[:3]) +
+            "。建议按这三个指标分组，把证据不足（n<3）的学生单独列出来做补充观察。")
+
+    head = f"{cls}：{n} 名学生" + (f"，班级得分率 {ov:.0%}" if ov is not None else "")
+    extra = ""
+    if qs:
+        extra = f"最薄弱的题是 {qs[0]['question']}（{qs[0]['rate']:.0%}）。"
+    return head + "。" + extra + "可以问我「下周该讲哪几道题」或「哪些学生要单独关注」。"
+
+
+def _answer_from_facts(question: str, facts: dict) -> str:
+    """确定性兜底回答：模型输出不可用时，用事实拼一段人话。"""
+    if "class" in facts and "student" not in facts:      # 教师视角的班级事实
+        return _teacher_answer(question, facts)
+    s = facts.get("student", {})
+    sid = s.get("student_id", "该生")
+    weak = facts.get("weak_indicators") or []
+    ins = facts.get("insufficient_indicators") or []
+    errs = facts.get("error_types") or []
+    q = question or ""
+
+    if any(k in q for k in ("证据不足", "不足", "看不出", "哪些结论", "不确定")):
+        if not ins:
+            return f"{sid} 的 9 个指标目前都有至少 3 条证据，没有「证据不足」的结论。"
+        items = "；".join(f"{i['indicator']} {i.get('name','')}（只有 {i['n']} 条）"
+                         for i in ins[:4])
+        return (f"{sid} 现在有 {len(ins)} 个指标证据不够 3 条，我先不下结论：{items}。"
+                f"这些地方需要再做几道题补证据，才能判断是真不会还是只是没做到。")
+
+    if any(k in q for k in ("薄弱", "最弱", "拖后腿", "哪里差", "掌握")):
+        if not weak:
+            return f"{sid} 目前没有证据充分又明显薄弱的指标，可以先按课内节奏走。"
+        top = weak[0]
+        more = "；".join(f"{w['indicator']}（{w.get('mastery', 0):.0%}，n={w['n']}）"
+                        for w in weak[1:3])
+        return (f"最该先补的是 {top['indicator']} {top.get('name','')}，"
+                f"掌握度 {top.get('mastery', 0):.0%}、证据 {top['n']} 条。"
+                + (f"其次是 {more}。" if more else "")
+                + "这些数字都来自你的实际作答，点开「我的学情」能看到具体是哪几道题。")
+
+    if any(k in q for k in ("错", "粗心", "错因", "类型")):
+        summary = facts.get("error_summary") or {}
+        by_type = summary.get("by_type") or {}
+        if not by_type:
+            return f"{sid} 暂时没有可归因的错误记录。"
+        top3 = sorted(by_type.items(), key=lambda kv: -kv[1])[:3]
+        top = "、".join(f"{k} {v} 处" for k, v in top3)
+        return (f"{sid} 的错误主要是：{top}。可以打开「我的学情」按指标看是哪几道题、"
+                f"具体丢在哪个评分点上。")
+
+    if any(k in q for k in ("计划", "建议", "下一步", "练什么", "怎么学", "安排")):
+        if not weak:
+            return f"{sid} 目前没有证据充分的薄弱点，建议保持每周一次综合练习，重点练 T03 的不等式应用题。"
+        steps = "；".join(f"第{i}步补 {w['indicator']}" for i, w in enumerate(weak[:3], 1))
+        return (f"给你一个三步计划：{steps}。每个指标先做 2 道没做过的同类题，"
+                f"做完对照评分点自查；连续 2 次满分再进入下一个。")
+
+    if weak:
+        return (f"{sid}：{s.get('records','—')} 条记录，9 个指标里 {s.get('decided', 0)} 个可下结论。"
+                f"最薄弱的是 {weak[0]['indicator']}（{weak[0].get('mastery', 0):.0%}，"
+                f"n={weak[0]['n']}），另有 {len(ins)} 个指标证据不足。")
+    return (f"{sid}：{s.get('records','—')} 条记录，9 个指标里 {s.get('decided', 0)} 个可下结论，"
+            f"{len(ins)} 个证据不足。可以问我「哪里最薄弱」或「哪些结论证据不足」。")
+
+
+REWRITE_PROMPT = """你是"智慧学伴"，说话像老师课间跟七年级学生聊天，用第二人称，语气亲切但不啰嗦。
+
+下面【事实结论】已经核实过，**数字和结论一个字都不能改**，你只负责把语气改得更像人话。
+不要输出思考过程，不要解释你在做什么，不要复述问题，直接给最终回答（不超过 3 句）。
+
+【事实结论】{draft}
+
+【学生问】{question}
+
+直接给回答："""
+
+
+def _numbers(text: str) -> set[str]:
+    return set(re.findall(r"\d+", text or ""))
+
+
+def _safe_rewrite(draft: str, question: str, key: str | None) -> str:
+    """让模型改写 draft；改坏了（新增数字 / 编造指标 / 带思考链）就退回 draft。"""
+    try:
+        raw = _chat(key, REWRITE_PROMPT.format(draft=draft, question=question),
+                    temperature=0.3, max_tokens=300)
+        text = _clean_answer(raw)
+    except Exception:  # noqa: BLE001
+        return ""
+    if not text:
+        return ""
+    allowed_nums = _numbers(draft) | {"3", "9"}      # 3=门槛、9=指标总数
+    if _numbers(text) - allowed_nums:
+        return ""                                    # 冒出 draft 里没有的数字 → 拒
+    codes = set(re.findall(r"T0[123]I[123]", text))
+    if codes - set(re.findall(r"T0[123]I[123]", draft)):
+        return ""                                    # 编造指标编号 → 拒
+    return text
+
+
 def answer_question(question: str, facts: dict, key: str | None, cache_dir: str) -> str:
+    """先由事实生成"不会错"的草稿，再让模型改写口吻；改写不达标就用草稿。"""
     ident = question + json.dumps(facts, ensure_ascii=False, sort_keys=True)
     cached = read_cache(cache_dir, "qa", ident)
     if cached:
         return cached.get("answer", "")
-    text = _chat(key, QA_PROMPT.format(facts=json.dumps(facts, ensure_ascii=False, indent=1),
-                                       question=question), temperature=0.2, max_tokens=500)
-    write_cache(cache_dir, "qa", ident, {"question": question, "answer": text})
+
+    draft = _answer_from_facts(question, facts)
+    text = _safe_rewrite(draft, question, key) or draft
+    source = "model" if text != draft else "template"
+    write_cache(cache_dir, "qa", ident,
+                {"question": question, "answer": text, "source": source, "draft": draft})
     return text
 
 
@@ -417,25 +601,19 @@ def answer_question(question: str, facts: dict, key: str | None, cache_dir: str)
 # --------------------------------------------------------------------------
 def offline_answer(question: str, facts: dict) -> str:
     """没有可用模型时的确定性回答：直接复述事实，绝不编造。"""
-    s = facts.get("student", {})
-    lines = [
-        f"【离线模式】关于 {s.get('student_id', '该生')}：总分得分率 "
-        f"{s.get('score_rate', '—')}，有效记录 {s.get('records', '—')} 条，"
-        f"9 个指标中可下结论 {s.get('decided', 0)} 个。",
-    ]
-    weak = facts.get("weak_indicators") or []
-    if weak:
-        lines.append("证据充分的薄弱指标：" + "；".join(
-            f"{w['indicator']}（n={w['n']}，掌握度 {w['mastery']:.0%}）" for w in weak[:3]))
-    ins = facts.get("insufficient_indicators") or []
-    if ins:
-        lines.append(f"另有 {len(ins)} 个指标证据不足（如 {', '.join(ins[:3])}），按要求不下结论。")
-    lines.append("启动本地模型后会给出更自然的解读；当前回答全部来自结构化统计。")
-    return "\n\n".join(lines)
+    body = _answer_from_facts(question, facts)
+    return f"{body}\n\n（离线模式：以上内容全部来自结构化统计，未经模型改写。）"
 
 
 def build_facts(student: dict, stats_student: dict | None, class_rows: dict | None) -> dict:
-    """把界面上的数据压成问答允许使用的"事实白名单"。"""
+    """把界面上的数据压成问答允许使用的"事实白名单"（尽量给全，免得模型瞎猜）。"""
+    ins = [{"indicator": x["code"], "name": x["name"], "n": x["n"]}
+           for x in student["insufficient"]]
+    errs = student["errors"]
+    by_type: dict[str, int] = {}
+    for e in errs:
+        k = e.get("error_type") or "未分类"
+        by_type[k] = by_type.get(k, 0) + 1
     return {
         "student": {
             "student_id": student["sid"],
@@ -443,20 +621,24 @@ def build_facts(student: dict, stats_student: dict | None, class_rows: dict | No
             "records": student["evidence_total"],
             "decided": student["coverage"]["decided"],
             "answered": student["coverage"]["answered"],
+            "total_indicators": 9,
             "score_rate": (stats_student or {}).get("score_rate_percent", "—"),
+            "threshold": 3,
         },
         "weak_indicators": [
             {"indicator": w["code"], "n": w["n"], "mastery": w["mastery"], "name": w["name"]}
             for w in student["weak"]
         ],
         "developing_indicators": [
-            {"indicator": w["code"], "n": w["n"], "mastery": w["mastery"]} for w in student["developing"]
+            {"indicator": w["code"], "n": w["n"], "mastery": w["mastery"], "name": w["name"]}
+            for w in student["developing"]
         ],
-        "insufficient_indicators": [x["code"] for x in student["insufficient"]],
+        "insufficient_indicators": ins,
+        "error_summary": {"total": len(errs), "by_type": by_type},
         "error_types": [
             {"type": d.get("error_type"), "code": d.get("error_type_code"),
              "question": d.get("question_id")}
-            for d in student["errors"][:8]
+            for d in errs[:8]
         ],
         "class_theme_rates": class_rows or {},
     }
