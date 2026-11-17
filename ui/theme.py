@@ -1,0 +1,132 @@
+# -*- coding: utf-8 -*-
+"""视觉层：智能体形象、动画、聊天气泡。全部用内联 SVG + CSS，不依赖外部资源。"""
+from __future__ import annotations
+
+import streamlit as st
+
+CSS = """
+<style>
+@keyframes sa-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes sa-pulse { 0% { opacity:.55; transform: scale(.92); } 70% { opacity:0; transform: scale(1.35); } 100% { opacity:0; } }
+@keyframes sa-glow  { 0%,100% { filter: drop-shadow(0 6px 18px rgba(47,111,237,.35)); } 50% { filter: drop-shadow(0 10px 30px rgba(122,86,255,.55)); } }
+@keyframes sa-fadein { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+@keyframes sa-blink { 0%,92%,100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+@keyframes sa-dot { 0%,60%,100% { transform: translateY(0); opacity:.4; } 30% { transform: translateY(-4px); opacity:1; } }
+
+.sa-hero { display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 0 4px; animation: sa-fadein .6s ease both; }
+.sa-avatar-wrap { position:relative; width:150px; height:150px; display:flex; align-items:center; justify-content:center; }
+.sa-avatar { width:132px; height:132px; animation: sa-float 4.2s ease-in-out infinite, sa-glow 4.2s ease-in-out infinite; }
+.sa-avatar .sa-eye { animation: sa-blink 5.5s infinite; transform-origin: center; }
+.sa-ring { position:absolute; width:132px; height:132px; border-radius:50%; border:2px solid rgba(47,111,237,.45); animation: sa-pulse 2.6s ease-out infinite; }
+.sa-ring.d2 { animation-delay: 1.3s; }
+.sa-name { font-size:22px; font-weight:700; color:#16233a; letter-spacing:.5px; }
+.sa-sub  { font-size:13px; color:#6b7787; }
+
+.sa-bubble { position:relative; max-width:560px; background:#fff; border:1px solid #e5ebf5; border-radius:16px;
+  padding:14px 18px; margin:14px auto 6px; box-shadow:0 10px 30px rgba(23,43,77,.08); font-size:14.5px; line-height:1.8;
+  animation: sa-fadein .7s .1s ease both; }
+.sa-bubble:after { content:''; position:absolute; top:-8px; left:50%; margin-left:-8px; width:16px; height:16px;
+  background:#fff; border-left:1px solid #e5ebf5; border-top:1px solid #e5ebf5; transform:rotate(45deg); }
+
+.sa-role-card { border:1px solid #e5ebf5; border-radius:18px; padding:22px; background:#fff; text-align:center;
+  box-shadow:0 6px 20px rgba(23,43,77,.06); transition: all .18s ease; }
+.sa-role-card:hover { transform: translateY(-3px); box-shadow:0 14px 32px rgba(23,43,77,.12); border-color:#c7d8fb; }
+.sa-role-ico { font-size:40px; line-height:1; }
+.sa-role-title { font-size:18px; font-weight:700; margin-top:8px; color:#16233a; }
+.sa-role-desc { font-size:13px; color:#6b7787; margin-top:6px; line-height:1.7; }
+
+.sa-brand { display:flex; align-items:center; gap:10px; padding:2px 0 10px; }
+.sa-brand .sa-avatar { width:44px; height:44px; animation: sa-float 5s ease-in-out infinite; }
+.sa-brand-t { font-weight:700; font-size:16px; color:#16233a; line-height:1.2; }
+.sa-brand-s { font-size:11.5px; color:#7c8798; }
+
+.sa-chat-row { animation: sa-fadein .35s ease both; }
+.sa-dots span { display:inline-block; width:6px; height:6px; margin:0 2px; border-radius:50%; background:#8aa4d6;
+  animation: sa-dot 1.2s infinite; }
+.sa-dots span:nth-child(2) { animation-delay:.15s; }
+.sa-dots span:nth-child(3) { animation-delay:.3s; }
+
+.sa-strip { display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 2px; }
+.sa-chip { font-size:12.5px; padding:5px 12px; border-radius:999px; background:#eef3fe; color:#2F6FED; border:1px solid #dbe7fd; }
+
+.sa-fade { animation: sa-fadein .5s ease both; }
+</style>
+"""
+
+
+def inject() -> None:
+    st.markdown(CSS, unsafe_allow_html=True)
+
+
+def avatar_svg(size: int = 132, cls: str = "sa-avatar") -> str:
+    """内联 SVG 智能体形象：渐变圆角头 + 天线 + 眨眼 + 微笑。"""
+    return f"""
+<svg class="{cls}" width="{size}" height="{size}" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sa-g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3B82F6"/><stop offset="55%" stop-color="#6366F1"/><stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="sa-g2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EAF1FF"/><stop offset="100%" stop-color="#CFE0FF"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="62" r="52" fill="url(#sa-g)" opacity="0.10"/>
+  <line x1="60" y1="22" x2="60" y2="36" stroke="url(#sa-g)" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="60" cy="18" r="6" fill="url(#sa-g)"/>
+  <rect x="24" y="36" width="72" height="60" rx="20" fill="url(#sa-g)"/>
+  <rect x="33" y="46" width="54" height="34" rx="12" fill="url(#sa-g2)" opacity="0.95"/>
+  <circle class="sa-eye" cx="49" cy="62" r="4.6" fill="#1E3A8A"/>
+  <circle class="sa-eye" cx="71" cy="62" r="4.6" fill="#1E3A8A"/>
+  <path d="M50 72 q10 7 20 0" stroke="#1E3A8A" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <rect x="52" y="88" width="16" height="10" rx="4" fill="url(#sa-g)"/>
+</svg>"""
+
+
+def hero(name: str = "智慧学伴", sub: str = "学情诊断智能体 · 会看证据，也会说“不知道”") -> None:
+    st.markdown(
+        f"""<div class="sa-hero">
+              <div class="sa-avatar-wrap">
+                 <div class="sa-ring"></div><div class="sa-ring d2"></div>
+                 {avatar_svg(132)}
+              </div>
+              <div class="sa-name">{name}</div>
+              <div class="sa-sub">{sub}</div>
+            </div>""",
+        unsafe_allow_html=True,
+    )
+
+
+def bubble(text: str) -> None:
+    st.markdown(f'<div class="sa-bubble">{text}</div>', unsafe_allow_html=True)
+
+
+def role_card(icon: str, title: str, desc: str) -> None:
+    st.markdown(
+        f"""<div class="sa-role-card">
+              <div class="sa-role-ico">{icon}</div>
+              <div class="sa-role-title">{title}</div>
+              <div class="sa-role-desc">{desc}</div>
+            </div>""",
+        unsafe_allow_html=True,
+    )
+
+
+def brand(title: str = "智慧学伴", sub: str = "智能体已就绪") -> None:
+    st.markdown(
+        f"""<div class="sa-brand">
+              {avatar_svg(44)}
+              <div><div class="sa-brand-t">{title}</div><div class="sa-brand-s">{sub}</div></div>
+            </div>""",
+        unsafe_allow_html=True,
+    )
+
+
+def chips(items: list[str]) -> None:
+    if not items:
+        return
+    html = "".join(f'<span class="sa-chip">{x}</span>' for x in items)
+    st.markdown(f'<div class="sa-strip">{html}</div>', unsafe_allow_html=True)
+
+
+def typing() -> str:
+    return '<span class="sa-dots"><span></span><span></span><span></span></span>'
