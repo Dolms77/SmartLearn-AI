@@ -109,7 +109,7 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
                          "content": TEACHER_GREET.format(cls=ident, n=row.get("students", 0), m=n)})
 
     for m in hist:
-        with st.chat_message(m["role"], avatar="🧑‍🎓" if m["role"] == "user" else None):
+        with st.chat_message(m["role"], avatar="🧑‍🎓" if m["role"] == "user" else theme.character_path()):
             st.markdown(m["content"])
 
     chips = STUDENT_CHIPS if role == "student" else TEACHER_CHIPS
@@ -131,13 +131,13 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
 
     placeholder = st.empty()
     with placeholder.container():
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar=theme.character_path()):
             st.markdown(theme.typing(), unsafe_allow_html=True)
     answer = _answer(question, role, ident, bundle, key, cache_dir)
     time.sleep(0.35)
     placeholder.empty()
     hist.append({"role": "assistant", "content": answer})
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar=theme.character_path()):
         st.markdown(answer)
     st.caption("回答依据：结构化统计 + 证据白名单；" +
                "数字与结论来自结构化统计，口吻由本地模型改写；模型不可用时自动回退模板。")

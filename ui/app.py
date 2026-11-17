@@ -26,7 +26,7 @@ DEFAULT_OUTPUT = os.path.abspath(os.path.join(HERE, "..", "output"))
 DEFAULT_RAW = os.path.abspath(os.path.join(
     HERE, "..", "赛题材料", "赛题数据", "赛题资料包", "4_赛题数据", "模拟学情数据"))
 
-st.set_page_config(page_title="智慧学伴 · 学情诊断智能体", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="智慧学伴 · 学情诊断智能体", page_icon=(theme.icon_path() or "🤖"), layout="wide")
 theme.inject()
 st.markdown("""
 <style>

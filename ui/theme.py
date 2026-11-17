@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
-"""视觉层：智能体形象、动画、聊天气泡。全部用内联 SVG + CSS，不依赖外部资源。"""
+"""视觉层：智能体形象、动画、聊天气泡。优先用 ui/assets 的角色图，缺失时回退内联 SVG。"""
 from __future__ import annotations
 
+import base64
+import os
+from functools import lru_cache
+
 import streamlit as st
+
+ASSET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+CHARACTER_FILE = "character.jpg"
+ICON_FILE = "icon.jpg"
 
 CSS = """
 <style>
@@ -14,10 +22,12 @@ CSS = """
 @keyframes sa-dot { 0%,60%,100% { transform: translateY(0); opacity:.4; } 30% { transform: translateY(-4px); opacity:1; } }
 
 .sa-hero { display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 0 4px; animation: sa-fadein .6s ease both; }
-.sa-avatar-wrap { position:relative; width:150px; height:150px; display:flex; align-items:center; justify-content:center; }
+.sa-avatar-wrap { position:relative; width:160px; height:160px; display:flex; align-items:center; justify-content:center; }
 .sa-avatar { width:132px; height:132px; animation: sa-float 4.2s ease-in-out infinite, sa-glow 4.2s ease-in-out infinite; }
+img.sa-avatar { border-radius:26px; background:#fff; object-fit:cover;
+  box-shadow:0 10px 26px rgba(23,43,77,.16); }
 .sa-avatar .sa-eye { animation: sa-blink 5.5s infinite; transform-origin: center; }
-.sa-ring { position:absolute; width:132px; height:132px; border-radius:50%; border:2px solid rgba(47,111,237,.45); animation: sa-pulse 2.6s ease-out infinite; }
+.sa-ring { position:absolute; width:150px; height:150px; border-radius:50%; border:2px solid rgba(47,111,237,.45); animation: sa-pulse 2.6s ease-out infinite; }
 .sa-ring.d2 { animation-delay: 1.3s; }
 .sa-name { font-size:22px; font-weight:700; color:#16233a; letter-spacing:.5px; }
 .sa-sub  { font-size:13px; color:#6b7787; }
@@ -36,7 +46,7 @@ CSS = """
 .sa-role-desc { font-size:13px; color:#6b7787; margin-top:6px; line-height:1.7; }
 
 .sa-brand { display:flex; align-items:center; gap:10px; padding:2px 0 10px; }
-.sa-brand .sa-avatar { width:44px; height:44px; animation: sa-float 5s ease-in-out infinite; }
+.sa-brand .sa-avatar { width:46px; height:46px; border-radius:12px; animation: sa-float 5s ease-in-out infinite; }
 .sa-brand-t { font-weight:700; font-size:16px; color:#16233a; line-height:1.2; }
 .sa-brand-s { font-size:11.5px; color:#7c8798; }
 
@@ -56,6 +66,43 @@ CSS = """
 
 def inject() -> None:
     st.markdown(CSS, unsafe_allow_html=True)
+
+
+# --------------------------------------------------------------------------
+# 素材（ui/assets/character.jpg、icon.jpg）
+# --------------------------------------------------------------------------
+@lru_cache(maxsize=4)
+def _data_uri(filename: str) -> str:
+    p = os.path.join(ASSET_DIR, filename)
+    if not os.path.exists(p):
+        return ""
+    mime = "image/png" if p.lower().endswith(".png") else "image/jpeg"
+    with open(p, "rb") as f:
+        return f"data:{mime};base64," + base64.b64encode(f.read()).decode("ascii")
+
+
+def asset_path(filename: str) -> str | None:
+    p = os.path.join(ASSET_DIR, filename)
+    return p if os.path.exists(p) else None
+
+
+def character_path() -> str | None:
+    """给 st.chat_message(avatar=...) 用的文件路径。"""
+    return asset_path(CHARACTER_FILE)
+
+
+def icon_path() -> str | None:
+    """给 st.set_page_config(page_icon=...) 用的文件路径。"""
+    return asset_path(ICON_FILE)
+
+
+def avatar_img(size: int = 132, cls: str = "sa-avatar") -> str:
+    """角色图（内联 base64，免静态服务）；素材缺失时自动回退 SVG。"""
+    uri = _data_uri(CHARACTER_FILE)
+    if not uri:
+        return avatar_svg(size, cls)
+    return (f'<img class="{cls}" width="{size}" height="{size}" src="{uri}" '
+            f'alt="智慧学伴" style="width:{size}px;height:{size}px;"/>')
 
 
 def avatar_svg(size: int = 132, cls: str = "sa-avatar") -> str:
@@ -87,7 +134,7 @@ def hero(name: str = "智慧学伴", sub: str = "学情诊断智能体 · 会看
         f"""<div class="sa-hero">
               <div class="sa-avatar-wrap">
                  <div class="sa-ring"></div><div class="sa-ring d2"></div>
-                 {avatar_svg(132)}
+                 {avatar_img(132)}
               </div>
               <div class="sa-name">{name}</div>
               <div class="sa-sub">{sub}</div>
@@ -114,7 +161,7 @@ def role_card(icon: str, title: str, desc: str) -> None:
 def brand(title: str = "智慧学伴", sub: str = "智能体已就绪") -> None:
     st.markdown(
         f"""<div class="sa-brand">
-              {avatar_svg(44)}
+              {avatar_img(46)}
               <div><div class="sa-brand-t">{title}</div><div class="sa-brand-s">{sub}</div></div>
             </div>""",
         unsafe_allow_html=True,

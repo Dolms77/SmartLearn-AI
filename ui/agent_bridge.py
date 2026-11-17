@@ -27,6 +27,8 @@ import traceback
 
 import streamlit as st
 
+import theme
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(HERE, ".."))
 DEFAULT_OUTPUT = os.path.join(REPO_ROOT, "output")
@@ -288,7 +290,7 @@ def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
                      "- **他呢？**（沿用上一位学生）"})
 
     for m in hist:
-        with st.chat_message(m["role"], avatar="🧑‍🎓" if m["role"] == "user" else "🤖"):
+        with st.chat_message(m["role"], avatar="🧑‍🎓" if m["role"] == "user" else theme.character_path()):
             st.markdown(m["content"])
             if m.get("result"):
                 for r in m["result"].get("results", []) or []:
@@ -320,7 +322,7 @@ def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
     with st.chat_message("user", avatar="🧑‍🎓"):
         st.markdown(question)
 
-    with st.chat_message("assistant", avatar="🤖"):
+    with st.chat_message("assistant", avatar=theme.character_path()):
         with st.status("🧭 协调器正在识别意图…", expanded=False) as status:
             result = ask(question, output_dir)
             if result.get("error"):
