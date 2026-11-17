@@ -50,4 +50,4 @@ EXE 将赛题 CSV 嵌入单文件，默认生成到项目根目录 `output/`，�
 
 ## 环境
 
-Python ≥ 3.10；脚本依赖见 `requirements-scripts.txt`，RAG 依赖见 `requirements-rag.txt`（可选）；完整界面依赖见 `requirements.txt`。
+Python ≥ 3.10；运行时依赖（界面 + 脚本）见 `requirements.txt`，RAG 可选依赖见 `requirements-rag.txt`，打包 exe 见 `requirements-build.txt`。

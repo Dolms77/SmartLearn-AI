@@ -1,2 +1,16 @@
--r requirements-ui.txt
--r requirements-scripts.txt
+# 运行时依赖：ui/ 界面 + 01–09 全部脚本
+# 安装：pip install -r requirements.txt
+# 已验证组合：streamlit 1.67 / plotly 7.1 / pandas 3.1.1 / networkx 3.7 / openai 3.51
+
+# ---- 界面 ----
+streamlit>=1.49
+plotly>=5.20
+pandas>=2.2
+openpyxl>=3.1
+
+# ---- 脚本（05 知识图谱）----
+networkx>=3.2,<4
+pyvis>=0.3.2,<1
+
+# ---- 可选：仅当 SA_LLM_PROVIDER=api（云端 DeepSeek）时需要；默认本地 Ollama 不用 ----
+openai>=1.40,<4

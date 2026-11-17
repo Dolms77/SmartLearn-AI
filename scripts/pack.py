@@ -22,7 +22,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 TOP = "智慧学伴_队伍交付"
 
 INCLUDE_FILES = [
-    "00_开始使用.html", "README.md", "requirements.txt", "requirements-rag.txt",
+    "00_开始使用.html", "README.md", "requirements.txt", "requirements-rag.txt", "requirements-build.txt",
     ".gitignore", "赛题规则.pdf", "创新点.xlsx",
     "1_一键安装.bat", "2_一键运行全部.bat", "3_启动界面.bat",
 ]

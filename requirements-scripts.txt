@@ -1,6 +1,0 @@
-# 05_knowledge_graph.py
-networkx>=3.2,<4
-pyvis>=0.3.2,<1
-
-# Optional DeepSeek LLM diagnostics for 03_error_diagnosis.py
-openai>=1.40,<4

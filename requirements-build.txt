@@ -1,4 +1,3 @@
-# Dependencies for creating the single-file Windows executable
-networkx>=3.2,<4
-pyvis>=0.3.2,<1
+# 仅用于打包 dist/SmartLearn-AI.exe（PyInstaller）
+-r requirements.txt
 pyinstaller>=6.10,<7

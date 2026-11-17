@@ -1,6 +1,0 @@
-﻿streamlit>=1.49
-plotly>=5.20
-pandas>=2.2
-networkx>=3.2
-openpyxl>=3.1
-openai>=1.40

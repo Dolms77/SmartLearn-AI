@@ -61,7 +61,7 @@ foreach ($s in $steps) {
     $code = $LASTEXITCODE
     if ($code -ne 0) {
         if ($s.optional) {
-            Write-Host "  WARN $($s.n) failed (optional, continue). See requirements-rag.txt / requirements-scripts.txt." -ForegroundColor Yellow
+            Write-Host "  WARN $($s.n) failed (optional, continue). See requirements-rag.txt." -ForegroundColor Yellow
             continue
         }
         throw "$($s.n) failed with exit code $code"
