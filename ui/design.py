@@ -165,6 +165,28 @@ div[data-testid="stDataFrame"],div[data-testid="stPlotlyChart"]{
 ::-webkit-scrollbar{width:10px;height:10px;}
 ::-webkit-scrollbar-thumb{background:rgba(47,111,237,.28);border-radius:8px;}
 ::-webkit-scrollbar-thumb:hover{background:rgba(47,111,237,.45);}
+
+/* ---------- 整卡可点：容器内放一个透明按钮铺满 ----------
+   用法：with st.container(key="click-xxx"): 渲染卡片; st.button("...", key="...")
+   容器 class 为 st-key-click-xxx，透明按钮盖住整张卡片。 */
+div[class*="st-key-click-"]{position:relative;}
+div[class*="st-key-click-"] div[data-testid="stButton"]{
+  position:absolute;inset:0;z-index:5;opacity:0;margin:0;padding:0;}
+div[class*="st-key-click-"] div[data-testid="stButton"] > button{
+  width:100%;height:100%;border:0;background:transparent;cursor:pointer;}
+
+/* 悬停/聚焦时整卡给出反馈（:has 兼容 Edge 105+/Chrome 105+） */
+div[class*="st-key-click-"]:has(div[data-testid="stButton"] button:hover) .sa-role-card,
+div[class*="st-key-click-"]:has(div[data-testid="stButton"] button:hover) .sa-hero{
+  transform:translateY(-4px);
+}
+div[class*="st-key-click-"]:has(div[data-testid="stButton"] button:hover) .sa-role-card{
+  border-color:#c7d8fb;box-shadow:0 16px 38px rgba(47,111,237,.18);
+}
+div[class*="st-key-click-"]:has(div[data-testid="stButton"] button:focus-visible) .sa-role-card{
+  outline:2px solid var(--brand);outline-offset:3px;
+}
+.sa-hero-hint{text-align:center;font-size:12px;color:var(--muted);margin-top:-2px;}
 </style>
 """
 

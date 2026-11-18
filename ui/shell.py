@@ -54,10 +54,16 @@ def current() -> tuple[str, str] | None:
 # 唤醒 / 选身份 / 选对象
 # --------------------------------------------------------------------------
 def landing() -> None:
-    theme.hero()
+    # 整块可点：点智能体形象（或下方按钮）都能进入下一步
+    with st.container(key="click-hero"):
+        theme.hero()
+        if st.button("唤醒智慧学伴", key="wake_avatar"):
+            st.session_state["stage"] = "role"
+            st.rerun()
+    st.markdown('<div class="sa-hero-hint">点上面那个我，也能直接开始 ↑</div>', unsafe_allow_html=True)
     theme.bubble(
         "我是这个系统的智能体，不是一页报表。<br>"
-        "点下面的按钮唤醒我，我们开始：<b>你会以什么身份进来？</b>")
+        "点我或者点下面的按钮唤醒我，我们开始：<b>你会以什么身份进来？</b>")
     st.write("")
     c1, c2, c3 = st.columns([1, 1.1, 1])
     with c2:
@@ -72,16 +78,21 @@ def pick_role() -> None:
     st.write("")
     c1, c2 = st.columns(2)
     with c1:
-        theme.role_card("🧑‍🎓", "我是学生", "看自己的掌握情况、薄弱点、下一步练什么。<br>只会看到你自己的数据。")
-        if st.button("以学生身份进入", width="stretch", key="as_student"):
-            st.session_state.update({"role": "student", "stage": "identity"})
-            st.rerun()
+        with st.container(key="click-role-student"):
+            theme.role_card("🧑‍🎓", "我是学生",
+                            "看自己的掌握情况、薄弱点、下一步练什么。<br>只会看到你自己的数据。")
+            if st.button("以学生身份进入", key="as_student"):
+                st.session_state.update({"role": "student", "stage": "identity"})
+                st.rerun()
     with c2:
-        theme.role_card("🧑‍🏫", "我是教师", "看班级整体、共性薄弱点、讲评顺序。<br>可以下钻到任意学生。")
-        if st.button("以教师身份进入", width="stretch", key="as_teacher"):
-            st.session_state.update({"role": "teacher", "stage": "identity"})
-            st.rerun()
+        with st.container(key="click-role-teacher"):
+            theme.role_card("🧑‍🏫", "我是教师",
+                            "看班级整体、共性薄弱点、讲评顺序。<br>可以下钻到任意学生。")
+            if st.button("以教师身份进入", key="as_teacher"):
+                st.session_state.update({"role": "teacher", "stage": "identity"})
+                st.rerun()
 
+    st.caption("点任意一张卡片即可进入。")
     st.write("")
     if st.button("← 返回", key="back_role"):
         st.session_state["stage"] = "landing"
