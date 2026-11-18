@@ -238,8 +238,21 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
         et = I.error_types(bundle)
         if et:
             st.plotly_chart(C.error_type_chart(et), width="stretch")
-        st.markdown("**全班 40 × 9 掌握度（空白=证据不足）**")
-        st.plotly_chart(C.mastery_heatmap_chart(I.mastery_heatmap(bundle)), width="stretch")
+        st.markdown(f"**{cls} 班全员掌握度矩阵**")
+        sort_mode = st.radio(
+            "矩阵排序",
+            ["学生编号", "平均掌握度"],
+            horizontal=True,
+            label_visibility="collapsed",
+            key=f"mastery_matrix_sort_{cls}",
+        )
+        matrix = I.mastery_heatmap(
+            bundle, class_id=cls, clustered=sort_mode == "平均掌握度")
+        st.caption(
+            "气泡大小与颜色表示掌握度（红 <40% · 燕麦色 40–80% · 绿 ≥80%）；"
+            "灰色空心点表示证据不足。悬停查看掌握度、正确记录数和证据数。"
+        )
+        st.plotly_chart(C.mastery_bubble_matrix_chart(matrix), width="stretch")
     with t3:
         rows = []
         for sid in A.list_students(bundle):

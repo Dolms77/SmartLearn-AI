@@ -84,27 +84,64 @@ def student_theme_rates(bundle: dict, sid: str) -> dict:
     return stats.get("theme_rates") or {}
 
 
-def mastery_heatmap(bundle: dict) -> dict:
-    """40×9 掌握度热力图；证据 <3 条的格子置空，避免把先验值画成"掌握"。"""
+def mastery_heatmap(
+    bundle: dict, class_id: str | None = None, clustered: bool = False
+) -> dict:
+    """生成班级×指标掌握矩阵；证据不足格不暴露 BKT 先验值。"""
     profiles = bundle.get("profiles") or {}
-    students = sorted(profiles.keys())
-    z, hover = [], []
+    students = sorted(
+        sid for sid in profiles
+        if class_id is None or A.student_class(bundle, sid) == class_id
+    )
+    cells: dict[str, dict[str, tuple[float | None, int, int]]] = {}
     for sid in students:
         details = (profiles[sid] or {}).get("indicator_details") or {}
-        row, hrow = [], []
+        cells[sid] = {}
         for code in IND:
             d = details.get(code) or {}
             n = int(d.get("answer_count") or 0)
             val = d.get("current_mastery")
-            if n < A.MIN_EVIDENCE or val is None:
-                row.append(None)
-                hrow.append(f"{sid} {code}：证据 {n} 条（不足 3 条，不下结论）")
-            else:
-                row.append(round(float(val), 3))
-                hrow.append(f"{sid} {code}：{val:.0%}（证据 {n} 条）")
-        z.append(row)
-        hover.append(hrow)
-    return {"students": students, "indicators": IND, "z": z, "hover": hover}
+            mastery = round(float(val), 4) if n >= A.MIN_EVIDENCE and val is not None else None
+            correct = int(d.get("correct_count") or 0)
+            cells[sid][code] = (mastery, n, correct)
+
+    indicators = list(IND)
+    if clustered:
+        def mean_mastery(values: list[float | None]) -> float | None:
+            decided = [value for value in values if value is not None]
+            return sum(decided) / len(decided) if decided else None
+
+        def student_order(sid: str) -> tuple[bool, float, int, str]:
+            values = [cells[sid][code][0] for code in indicators]
+            mean = mean_mastery(values)
+            return (mean is None, -(mean or 0.0), -sum(v is not None for v in values), sid)
+
+        def indicator_order(code: str) -> tuple[bool, float, int, str]:
+            values = [cells[sid][code][0] for sid in students]
+            mean = mean_mastery(values)
+            return (mean is None, -(mean or 0.0), -sum(v is not None for v in values), code)
+
+        students.sort(key=student_order)
+        indicators.sort(key=indicator_order)
+
+    mastery_rows = []
+    evidence_rows = []
+    correct_rows = []
+    for sid in students:
+        mastery_rows.append([cells[sid][code][0] for code in indicators])
+        evidence_rows.append([cells[sid][code][1] for code in indicators])
+        correct_rows.append([cells[sid][code][2] for code in indicators])
+
+    return {
+        "students": students,
+        "indicators": indicators,
+        "indicator_names": A.INDICATOR_NAMES,
+        "mastery": mastery_rows,
+        "evidence": evidence_rows,
+        "correct": correct_rows,
+        "clustered": clustered,
+        "class_id": class_id,
+    }
 
 
 def class_mastery_summary(bundle: dict) -> dict:
