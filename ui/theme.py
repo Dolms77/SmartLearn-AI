@@ -96,9 +96,29 @@ def icon_path() -> str | None:
     return asset_path(ICON_FILE)
 
 
+@lru_cache(maxsize=8)
+def _thumb_uri(filename: str, size: int) -> str:
+    """小尺寸头像：用 Pillow 压到几十 KB，避免每次 rerun 塞 110KB base64。"""
+    p = os.path.join(ASSET_DIR, filename)
+    if not os.path.exists(p):
+        return ""
+    try:
+        import io as _io
+
+        from PIL import Image
+
+        im = Image.open(p).convert("RGB")
+        im.thumbnail((size * 2, size * 2))       # 2x 便于高分屏
+        buf = _io.BytesIO()
+        im.save(buf, format="JPEG", quality=84, optimize=True)
+        return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+    except Exception:  # noqa: BLE001 - 没装 Pillow 就退回原图
+        return _data_uri(filename)
+
+
 def avatar_img(size: int = 132, cls: str = "sa-avatar") -> str:
     """角色图（内联 base64，免静态服务）；素材缺失时自动回退 SVG。"""
-    uri = _data_uri(CHARACTER_FILE)
+    uri = _thumb_uri(CHARACTER_FILE, max(size, 32)) if size <= 72 else _data_uri(CHARACTER_FILE)
     if not uri:
         return avatar_svg(size, cls)
     return (f'<img class="{cls}" width="{size}" height="{size}" src="{uri}" '

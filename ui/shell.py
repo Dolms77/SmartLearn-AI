@@ -12,6 +12,19 @@ import insights as I
 import theme
 import views
 
+NAV_LABELS = {
+    "对话": "💬 与智能体对话", "智能体": "🤖 多智能体", "我的学情": "📊 我的学情",
+    "学习建议": "🎯 学习建议", "知识地图": "🗺 知识地图",
+    "班级概览": "📈 班级概览", "学生名单": "👥 学生名单",
+    "数据质量": "🧹 数据质量", "成果文件": "📁 成果文件",
+}
+
+
+def _nav_label(p: str) -> str:
+    """模块级函数（不是 lambda）：保证控件 ID 稳定。"""
+    return NAV_LABELS.get(p, p)
+
+
 STUDENT_PAGES = ["对话", "智能体", "我的学情", "学习建议", "知识地图", "成果文件"]
 TEACHER_PAGES = ["对话", "智能体", "班级概览", "学生名单", "数据质量", "成果文件"]
 
@@ -24,7 +37,7 @@ def _ss(key, default=None):
 
 
 def reset() -> None:
-    for k in ("stage", "role", "ident", "page"):
+    for k in ("stage", "role", "ident", "page", "nav_page"):
         st.session_state.pop(k, None)
 
 
@@ -175,19 +188,15 @@ def render_advice(bundle: dict, sid: str) -> None:
 
 def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str) -> None:
     pages = STUDENT_PAGES if role == "student" else TEACHER_PAGES
-    page = st.session_state.get("page") or "对话"
-    if page not in pages:
-        page = "对话"
+    # 导航必须用固定 key、且不传 index：否则每次 rerun 的 index/format_func 变化会让
+    # Streamlit 认为是"新控件"，把这次点击丢掉 —— 表现就是"要点两次才生效"。
+    if st.session_state.get("nav_page") not in pages:
+        st.session_state["nav_page"] = pages[0]
 
     with st.sidebar:
         theme.brand(sub=f"{'学生视角' if role == 'student' else '教师视角'} · {ident}")
-        page = st.radio("导航", pages, index=pages.index(page),
-                        format_func=lambda p: {
-                            "对话": "💬 与智能体对话", "我的学情": "📊 我的学情",
-                            "学习建议": "🎯 学习建议", "知识地图": "🗺 知识地图",
-                            "班级概览": "📈 班级概览", "学生名单": "👥 学生名单",
-                            "数据质量": "🧹 数据质量", "成果文件": "📁 成果文件",
-                        }.get(p, p))
+        page = st.radio("导航", pages, key="nav_page", format_func=_nav_label,
+                        label_visibility="collapsed")
         st.session_state["page"] = page
         st.divider()
         st.caption("智能体状态")

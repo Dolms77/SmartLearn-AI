@@ -51,7 +51,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-@st.cache_data(show_spinner="智能体正在读取学情数据…")
+@st.cache_resource(show_spinner="智能体正在读取学情数据…")
 def cached_bundle(output_dir: str, file_signature: tuple) -> dict:
     del file_signature
     return A.load_bundle(output_dir)
@@ -79,7 +79,12 @@ if not bundle.get("records"):
     st.error("cleaned_data.json 缺失或为空，请先运行 01_data_loader.py。")
     st.stop()
 
-stt = llm.status()
+@st.cache_data(ttl=20, show_spinner=False)
+def _llm_status_cached():
+    return llm.status()
+
+
+stt = _llm_status_cached()
 online = bool(stt["online"])
 key = llm.resolve_key(st.session_state.get("api_key_input") or None) if stt["provider"] == "api" else None
 # views/chat 只判断"模型是否可用"，因此本地模式传一个真值哨兵
