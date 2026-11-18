@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 import streamlit as st
+from urllib.parse import quote
 
 import adapter as A
 import chat
@@ -23,6 +24,13 @@ NAV_LABELS = {
     "学生名单": ("👥", "学生名单"),
     "数据质量": ("🧹", "数据质量"),
     "成果文件": ("📁", "成果文件"),
+}
+
+# 控件 key 用 ASCII slug：Streamlit 的 st-key-* 类名对非 ASCII 不保证，CSS 会匹配不到
+NAV_KEYS = {
+    "对话": "chat", "智能体": "agent", "我的学情": "diagnosis",
+    "学习建议": "advice", "知识地图": "kmap", "班级概览": "class",
+    "学生名单": "students", "数据质量": "quality", "成果文件": "files",
 }
 
 
@@ -199,21 +207,44 @@ def render_advice(bundle: dict, sid: str) -> None:
 
 
 def _nav(pages: list[str]) -> str:
-    """自绘导航：固定宽度的图标列 + 文字，保证左侧完全对齐；整行可点。"""
+    """侧栏导航：真实按钮（点击最可靠）+ CSS 伪元素图标（保证左对齐）。
+
+    图标不放进按钮文字里，而是用 ::before 生成并固定宽度，
+    这样 💬🤖📊 宽度不同也不会让文字参差。
+    """
     if st.session_state.get("nav_page") not in pages:
         st.session_state["nav_page"] = pages[0]
     cur = st.session_state["nav_page"]
+
+    icon_rules = "".join(
+        f'div[class*="st-key-nav_btn_{NAV_KEYS.get(p, p)}"] button::before'
+        f'{{content:"{NAV_LABELS.get(p, ("", p))[0]}";}}'
+        for p in pages)
+    active_rule = (
+        f'div[class*="st-key-nav_btn_{NAV_KEYS.get(cur, cur)}"] button{{'
+        'background:linear-gradient(135deg,#eaf1ff,#f4f0ff)!important;'
+        'color:#2F6FED!important;font-weight:600!important;}}')
+    st.markdown(
+        "<style>"
+        'div[class*="st-key-nav_btn_"] button{'
+        'width:100%;display:flex!important;align-items:center;justify-content:flex-start!important;'
+        'gap:10px;padding:9px 10px!important;border:0!important;border-radius:10px!important;'
+        'background:transparent!important;box-shadow:none!important;'
+        'color:#31415c!important;font-size:14px!important;text-align:left!important;'
+        'min-height:38px;}'
+        'div[class*="st-key-nav_btn_"] button:hover{background:rgba(47,111,237,.07)!important;}'
+        'div[class*="st-key-nav_btn_"] button div[data-testid="stMarkdownContainer"]{'
+        'justify-content:flex-start;text-align:left;}'
+        'div[class*="st-key-nav_btn_"] button::before{'
+        'flex:0 0 22px;width:22px;text-align:center;font-size:15px;line-height:1;}'
+        f"{icon_rules}{active_rule}"
+        "</style>", unsafe_allow_html=True)
+
     for p in pages:
-        icon, text = NAV_LABELS.get(p, ("", p))
-        with st.container(key=f"click-nav-{p}"):
-            st.markdown(
-                f'<div class="sa-nav-row{" on" if p == cur else ""}">'
-                f'<span class="ico">{icon}</span>'
-                f'<span class="t">{text}</span></div>',
-                unsafe_allow_html=True)
-            if st.button(text, key=f"nav_btn_{p}"):
-                st.session_state["nav_page"] = p
-                st.rerun()
+        text = NAV_LABELS.get(p, ("", p))[1]
+        if st.button(text, key=f"nav_btn_{NAV_KEYS.get(p, p)}", width="stretch"):
+            st.session_state["nav_page"] = p
+            st.rerun()
     return st.session_state["nav_page"]
 
 
