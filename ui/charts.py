@@ -217,20 +217,107 @@ def error_type_chart(rows: list[dict]) -> go.Figure:
     return _layout(fig, 320)
 
 
-def mastery_heatmap_chart(data: dict, height: int = 620) -> go.Figure:
-    """学生×指标 热力图；空白=证据不足。"""
-    fig = go.Figure(go.Heatmap(
-        z=data["z"], x=data["indicators"], y=data["students"],
-        customdata=data["hover"],
-        colorscale=[[0, "#F2A6A4"], [0.35, "#F6C667"], [0.65, "#A8D98A"], [1, "#2E9E5B"]],
-        zmin=0, zmax=1,
-        hovertemplate="%{customdata}<extra></extra>",
-        colorbar=dict(title="掌握度", tickformat=".0%"),
-        xgap=1, ygap=1,
+def mastery_bubble_matrix_chart(data: dict, height: int | None = None) -> go.Figure:
+    """学生×指标掌握度气泡矩阵；浅灰空心点明确表示证据不足。"""
+    students = data.get("students") or []
+    indicators = data.get("indicators") or []
+    mastery = data.get("mastery") or []
+    evidence = data.get("evidence") or []
+    correct = data.get("correct") or []
+    indicator_names = data.get("indicator_names") or {}
+
+    if height is None:
+        height = max(390, min(900, len(students) * 19 + 160))
+
+    fig = go.Figure()
+    bands = [
+        ("低于 40%", lambda value: value < 0.4, "#B97980"),
+        ("40%–80%", lambda value: 0.4 <= value < 0.8, "#C2A775"),
+        ("80% 及以上", lambda value: value >= 0.8, "#4F806D"),
+    ]
+    for label, belongs, color in bands:
+        xs, ys, sizes, custom = [], [], [], []
+        for row_index, sid in enumerate(students):
+            for col_index, code in enumerate(indicators):
+                value = mastery[row_index][col_index]
+                if value is None or not belongs(value):
+                    continue
+                n = evidence[row_index][col_index]
+                xs.append(code)
+                ys.append(sid)
+                sizes.append(7 + 11 * value)
+                custom.append([
+                    sid, code, indicator_names.get(code, code),
+                    value, correct[row_index][col_index], n,
+                ])
+        fig.add_trace(go.Scatter(
+            x=xs, y=ys, mode="markers", name=label,
+            customdata=custom,
+            marker=dict(
+                size=sizes, sizemode="diameter", color=color, opacity=0.9,
+                line=dict(color="rgba(255,255,255,0.8)", width=1),
+            ),
+            hovertemplate=(
+                "<b>学生 %{customdata[0]} · %{customdata[1]}</b>"
+                "<br>%{customdata[2]}"
+                "<br>掌握度 %{customdata[3]:.0%}"
+                "<br>答对 %{customdata[4]}/%{customdata[5]} 条"
+                "<extra></extra>"
+            ),
+        ))
+
+    missing_x, missing_y, missing_custom = [], [], []
+    for row_index, sid in enumerate(students):
+        for col_index, code in enumerate(indicators):
+            if mastery[row_index][col_index] is not None:
+                continue
+            n = evidence[row_index][col_index]
+            missing_x.append(code)
+            missing_y.append(sid)
+            note = (
+                f"证据不足：已有 {n} 条记录，未达到 3 条判定门槛"
+                if n else "暂无作答记录，证据不足"
+            )
+            missing_custom.append([sid, code, indicator_names.get(code, code), note])
+    fig.add_trace(go.Scatter(
+        x=missing_x, y=missing_y, mode="markers", name="证据不足",
+        customdata=missing_custom,
+        marker=dict(
+            size=8, symbol="circle-open", color="#C9CDD3",
+            line=dict(color="#C9CDD3", width=1.2),
+        ),
+        hovertemplate=(
+            "<b>学生 %{customdata[0]} · %{customdata[1]}</b>"
+            "<br>%{customdata[2]}<br>%{customdata[3]}"
+            "<extra></extra>"
+        ),
     ))
-    fig.update_yaxes(autorange="reversed", tickfont=dict(size=9))
-    fig.update_xaxes(side="top")
-    return _layout(fig, height)
+
+    fig.update_xaxes(
+        side="top", categoryorder="array", categoryarray=indicators,
+        showgrid=True, gridcolor="#EEF0F3", gridwidth=0.5,
+        showline=False, ticks="", tickfont=dict(size=10),
+    )
+    fig.update_yaxes(
+        autorange="reversed", categoryorder="array", categoryarray=students,
+        showgrid=True, gridcolor="#F1F2F4", gridwidth=0.5,
+        showline=False, ticks="", tickfont=dict(size=9),
+    )
+    fig = _layout(fig, height)
+    fig.update_layout(
+        legend=dict(
+            orientation="h", yanchor="bottom", y=-0.22, x=0,
+            font=dict(size=10),
+        ),
+        hoverlabel=dict(
+            bgcolor="#17212B", bordercolor="#38434D",
+            font=dict(color="#F5F7FA", size=12),
+        ),
+        margin=dict(l=44, r=16, t=34, b=62),
+        height=height,
+        showlegend=True,
+    )
+    return fig
 
 
 def theme_rates_chart(rates: dict) -> go.Figure:

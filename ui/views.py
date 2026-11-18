@@ -488,11 +488,22 @@ def render_class(bundle: dict, cls: str | None) -> None:
         st.caption("40×9=360 个『学生-指标』格子里，只有 130 个达到 3 条证据门槛（36%）。"
                    "这就是为什么个体页大量显示「证据不足」。")
 
-    # ---- 全班热力图 ----
-    st.markdown("##### 全班 40 × 9 掌握度热力图（空白=证据不足）")
-    hm = I.mastery_heatmap(bundle)
-    st.plotly_chart(C.mastery_heatmap_chart(hm), width="stretch")
-    st.caption("留白格子不填先验值：宁可空着，也不把「没有记录」画成「掌握/未掌握」。")
+    # ---- 全班掌握度矩阵 ----
+    st.markdown(f"##### {selected} 班全员掌握度矩阵")
+    sort_mode = st.radio(
+        "矩阵排序",
+        ["学生编号", "平均掌握度"],
+        horizontal=True,
+        label_visibility="collapsed",
+        key=f"mastery_matrix_sort_{selected}",
+    )
+    matrix = I.mastery_heatmap(
+        bundle, class_id=selected, clustered=sort_mode == "平均掌握度")
+    st.caption(
+        "气泡大小与颜色表示掌握度（红 <40% · 燕麦色 40–80% · 绿 ≥80%）；"
+        "灰色空心点表示证据不足。悬停查看掌握度、正确记录数和证据数。"
+    )
+    st.plotly_chart(C.mastery_bubble_matrix_chart(matrix), width="stretch")
 
     # ---- 关键发现 ----
     findings = I.critical_findings(bundle)

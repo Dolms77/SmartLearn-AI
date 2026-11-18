@@ -20,6 +20,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 import adapter as A  # noqa: E402
+import charts as C    # noqa: E402
+import insights as I  # noqa: E402
 import llm            # noqa: E402
 
 DEFAULT_OUT = os.path.abspath(os.path.join(HERE, "..", "output"))
@@ -75,6 +77,46 @@ def main() -> int:
         for record in b["records"]
     ):
         fails.append("作答记录缺少 UI 展示所需的过程、评分点或质量字段")
+
+    print("      班级掌握度矩阵 ...")
+    if cv["classes"]:
+        cls = cv["classes"][0]
+        matrix = I.mastery_heatmap(b, class_id=cls)
+        expected_students = sorted(
+            sid for sid in A.list_students(b) if A.student_class(b, sid) == cls)
+        if matrix["students"] != expected_students:
+            fails.append(f"{cls} 矩阵学生范围与班级不一致")
+        if any(len(row) != 9 for row in matrix["mastery"]):
+            fails.append(f"{cls} 矩阵不是 9 个指标")
+        for values, counts in zip(matrix["mastery"], matrix["evidence"]):
+            if any(value is not None and count < A.MIN_EVIDENCE
+                   for value, count in zip(values, counts)):
+                fails.append("证据不足格错误地显示了掌握度")
+                break
+
+        clustered = I.mastery_heatmap(b, class_id=cls, clustered=True)
+        means = [
+            sum(value for value in row if value is not None)
+            / sum(value is not None for value in row)
+            for row in clustered["mastery"] if any(value is not None for value in row)
+        ]
+        if means != sorted(means, reverse=True):
+            fails.append("掌握度排序未将高平均掌握度学生排在前面")
+
+        figure = C.mastery_bubble_matrix_chart(matrix)
+        missing_count = sum(value is None for row in matrix["mastery"] for value in row)
+        if len(figure.data) != 4 or len(figure.data[-1].x) != missing_count:
+            fails.append("掌握度气泡图未为所有证据不足格绘制灰色占位点")
+        if not any("答对" in (trace.hovertemplate or "") for trace in figure.data):
+            fails.append("掌握度气泡图缺少答题正确数悬浮提示")
+
+        mock = {
+            "students": ["D00"], "indicators": ["T01I1"],
+            "indicator_names": {"T01I1": "测试指标"},
+            "mastery": [[None]], "evidence": [[0]], "correct": [[0]],
+        }
+        if len(C.mastery_bubble_matrix_chart(mock).data[-1].x) != 1:
+            fails.append("无作答模拟格未生成占位点")
 
     print("[4/5] 数据质量独立复核 ...")
     audit = (b.get("quality") or {}).get("source_quality_audit") or {}
