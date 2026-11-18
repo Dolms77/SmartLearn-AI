@@ -7,6 +7,7 @@ import streamlit as st
 
 import adapter as A
 import chat
+import design
 import home
 import insights as I
 import theme
@@ -37,7 +38,7 @@ def _ss(key, default=None):
 
 
 def reset() -> None:
-    for k in ("stage", "role", "ident", "page", "nav_page"):
+    for k in ("stage", "role", "ident", "page", "nav_page", "_shown_page"):
         st.session_state.pop(k, None)
 
 
@@ -204,6 +205,20 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
         if st.button("🔄 切换身份", width="stretch", key="switch_role"):
             reset()
             st.rerun()
+
+    # 切页时给一次"AI 思考"过渡：只在页面真的变化时出现，纯 CSS 自动淡出、不阻塞点击
+    if st.session_state.get("_shown_page") != page:
+        st.session_state["_shown_page"] = page
+        design.thinking_overlay(
+            {"我的学情": "正在核对证据链…",
+             "学习建议": "正在按优先级排学习路径…",
+             "知识地图": "正在梳理知识谱系…",
+             "班级概览": "正在汇总班级数据…",
+             "学生名单": "正在读取学生档案…",
+             "数据质量": "正在复核 8 条清洗规则…",
+             "成果文件": "正在整理产物清单…",
+             "智能体": "正在唤醒多智能体…",
+             "对话": "正在准备对话…"}.get(page, f"正在打开「{page}」…"))
 
     # 顶部状态条
     sub = (f"{ident} · {A.student_class(bundle, ident)}" if role == "student" else f"{ident} 班级视角")
