@@ -7,6 +7,7 @@ import time
 import streamlit as st
 
 import adapter as A
+import labels
 import llm
 import theme
 
@@ -110,7 +111,8 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
 
     for m in hist:
         with st.chat_message(m["role"], avatar="🧑‍🎓" if m["role"] == "user" else theme.character_path()):
-            st.markdown(m["content"])
+            st.markdown(labels.humanize(m["content"], bundle.get("output_dir"))
+                        if m["role"] != "user" else m["content"])
 
     chips = STUDENT_CHIPS if role == "student" else TEACHER_CHIPS
     st.caption("试试这样问：")
@@ -133,7 +135,8 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
     with placeholder.container():
         with st.chat_message("assistant", avatar=theme.character_path()):
             st.markdown(theme.typing(), unsafe_allow_html=True)
-    answer = _answer(question, role, ident, bundle, key, cache_dir)
+    answer = labels.humanize(_answer(question, role, ident, bundle, key, cache_dir),
+                             bundle.get("output_dir"))
     time.sleep(0.35)
     placeholder.empty()
     hist.append({"role": "assistant", "content": answer})

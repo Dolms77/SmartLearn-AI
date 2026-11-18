@@ -505,7 +505,7 @@ def _answer_from_facts(question: str, facts: dict) -> str:
     if any(k in q for k in ("证据不足", "不足", "看不出", "哪些结论", "不确定")):
         if not ins:
             return f"{sid} 的 9 个指标目前都有至少 3 条证据，没有「证据不足」的结论。"
-        items = "；".join(f"{i['indicator']} {i.get('name','')}（只有 {i['n']} 条）"
+        items = "；".join(f"{i.get('name') or i['indicator']}（只有 {i['n']} 条）"
                          for i in ins[:4])
         return (f"{sid} 现在有 {len(ins)} 个指标证据不够 3 条，我先不下结论：{items}。"
                 f"这些地方需要再做几道题补证据，才能判断是真不会还是只是没做到。")
@@ -514,9 +514,9 @@ def _answer_from_facts(question: str, facts: dict) -> str:
         if not weak:
             return f"{sid} 目前没有证据充分又明显薄弱的指标，可以先按课内节奏走。"
         top = weak[0]
-        more = "；".join(f"{w['indicator']}（{w.get('mastery', 0):.0%}，n={w['n']}）"
+        more = "；".join(f"{w.get('name') or w['indicator']}（{w.get('mastery', 0):.0%}，证据 {w['n']} 条）"
                         for w in weak[1:3])
-        return (f"最该先补的是 {top['indicator']} {top.get('name','')}，"
+        return (f"最该先补的是 {top.get('name') or top['indicator']}，"
                 f"掌握度 {top.get('mastery', 0):.0%}、证据 {top['n']} 条。"
                 + (f"其次是 {more}。" if more else "")
                 + "这些数字都来自你的实际作答，点开「我的学情」能看到具体是哪几道题。")
@@ -533,15 +533,17 @@ def _answer_from_facts(question: str, facts: dict) -> str:
 
     if any(k in q for k in ("计划", "建议", "下一步", "练什么", "怎么学", "安排")):
         if not weak:
-            return f"{sid} 目前没有证据充分的薄弱点，建议保持每周一次综合练习，重点练 T03 的不等式应用题。"
-        steps = "；".join(f"第{i}步补 {w['indicator']}" for i, w in enumerate(weak[:3], 1))
+            return f"{sid} 目前没有证据充分的薄弱点，建议保持每周一次综合练习，重点练「不等式与不等式组」的应用题。"
+        steps = "；".join(f"第{i}步补「{w.get('name') or w['indicator']}」"
+                         for i, w in enumerate(weak[:3], 1))
         return (f"给你一个三步计划：{steps}。每个指标先做 2 道没做过的同类题，"
                 f"做完对照评分点自查；连续 2 次满分再进入下一个。")
 
     if weak:
         return (f"{sid}：{s.get('records','—')} 条记录，9 个指标里 {s.get('decided', 0)} 个可下结论。"
-                f"最薄弱的是 {weak[0]['indicator']}（{weak[0].get('mastery', 0):.0%}，"
-                f"n={weak[0]['n']}），另有 {len(ins)} 个指标证据不足。")
+                f"最薄弱的是 {weak[0].get('name') or weak[0]['indicator']}"
+                f"（{weak[0].get('mastery', 0):.0%}，证据 {weak[0]['n']} 条），"
+                f"另有 {len(ins)} 个指标证据不足。")
     return (f"{sid}：{s.get('records','—')} 条记录，9 个指标里 {s.get('decided', 0)} 个可下结论，"
             f"{len(ins)} 个证据不足。可以问我「哪里最薄弱」或「哪些结论证据不足」。")
 
