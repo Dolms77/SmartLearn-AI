@@ -1,9 +1,10 @@
-# Run pipeline 01..09 in order, then verify artifacts.
+# Run pipeline 01..05 and 07..09 in order, then verify artifacts.
 # Usage:
 #   .\scripts\run_all.ps1                         # use the repository .venv-ui
 #   .\scripts\run_all.ps1 -Python (Get-Command python).Source
 #   .\scripts\run_all.ps1 -WithRag                # also run 04 (needs requirements-rag.txt)
 #   .\scripts\run_all.ps1 -WithUI                 # launch UI when done
+# NOTE: 06_dashboard.py remains available for manual runs but is not part of this pipeline.
 # NOTE: keep this file ASCII-only (no BOM); Chinese text breaks Windows PowerShell 5.1 parsing.
 param(
     [switch]$WithRag,
@@ -41,7 +42,6 @@ $steps = @(
     @{ n = "03_error_diagnosis"; f = "03_error_diagnosis.py" },
     @{ n = "04_rag_knowledge";   f = "04_rag_knowledge.py"; optional = $true },
     @{ n = "05_knowledge_graph"; f = "05_knowledge_graph.py"; optional = $true },
-    @{ n = "06_dashboard";       f = "06_dashboard.py" },
     @{ n = "07_multi_agent";     f = "07_multi_agent.py" },
     @{ n = "08_task3_generator"; f = "08_task3_generator.py"; args = @("--all-students") },
     @{ n = "09_task1_knowledge_structure"; f = "09_task1_knowledge_structure.py" }

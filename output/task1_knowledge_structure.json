@@ -1,10 +1,16 @@
 {
   "meta": {
-    "schema_version": "1.0",
+    "schema_version": "1.1",
     "generated_by": "09_task1_knowledge_structure.py",
     "generation_method": "source_data_aggregation",
     "source_file": "cleaned_data.json",
-    "generated_at": "2026-11-17T21:45:27+08:00",
+    "source_files": [
+      "课程要求.csv",
+      "题目与材料.csv",
+      "作答记录.csv"
+    ],
+    "generated_at": "2026-11-18T00:21:16+08:00",
+    "source_coverage_note": "课程要求.csv 提供课标编号/页码引用和教材页码范围，未提供课标原文或教材摘录；本产物不补造原文。",
     "evidence_density_thresholds": {
       "high": 150,
       "medium": 60
@@ -27,6 +33,12 @@
       "theme_goal": "能用代数式表示简单数量关系、代入求值，并进行整式加减与解释。",
       "course_standard": "CR01",
       "textbook_pages": "上册68—109",
+      "source_file": "课程要求.csv",
+      "source_rows": [
+        2,
+        3,
+        4
+      ],
       "question_count": 18,
       "full_score": 30,
       "evidence_count": 353,
@@ -36,6 +48,23 @@
           "course_standard_ref": "62／55",
           "course_standard": "CR01",
           "textbook_pages": "上册68—109",
+          "curriculum_source": {
+            "file": "课程要求.csv",
+            "row": 2,
+            "standard_id": "CR01",
+            "page_reference": "62／55",
+            "full_text_available": false
+          },
+          "textbook_source": {
+            "file": "课程要求.csv",
+            "source_rows": [
+              2,
+              3,
+              4
+            ],
+            "page_reference": "上册68—109",
+            "excerpt_available": false
+          },
           "question_ids": [
             "Q001",
             "Q002",
@@ -43,6 +72,44 @@
             "Q007",
             "Q013",
             "Q014"
+          ],
+          "question_references": [
+            {
+              "question_id": "Q001",
+              "source_file": "题目与材料.csv",
+              "source_row": 2,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q002",
+              "source_file": "题目与材料.csv",
+              "source_row": 3,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q006",
+              "source_file": "题目与材料.csv",
+              "source_row": 7,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q007",
+              "source_file": "题目与材料.csv",
+              "source_row": 8,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q013",
+              "source_file": "题目与材料.csv",
+              "source_row": 14,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q014",
+              "source_file": "题目与材料.csv",
+              "source_row": 15,
+              "material_source": "赛事新编"
+            }
           ],
           "question_count": 6,
           "question_type_counts": {
@@ -58,6 +125,23 @@
           "course_standard_ref": "62／55",
           "course_standard": "CR01",
           "textbook_pages": "上册68—109",
+          "curriculum_source": {
+            "file": "课程要求.csv",
+            "row": 3,
+            "standard_id": "CR01",
+            "page_reference": "62／55",
+            "full_text_available": false
+          },
+          "textbook_source": {
+            "file": "课程要求.csv",
+            "source_rows": [
+              2,
+              3,
+              4
+            ],
+            "page_reference": "上册68—109",
+            "excerpt_available": false
+          },
           "question_ids": [
             "Q003",
             "Q004",
@@ -69,6 +153,68 @@
             "Q015",
             "Q016",
             "Q017"
+          ],
+          "question_references": [
+            {
+              "question_id": "Q003",
+              "source_file": "题目与材料.csv",
+              "source_row": 4,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q004",
+              "source_file": "题目与材料.csv",
+              "source_row": 5,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q005",
+              "source_file": "题目与材料.csv",
+              "source_row": 6,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q008",
+              "source_file": "题目与材料.csv",
+              "source_row": 9,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q009",
+              "source_file": "题目与材料.csv",
+              "source_row": 10,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q010",
+              "source_file": "题目与材料.csv",
+              "source_row": 11,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q012",
+              "source_file": "题目与材料.csv",
+              "source_row": 13,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q015",
+              "source_file": "题目与材料.csv",
+              "source_row": 16,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q016",
+              "source_file": "题目与材料.csv",
+              "source_row": 17,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q017",
+              "source_file": "题目与材料.csv",
+              "source_row": 18,
+              "material_source": "赛事新编"
+            }
           ],
           "question_count": 10,
           "question_type_counts": {
@@ -85,9 +231,40 @@
           "course_standard_ref": "62／55",
           "course_standard": "CR01",
           "textbook_pages": "上册68—109",
+          "curriculum_source": {
+            "file": "课程要求.csv",
+            "row": 4,
+            "standard_id": "CR01",
+            "page_reference": "62／55",
+            "full_text_available": false
+          },
+          "textbook_source": {
+            "file": "课程要求.csv",
+            "source_rows": [
+              2,
+              3,
+              4
+            ],
+            "page_reference": "上册68—109",
+            "excerpt_available": false
+          },
           "question_ids": [
             "Q011",
             "Q018"
+          ],
+          "question_references": [
+            {
+              "question_id": "Q011",
+              "source_file": "题目与材料.csv",
+              "source_row": 12,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q018",
+              "source_file": "题目与材料.csv",
+              "source_row": 19,
+              "material_source": "赛事新编"
+            }
           ],
           "question_count": 2,
           "question_type_counts": {
@@ -104,6 +281,12 @@
       "theme_goal": "能解一元一次方程和二元一次方程组，依据等量关系建立模型并检验答案。",
       "course_standard": "CR02",
       "textbook_pages": "上册110—148；下册87—119",
+      "source_file": "课程要求.csv",
+      "source_rows": [
+        5,
+        6,
+        7
+      ],
       "question_count": 18,
       "full_score": 30,
       "evidence_count": 270,
@@ -113,6 +296,23 @@
           "course_standard_ref": "63／56",
           "course_standard": "CR02",
           "textbook_pages": "上册110—148；下册87—119",
+          "curriculum_source": {
+            "file": "课程要求.csv",
+            "row": 5,
+            "standard_id": "CR02",
+            "page_reference": "63／56",
+            "full_text_available": false
+          },
+          "textbook_source": {
+            "file": "课程要求.csv",
+            "source_rows": [
+              5,
+              6,
+              7
+            ],
+            "page_reference": "上册110—148；下册87—119",
+            "excerpt_available": false
+          },
           "question_ids": [
             "Q019",
             "Q020",
@@ -122,6 +322,56 @@
             "Q024",
             "Q025",
             "Q026"
+          ],
+          "question_references": [
+            {
+              "question_id": "Q019",
+              "source_file": "题目与材料.csv",
+              "source_row": 20,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q020",
+              "source_file": "题目与材料.csv",
+              "source_row": 21,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q021",
+              "source_file": "题目与材料.csv",
+              "source_row": 22,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q022",
+              "source_file": "题目与材料.csv",
+              "source_row": 23,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q023",
+              "source_file": "题目与材料.csv",
+              "source_row": 24,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q024",
+              "source_file": "题目与材料.csv",
+              "source_row": 25,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q025",
+              "source_file": "题目与材料.csv",
+              "source_row": 26,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q026",
+              "source_file": "题目与材料.csv",
+              "source_row": 27,
+              "material_source": "赛事新编"
+            }
           ],
           "question_count": 8,
           "question_type_counts": {
@@ -138,6 +388,23 @@
           "course_standard_ref": "63／56",
           "course_standard": "CR02",
           "textbook_pages": "上册110—148；下册87—119",
+          "curriculum_source": {
+            "file": "课程要求.csv",
+            "row": 6,
+            "standard_id": "CR02",
+            "page_reference": "63／56",
+            "full_text_available": false
+          },
+          "textbook_source": {
+            "file": "课程要求.csv",
+            "source_rows": [
+              5,
+              6,
+              7
+            ],
+            "page_reference": "上册110—148；下册87—119",
+            "excerpt_available": false
+          },
           "question_ids": [
             "Q028",
             "Q029",
@@ -145,6 +412,44 @@
             "Q031",
             "Q032",
             "Q035"
+          ],
+          "question_references": [
+            {
+              "question_id": "Q028",
+              "source_file": "题目与材料.csv",
+              "source_row": 29,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q029",
+              "source_file": "题目与材料.csv",
+              "source_row": 30,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q030",
+              "source_file": "题目与材料.csv",
+              "source_row": 31,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q031",
+              "source_file": "题目与材料.csv",
+              "source_row": 32,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q032",
+              "source_file": "题目与材料.csv",
+              "source_row": 33,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q035",
+              "source_file": "题目与材料.csv",
+              "source_row": 36,
+              "material_source": "赛事新编"
+            }
           ],
           "question_count": 6,
           "question_type_counts": {
@@ -160,11 +465,54 @@
           "course_standard_ref": "63／56",
           "course_standard": "CR02",
           "textbook_pages": "上册110—148；下册87—119",
+          "curriculum_source": {
+            "file": "课程要求.csv",
+            "row": 7,
+            "standard_id": "CR02",
+            "page_reference": "63／56",
+            "full_text_available": false
+          },
+          "textbook_source": {
+            "file": "课程要求.csv",
+            "source_rows": [
+              5,
+              6,
+              7
+            ],
+            "page_reference": "上册110—148；下册87—119",
+            "excerpt_available": false
+          },
           "question_ids": [
             "Q027",
             "Q033",
             "Q034",
             "Q036"
+          ],
+          "question_references": [
+            {
+              "question_id": "Q027",
+              "source_file": "题目与材料.csv",
+              "source_row": 28,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q033",
+              "source_file": "题目与材料.csv",
+              "source_row": 34,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q034",
+              "source_file": "题目与材料.csv",
+              "source_row": 35,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q036",
+              "source_file": "题目与材料.csv",
+              "source_row": 37,
+              "material_source": "赛事新编"
+            }
           ],
           "question_count": 4,
           "question_type_counts": {
@@ -182,6 +530,12 @@
       "theme_goal": "能解一元一次不等式及简单不等式组，表示解集，并解决范围约束问题。",
       "course_standard": "CR03",
       "textbook_pages": "下册120—145",
+      "source_file": "课程要求.csv",
+      "source_rows": [
+        8,
+        9,
+        10
+      ],
       "question_count": 18,
       "full_score": 30,
       "evidence_count": 167,
@@ -191,6 +545,23 @@
           "course_standard_ref": "63／56",
           "course_standard": "CR03",
           "textbook_pages": "下册120—145",
+          "curriculum_source": {
+            "file": "课程要求.csv",
+            "row": 8,
+            "standard_id": "CR03",
+            "page_reference": "63／56",
+            "full_text_available": false
+          },
+          "textbook_source": {
+            "file": "课程要求.csv",
+            "source_rows": [
+              8,
+              9,
+              10
+            ],
+            "page_reference": "下册120—145",
+            "excerpt_available": false
+          },
           "question_ids": [
             "Q037",
             "Q038",
@@ -199,6 +570,50 @@
             "Q041",
             "Q042",
             "Q043"
+          ],
+          "question_references": [
+            {
+              "question_id": "Q037",
+              "source_file": "题目与材料.csv",
+              "source_row": 38,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q038",
+              "source_file": "题目与材料.csv",
+              "source_row": 39,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q039",
+              "source_file": "题目与材料.csv",
+              "source_row": 40,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q040",
+              "source_file": "题目与材料.csv",
+              "source_row": 41,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q041",
+              "source_file": "题目与材料.csv",
+              "source_row": 42,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q042",
+              "source_file": "题目与材料.csv",
+              "source_row": 43,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q043",
+              "source_file": "题目与材料.csv",
+              "source_row": 44,
+              "material_source": "赛事新编"
+            }
           ],
           "question_count": 7,
           "question_type_counts": {
@@ -214,6 +629,23 @@
           "course_standard_ref": "63／56",
           "course_standard": "CR03",
           "textbook_pages": "下册120—145",
+          "curriculum_source": {
+            "file": "课程要求.csv",
+            "row": 9,
+            "standard_id": "CR03",
+            "page_reference": "63／56",
+            "full_text_available": false
+          },
+          "textbook_source": {
+            "file": "课程要求.csv",
+            "source_rows": [
+              8,
+              9,
+              10
+            ],
+            "page_reference": "下册120—145",
+            "excerpt_available": false
+          },
           "question_ids": [
             "Q044",
             "Q045",
@@ -222,6 +654,50 @@
             "Q048",
             "Q049",
             "Q053"
+          ],
+          "question_references": [
+            {
+              "question_id": "Q044",
+              "source_file": "题目与材料.csv",
+              "source_row": 45,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q045",
+              "source_file": "题目与材料.csv",
+              "source_row": 46,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q046",
+              "source_file": "题目与材料.csv",
+              "source_row": 47,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q047",
+              "source_file": "题目与材料.csv",
+              "source_row": 48,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q048",
+              "source_file": "题目与材料.csv",
+              "source_row": 49,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q049",
+              "source_file": "题目与材料.csv",
+              "source_row": 50,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q053",
+              "source_file": "题目与材料.csv",
+              "source_row": 54,
+              "material_source": "赛事新编"
+            }
           ],
           "question_count": 7,
           "question_type_counts": {
@@ -238,11 +714,54 @@
           "course_standard_ref": "63／56",
           "course_standard": "CR03",
           "textbook_pages": "下册120—145",
+          "curriculum_source": {
+            "file": "课程要求.csv",
+            "row": 10,
+            "standard_id": "CR03",
+            "page_reference": "63／56",
+            "full_text_available": false
+          },
+          "textbook_source": {
+            "file": "课程要求.csv",
+            "source_rows": [
+              8,
+              9,
+              10
+            ],
+            "page_reference": "下册120—145",
+            "excerpt_available": false
+          },
           "question_ids": [
             "Q050",
             "Q051",
             "Q052",
             "Q054"
+          ],
+          "question_references": [
+            {
+              "question_id": "Q050",
+              "source_file": "题目与材料.csv",
+              "source_row": 51,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q051",
+              "source_file": "题目与材料.csv",
+              "source_row": 52,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q052",
+              "source_file": "题目与材料.csv",
+              "source_row": 53,
+              "material_source": "赛事新编"
+            },
+            {
+              "question_id": "Q054",
+              "source_file": "题目与材料.csv",
+              "source_row": 55,
+              "material_source": "赛事新编"
+            }
           ],
           "question_count": 4,
           "question_type_counts": {

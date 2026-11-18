@@ -62,8 +62,24 @@ def main() -> int:
     print(f"      班级 {cv['classes']} | 题目 {len(cv['by_question'])} 道 | 知识结构 {len(rows)} 行")
     if len(rows) != 9:
         fails.append(f"知识结构应为 9 行，实际 {len(rows)}")
+    if set(cv["by_class_question"]) != set(cv["classes"]):
+        fails.append("班级视图未载入完整的班级×题目统计")
+    if set(cv["by_class_scoring_point"]) != set(cv["classes"]):
+        fails.append("班级视图未载入完整的班级×评分点统计")
+    if not all(row.get("question_references") for row in rows):
+        fails.append("任务1视图未载入题目来源引用")
+    if not all(
+        "student_process_status_label" in record
+        and "scoring_point_details" in record
+        and "quality_flags" in record
+        for record in b["records"]
+    ):
+        fails.append("作答记录缺少 UI 展示所需的过程、评分点或质量字段")
 
     print("[4/5] 数据质量独立复核 ...")
+    audit = (b.get("quality") or {}).get("source_quality_audit") or {}
+    if len(audit.get("checks") or []) != 8:
+        fails.append("data_quality_report.json 缺少 8 条源数据复核规则")
     qr = A.quality_recheck(a.raw_dir)
     print("      " + (f"命中 {qr['问题数']} 条规则" if qr else "原始目录不可用，已跳过（只影响数据质量页）"))
 

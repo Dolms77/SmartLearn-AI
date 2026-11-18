@@ -218,7 +218,7 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
     elif page == "学生名单":
         render_students_list(bundle)
     elif page == "数据质量":
-        views.render_quality(bundle, st.session_state.get("_raw", ""))
+        views.render_quality(bundle)
     elif page == "智能体":
         import agent_bridge as AB
 

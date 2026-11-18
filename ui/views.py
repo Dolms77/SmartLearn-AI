@@ -30,16 +30,39 @@ def _metric_row(items: list[tuple[str, str, str | None]]) -> None:
         col.metric(label, value, help=help_text)
 
 
-def _record_table(records: list[dict]) -> pd.DataFrame:
+def _quality_rule_names(bundle: dict) -> dict[str, str]:
+    audit = ((bundle.get("quality") or {}).get("source_quality_audit") or {})
+    return {
+        check.get("rule_id"): check.get("name", check.get("rule_id", ""))
+        for check in audit.get("checks") or []
+        if check.get("rule_id")
+    }
+
+
+def _record_table(records: list[dict], quality_rule_names: dict[str, str] | None = None) -> pd.DataFrame:
     rows = []
     for r in records:
+        process = r.get("student_process") or ""
+        point_details = r.get("scoring_point_details") or []
+        quality_flags = r.get("quality_flags") or []
         rows.append({
             "记录编号": r.get("record_id"),
             "节点": r.get("node_id"),
             "题号": r.get("question_id"),
             "得分": f"{r.get('score')}/{r.get('full_score')}",
             "作答": (str(r.get("student_answer") or "")[:40]),
-            "评分点": r.get("scoring_point_scores") or "—",
+            "过程状态": r.get("student_process_status_label")
+            or ("已记录" if process.strip() else "未记录"),
+            "解题过程": process or "源数据未记录",
+            "评分点": "；".join(
+                f"{point.get('scoring_point_id', '')} "
+                f"{point.get('description', '')} "
+                f"{point.get('score', '')}/{point.get('full_score', '—')}"
+                for point in point_details
+            ) or r.get("scoring_point_scores") or "—",
+            "数据质量提示": "、".join(
+                (quality_rule_names or {}).get(flag, flag) for flag in quality_flags
+            ) or "—",
         })
     return pd.DataFrame(rows)
 
@@ -121,7 +144,9 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
         with st.expander(f"{BAND_ICON[item['band']]} {code} {item['name']} · "
                          f"掌握度 {item['mastery']:.0%} · 证据 {item['n']} 条 · 错因 {len(errs)} 条"):
             recs = A.indicator_evidence(bundle, sid, code)
-            st.dataframe(_record_table(recs), width="stretch", hide_index=True)
+            st.dataframe(
+                _record_table(recs, _quality_rule_names(bundle)),
+                width="stretch", hide_index=True)
             hist = (v.get("bkt_history") or {}).get(code) or []
             if len(hist) > 1:
                 st.markdown("**知识追踪轨迹（BKT 掌握概率随作答次序变化）**")
@@ -329,15 +354,52 @@ def render_class(bundle: dict, cls: str | None) -> None:
     st.markdown("##### 最薄弱的题目（至少 5 人作答）")
     st.plotly_chart(C.question_rate_chart(cv["by_question"]), width="stretch")
 
+    class_questions = cv["by_class_question"].get(selected, {})
+    if class_questions:
+        with st.expander("本班逐题统计（题目 × 班级）", expanded=False):
+            rows = [{
+                "题号": qid,
+                "得分率": f"{float(item.get('score_rate', 0)):.1%}",
+                "得分/满分": f"{item.get('score', 0)}/{item.get('full', 0)}",
+                "记录数": item.get("count", 0),
+            } for qid, item in sorted(
+                class_questions.items(),
+                key=lambda pair: (float(pair[1].get("score_rate", 0)), pair[0]))]
+            st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
+
+    class_points = cv["by_class_scoring_point"].get(selected, {})
+    if class_points:
+        with st.expander("本班评分点统计（评分点 × 班级）", expanded=False):
+            rows = [{
+                "评分点": pid,
+                "得分率": f"{float(item.get('score_rate', 0)):.1%}",
+                "得分/满分": f"{item.get('score', 0)}/{item.get('full', 0)}",
+                "记录数": item.get("count", 0),
+            } for pid, item in sorted(
+                class_points.items(),
+                key=lambda pair: (float(pair[1].get("score_rate", 0)), pair[0]))]
+            st.dataframe(pd.DataFrame(rows[:20]), width="stretch", hide_index=True)
+            st.caption("按得分率升序展示本班最需关注的 20 个评分点。")
+
     st.markdown("##### 跨节点变化（N01 → N02）")
-    changes = cv["cross_node"]
+    changes = [
+        item for item in cv["cross_node"]
+        if A.student_class(bundle, item.get("student_id", "")) == selected
+    ]
     if changes:
+        change_labels = {
+            "improved": "后续节点进步",
+            "declined": "后续节点退步",
+            "still_wrong": "同题持续答错",
+            "persistent_error": "同题持续答错",
+            "still_right": "两个节点均答对",
+        }
         df = pd.DataFrame([{
             "学生": x["student_id"], "题目": x["question_id"],
             "N01": f"{x['N01']['score']}/{x['N01']['full']}",
             "N02": f"{x['N02']['score']}/{x['N02']['full']}",
-            "变化": {"improved": "进步", "declined": "退步", "still_wrong": "仍未掌握",
-                     "still_right": "保持正确"}.get(x.get("change_type"), x.get("change_type")),
+            "变化": x.get("change_type_label")
+            or change_labels.get(x.get("change_type"), "待识别变化"),
         } for x in changes])
         st.dataframe(df, width="stretch", hide_index=True, height=280)
         st.caption("只统计两个节点都出现的同一道题，共 "
@@ -450,56 +512,98 @@ def render_knowledge(bundle: dict) -> None:
     } for q in r["questions"]])
     st.dataframe(qdf, width="stretch", hide_index=True)
 
-    st.download_button("⬇ 导出任务1 结构（UI 组装版，供 B 校对）",
-                       data=json.dumps({"themes": bundle.get("knowledge")}, ensure_ascii=False, indent=2),
-                       file_name="task1_knowledge_structure_ui.json", mime="application/json")
-    st.caption("正式成果包请以 B 的 `task1_knowledge_structure.json` 为准；此文件仅用于交叉校对。")
+    curriculum = r.get("curriculum_source") or {}
+    textbook = r.get("textbook_source") or {}
+    question_sources = r.get("question_references") or []
+    with st.expander("来源追溯（课标、教材与题目原始行号）", expanded=False):
+        source_rows = [
+            {
+                "来源类型": "课标",
+                "文件": curriculum.get("file", "—"),
+                "行号": curriculum.get("row", "—"),
+                "引用": curriculum.get("standard_id", ""),
+                "页码": curriculum.get("page_reference", ""),
+            },
+            {
+                "来源类型": "教材",
+                "文件": textbook.get("file", "—"),
+                "行号": "、".join(map(str, textbook.get("source_rows") or [])) or "—",
+                "引用": "",
+                "页码": textbook.get("page_reference", ""),
+            },
+        ]
+        if question_sources:
+            source_rows.extend({
+                "来源类型": f"题目 {source.get('question_id', '')}",
+                "文件": source.get("source_file", "—"),
+                "行号": source.get("source_row", "—"),
+                "引用": source.get("material_source", ""),
+                "页码": "",
+            } for source in question_sources)
+        st.dataframe(pd.DataFrame(source_rows), width="stretch", hide_index=True)
+        st.caption("行号对应原始 CSV（含表头）；只提供来源定位，不代表产物含有课标原文或教材摘录。")
+
+    task1_export = bundle.get("task1_json")
+    if task1_export:
+        export_name = "task1_knowledge_structure.json"
+        export_label = "⬇ 导出当前任务1结构"
+        export_data = task1_export
+    else:
+        export_name = "task1_knowledge_structure_ui.json"
+        export_label = "⬇ 导出 UI 组装的任务1结构"
+        export_data = {"themes": bundle.get("knowledge")}
+    st.download_button(
+        export_label,
+        data=json.dumps(export_data, ensure_ascii=False, indent=2),
+        file_name=export_name, mime="application/json")
+    if not task1_export:
+        st.caption("正式成果包请以 B 的 `task1_knowledge_structure.json` 为准；当前文件由清洗数据临时组装。")
 
 
 # --------------------------------------------------------------------------
 # 页面 4：数据质量
 # --------------------------------------------------------------------------
-def render_quality(bundle: dict, raw_dir: str) -> None:
+def render_quality(bundle: dict) -> None:
     st.subheader("数据质量与清洗复核")
     rep = bundle.get("quality") or {}
-    a_issues = rep.get("issues") or []
-    st.markdown(
-        f"A 的 `data_quality_report.json`：总记录 {rep.get('total_records', '—')}，"
-        f"报告问题 **{len(a_issues)}** 条。")
-
-    st.markdown("##### UI 侧独立复核（直接读原始 CSV，重算 8 条规则）")
-    qr = A.quality_recheck(raw_dir)
-    if qr is None:
-        st.warning(f"未找到原始数据目录（`{raw_dir}`）或缺少 pandas，跳过独立复核。")
+    audit = rep.get("source_quality_audit") or {}
+    checks = audit.get("checks") or []
+    if not checks:
+        st.warning("质量报告中没有 source_quality_audit 检查结果。请重新运行 01 数据加载脚本。")
+        legacy_issues = rep.get("issues") or []
+        if legacy_issues:
+            st.dataframe(pd.DataFrame(legacy_issues), width="stretch", hide_index=True)
         return
 
-    st.markdown(f"原始记录 **{qr['总记录']}** 条，命中问题规则 **{qr['问题数']}** 条。")
-    df = pd.DataFrame(qr["明细"])
-    st.dataframe(df, width="stretch", hide_index=True)
-    st.caption("这 8 条规则对应任务 2「数据缺失、异常、重复记录的处理方式」，"
-               "每条都能给出记录编号，评审核对时可逐条复现。")
-    st.download_button("⬇ 导出质量复核 CSV",
-                       data=df.to_csv(index=False).encode("utf-8-sig"),
-                       file_name="quality_recheck.csv", mime="text/csv")
+    hit_rules = sum(1 for check in checks if check.get("hit_count", 0))
+    _metric_row([
+        ("原始记录数", str(audit.get("total_records", "—")), ""),
+        ("复核规则数", str(audit.get("rule_count", len(checks))), ""),
+        ("命中规则数", str(hit_rules), "命中数按记录-规则计数，同一记录可能命中多条规则"),
+    ])
+    st.caption("成绩与评分点保留源数据；命中下列规则表示需要复核，不代表已自动更正。")
 
-    with st.expander("这些异常对结论的影响（写进文档即可）", expanded=False):
-        st.markdown(
-            "1. **得分越界**（2 条）会直接抬高 D16 的指标掌握度，须先截断；\n"
-            "2. **评分点之和≠总分**（3 条）说明总分可能是人工录入，须以评分点为准重算；\n"
-            "3. **修订版本**（14 行/7 组）若不去重，同一事件会被计两次；\n"
-            "4. **待评分**（6 条）不是答错，不能计入掌握度；\n"
-            "5. **未作答**（5 条）同理；\n"
-            "6. **节点越界**（1 条，Q038 出现在未教不等式的 N01）会污染「前测」对照；\n"
-            "7. **主题错标**（1 条）会让按主题聚合的数字偏移；\n"
-            "8. **答案一致却 0 分**（1 条）属评分冲突，不能作为能力证据。")
+    df = pd.DataFrame([{
+        "规则": check.get("name", "数据质量检查"),
+        "命中记录数": check.get("hit_count", 0),
+        "涉及记录": "、".join(check.get("record_ids") or []) or "无",
+        "处理口径": check.get("disposition", ""),
+    } for check in checks])
+    st.dataframe(df, width="stretch", hide_index=True)
+
+    for key, title in (("pending_records", "待评分记录"), ("unanswered_records", "未作答记录")):
+        rows = rep.get(key) or []
+        if rows:
+            with st.expander(f"{title}（{len(rows)} 条，不纳入已评分证据）", expanded=False):
+                st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
 
 # --------------------------------------------------------------------------
-# 页面 5：成果文件（把 01–06 的其余产物接出来）
+# 页面 5：成果文件（集中提供结构化产物与知识图谱）
 # --------------------------------------------------------------------------
 def render_artifacts(bundle: dict) -> None:
     st.subheader("成果文件与外部产物")
-    st.caption("这里集中提供 01–06 生成、但未内联进页面的文件；缺失的会在最右列标出原因。")
+    st.caption("日常流程保留 05 知识图谱；06 仪表盘不再由一键流程生成，图表字段说明见前端数据契约。")
 
     rows = I.artifact_files(bundle)
     df = pd.DataFrame([{
@@ -529,7 +633,7 @@ def render_artifacts(bundle: dict) -> None:
                 hint = {
                     "knowledge_graph.html": "运行 05 需要 `pip install pyvis`",
                     "knowledge_base.json": "04 需要 `pip install -r requirements-rag.txt` 且下载 embedding 模型",
-                    "task1_knowledge_structure.json": "归属 B，界面已用 cleaned_data 现组装替代",
+                    "task1_knowledge_structure.json": "运行 09 生成任务1结构化成果",
                     "task3_recommendations.json": "归属 B，界面在建议区显示「待 B 交付」占位",
                 }.get(r["file"], "尚未运行对应脚本")
                 st.markdown(f"- `{r['file']}`：{hint}")

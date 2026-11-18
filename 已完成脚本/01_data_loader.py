@@ -17,6 +17,7 @@
 import csv
 import json
 import os
+import re
 from collections import defaultdict, Counter
 from datetime import datetime
 
@@ -29,6 +30,48 @@ DATA_DIR = os.environ.get("SS_DATA") or os.path.join(os.path.dirname(os.path.abs
 # 输出目录
 OUTPUT_DIR = os.environ.get("SS_OUT") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "output")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+CHANGE_TYPE_LABELS = {
+    'regressed': '后续节点退步',
+    'improved': '后续节点进步',
+    'persistent_error': '同题持续答错（最终答案相同）',
+    'still_wrong': '后续仍答错（最终答案变化）',
+    'both_correct': '两个节点均答对'
+}
+
+
+def parse_scoring_point_definitions(value):
+    """Parse rubric point IDs, descriptions, and maximum scores."""
+    definitions = {}
+    for item in re.split(r'[；;\r\n]+', value or ''):
+        match = re.fullmatch(r'\s*([A-Z]\d+P\d+)\s+(.+?)\s+(\d+)分\s*', item)
+        if match:
+            point_id, description, full_score = match.groups()
+            definitions[point_id] = {
+                'description': description.strip(),
+                'full_score': int(full_score)
+            }
+    return definitions
+
+
+def parse_scoring_point_details(score_value, definition_value):
+    """Return structured score-point results while preserving the original text."""
+    definitions = parse_scoring_point_definitions(definition_value)
+    details = []
+    for item in re.split(r'[；;\r\n]+', score_value or ''):
+        match = re.fullmatch(r'\s*([A-Z]\d+P\d+)\s*=\s*(-?\d+)\s*', item)
+        if not match:
+            continue
+        point_id, score = match.groups()
+        definition = definitions.get(point_id, {})
+        details.append({
+            'scoring_point_id': point_id,
+            'description': definition.get('description', ''),
+            'score': int(score),
+            'full_score': definition.get('full_score')
+        })
+    return details
+
 
 # ============================================================
 # 第二部分：数据加载
@@ -64,6 +107,143 @@ def load_all_data():
     print(f"  作答记录: {len(data['records'])} 条")
 
     return data
+
+
+def audit_source_quality(records, questions, test_nodes):
+    """Audit the original CSV rows without rewriting their submitted values."""
+    question_map = {q.get('材料编号', ''): q for q in questions}
+    node_scope = {
+        node.get('节点编号', ''): set(
+            item.strip() for item in (node.get('可用题目编号') or '').split('、') if item.strip()
+        )
+        for node in test_nodes
+    }
+    checks = []
+    flags_by_record = defaultdict(list)
+
+    def add_check(rule_id, name, matched_records, disposition, evaluated=True):
+        record_ids = [r.get('记录编号', '') for r in matched_records if r.get('记录编号')]
+        checks.append({
+            'rule_id': rule_id,
+            'name': name,
+            'evaluated': evaluated,
+            'hit_count': len(record_ids),
+            'record_ids': record_ids,
+            'disposition': disposition
+        })
+        for record_id in record_ids:
+            flags_by_record[record_id].append(rule_id)
+
+    def integer_value(record, field):
+        value = record.get(field, '')
+        try:
+            return int(value) if value != '' else None
+        except (TypeError, ValueError):
+            return None
+
+    over_scored = []
+    point_mismatches = []
+    pending = []
+    unanswered = []
+    node_scope_mismatches = []
+    theme_mismatches = []
+    answer_score_conflicts = []
+    event_groups = defaultdict(list)
+
+    for record in records:
+        event_groups[(record.get('作答事件编号') or '').strip()].append(record)
+        score = integer_value(record, '得分')
+        full_score = integer_value(record, '满分')
+        status = record.get('评分状态', '').strip()
+        point_scores = record.get('评分点得分', '')
+        question = question_map.get(record.get('材料编号', ''), {})
+
+        if score is not None and full_score is not None and score > full_score:
+            over_scored.append(record)
+
+        if status == '已评分' and score is not None and point_scores:
+            point_sum = sum(int(value) for value in re.findall(r'=(\d+)', point_scores))
+            if point_sum != score:
+                point_mismatches.append(record)
+        if status == '待评分':
+            pending.append(record)
+        if status == '未作答':
+            unanswered.append(record)
+
+        node_id = record.get('节点编号', '')
+        if test_nodes and record.get('材料编号', '') not in node_scope.get(node_id, set()):
+            node_scope_mismatches.append(record)
+        if record.get('主题编号', '') != question.get('主题编号', ''):
+            theme_mismatches.append(record)
+
+        if (question.get('题型') == '填空题' and status == '已评分' and score == 0):
+            def normalize_answer(value):
+                return re.sub(r'^(x|y|a|n)=|[\s，,。；;]', '', str(value or ''))
+
+            answer = normalize_answer(record.get('学生最终作答', ''))
+            reference = normalize_answer(question.get('参考答案', ''))
+            if answer and answer == reference:
+                answer_score_conflicts.append(record)
+
+    duplicate_records = []
+    for versions in event_groups.values():
+        if len(versions) > 1:
+            duplicate_records.extend(versions)
+
+    add_check(
+        'R1', '得分超过满分', over_scored,
+        '保留原始得分并标记；未自动截断或重算，复核前相关统计含原始录入值。'
+    )
+    add_check(
+        'R2', '评分点得分之和与总分不一致', point_mismatches,
+        '保留原始总分及评分点并标记；未自动按评分点重算。'
+    )
+    add_check(
+        'R3', '同一作答事件存在多个版本', duplicate_records,
+        '统计仅纳入最新的已评分版本；其他版本按状态隔离，全部记录编号保留在此报告。'
+    )
+    add_check(
+        'R4', '评分状态为待评分', pending,
+        '不纳入已评分统计，记录编号及事件信息单独保留。'
+    )
+    add_check(
+        'R5', '评分状态为未作答', unanswered,
+        '不作为答错或掌握度证据，单独统计。'
+    )
+    add_check(
+        'R6', '题目不在对应测验节点范围内', node_scope_mismatches,
+        '仅标记节点口径异常，不自动改节点或删除记录。',
+        evaluated=bool(test_nodes)
+    )
+    add_check(
+        'R7', '记录主题与题目主题不一致', theme_mismatches,
+        '保留原始主题并标记；未自动按题目表修正。'
+    )
+    add_check(
+        'R8', '填空题答案与参考答案一致但得分为零', answer_score_conflicts,
+        '保留原始评分并标记为待复核；不自动改分。'
+    )
+
+    revision_groups = []
+    for event_id, versions in event_groups.items():
+        if len(versions) > 1:
+            ordered = sorted(versions, key=lambda row: int(row.get('修订版本') or 1))
+            revision_groups.append({
+                'event_id': event_id,
+                'record_ids': [row.get('记录编号', '') for row in ordered],
+                'latest_revision_record_id': ordered[-1].get('记录编号', ''),
+                'latest_revision_status': ordered[-1].get('评分状态', '')
+            })
+
+    for record_id in flags_by_record:
+        flags_by_record[record_id].sort()
+
+    return {
+        'total_records': len(records),
+        'rule_count': len(checks),
+        'checks': checks,
+        'revision_event_groups': revision_groups
+    }, dict(flags_by_record)
 
 
 # ============================================================
@@ -165,6 +345,14 @@ def clean_records(records, questions, students):
 
     quality_report['processing_summary']['insufficient_students'] = len(insufficient_students)
     quality_report['insufficient_students_detail'] = insufficient_students
+    process_recorded = sum(1 for r in cleaned_scored if r.get('解答过程', '').strip())
+    quality_report['process_coverage'] = {
+        'scored_record_count': len(cleaned_scored),
+        'recorded_count': process_recorded,
+        'not_recorded_count': len(cleaned_scored) - process_recorded,
+        'coverage_rate': round(process_recorded / len(cleaned_scored), 4) if cleaned_scored else 0,
+        'note': '未记录表示源数据没有提供文字过程，不代表学生没有解题步骤。'
+    }
 
     # --- 2.4 标注待评分和未作答记录详情 ---
     quality_report['pending_records'] = [
@@ -383,7 +571,57 @@ def compute_statistics(scored_records, questions, students):
             'score_rate_percent': f"{rate*100:.1f}%"
         }
 
-    # --- 3.7 跨节点变化统计 ---
+    # --- 3.7 班级×题目及班级×评分点统计 ---
+    class_question_stats = defaultdict(
+        lambda: defaultdict(lambda: {'score': 0, 'full': 0, 'count': 0})
+    )
+    class_point_stats = defaultdict(
+        lambda: defaultdict(lambda: {'score': 0, 'full': 0, 'count': 0})
+    )
+    for r in scored_records:
+        sid = r.get('学生编号', '')
+        class_id = student_map.get(sid, {}).get('模拟班级编号', '?')
+        question_id = r.get('材料编号', '')
+        question = question_map.get(question_id, {})
+        question_stats = class_question_stats[class_id][question_id]
+        question_stats['score'] += int(r['得分']) if r.get('得分') else 0
+        question_stats['full'] += int(r['满分']) if r.get('满分') else 0
+        question_stats['count'] += 1
+
+        for point in parse_scoring_point_details(
+                r.get('评分点得分', ''), question.get('评分点', '')):
+            point_stats_for_class = class_point_stats[class_id][point['scoring_point_id']]
+            point_stats_for_class['score'] += point['score']
+            point_stats_for_class['full'] += point['full_score'] or 0
+            point_stats_for_class['count'] += 1
+
+    stats['by_class_question'] = {}
+    for class_id, questions_for_class in sorted(class_question_stats.items()):
+        stats['by_class_question'][class_id] = {}
+        for question_id, info in sorted(questions_for_class.items()):
+            rate = info['score'] / info['full'] if info['full'] > 0 else 0
+            stats['by_class_question'][class_id][question_id] = {
+                'count': info['count'],
+                'score': info['score'],
+                'full': info['full'],
+                'score_rate': round(rate, 4),
+                'score_rate_percent': f"{rate*100:.1f}%"
+            }
+
+    stats['by_class_scoring_point'] = {}
+    for class_id, points_for_class in sorted(class_point_stats.items()):
+        stats['by_class_scoring_point'][class_id] = {}
+        for point_id, info in sorted(points_for_class.items()):
+            rate = info['score'] / info['full'] if info['full'] > 0 else 0
+            stats['by_class_scoring_point'][class_id][point_id] = {
+                'count': info['count'],
+                'score': info['score'],
+                'full': info['full'],
+                'score_rate': round(rate, 4),
+                'score_rate_percent': f"{rate*100:.1f}%"
+            }
+
+    # --- 3.8 跨节点变化统计 ---
     # 同一学生同一题目在N01和N02都有记录的情况
     cross_node = defaultdict(dict)
     for r in scored_records:
@@ -423,7 +661,8 @@ def compute_statistics(scored_records, questions, students):
                 'question_id': event_key.split('-')[1],
                 'N01': n01,
                 'N02': n02,
-                'change_type': change_type
+                'change_type': change_type,
+                'change_type_label': CHANGE_TYPE_LABELS[change_type]
             })
 
     stats['cross_node_changes'] = progress_records
@@ -439,7 +678,8 @@ def compute_statistics(scored_records, questions, students):
 # 第五部分：构建关联数据模型（供BKT和错因诊断使用）
 # ============================================================
 
-def build_data_model(scored_records, questions, students, course_reqs, test_nodes):
+def build_data_model(scored_records, questions, students, course_reqs, test_nodes,
+                     quality_flags_by_record=None):
     """
     构建关联数据模型，输出cleaned_data.json
     这个文件是模块2（BKT）和模块3（错因诊断）的输入
@@ -454,7 +694,7 @@ def build_data_model(scored_records, questions, students, course_reqs, test_node
 
     # 构建知识结构
     knowledge_structure = {}
-    for cr in course_reqs:
+    for source_row, cr in enumerate(course_reqs, start=2):
         t_id = cr.get('主题编号', '')
         ind_id = cr.get('指标编号', '')
         if t_id not in knowledge_structure:
@@ -463,16 +703,21 @@ def build_data_model(scored_records, questions, students, course_reqs, test_node
                 'theme_goal': cr.get('主题目标', ''),
                 'course_standard': cr.get('课标整理编号', ''),
                 'textbook_pages': cr.get('教材正文页', ''),
+                'source_file': '课程要求.csv',
+                'source_rows': [],
                 'indicators': {}
             }
+        knowledge_structure[t_id]['source_rows'].append(source_row)
         knowledge_structure[t_id]['indicators'][ind_id] = {
             'indicator_name': cr.get('观察指标', ''),
-            'course_standard_ref': cr.get('课标文件页／正文页', '')
+            'course_standard_ref': cr.get('课标文件页／正文页', ''),
+            'source_file': '课程要求.csv',
+            'source_row': source_row
         }
 
     # 构建题目→指标映射
     question_indicator_map = {}
-    for q in questions:
+    for source_row, q in enumerate(questions, start=2):
         if q.get('材料类型') == '题目':
             question_indicator_map[q['材料编号']] = {
                 'indicator': q.get('指标编号', ''),
@@ -483,7 +728,13 @@ def build_data_model(scored_records, questions, students, course_reqs, test_node
                 'reference_answer': q.get('参考答案', ''),
                 'reference_solution': q.get('参考解析', ''),
                 'full_score': int(q.get('满分', 0)) if q.get('满分') else 0,
-                'scoring_points': q.get('评分点', '')
+                'scoring_points': q.get('评分点', ''),
+                'scoring_point_definitions': parse_scoring_point_definitions(
+                    q.get('评分点', '')
+                ),
+                'source': q.get('来源或资料文件', ''),
+                'source_file': '题目与材料.csv',
+                'source_row': source_row
             }
 
     # 构建结构化作答记录（供BKT和错因诊断使用）
@@ -508,13 +759,27 @@ def build_data_model(scored_records, questions, students, course_reqs, test_node
             'is_correct': int(r['得分']) == int(r['满分']) if r.get('得分') and r.get('满分') else False,
             'student_answer': r.get('学生最终作答', ''),
             'student_process': r.get('解答过程', ''),
+            'student_process_status': (
+                'recorded' if r.get('解答过程', '').strip() else 'not_recorded'
+            ),
+            'student_process_status_label': (
+                '已记录' if r.get('解答过程', '').strip() else '未记录'
+            ),
             'scoring_point_scores': r.get('评分点得分', ''),
+            'scoring_point_details': parse_scoring_point_details(
+                r.get('评分点得分', ''), q_info.get('评分点', '')
+            ),
+            'quality_flags': (quality_flags_by_record or {}).get(
+                r.get('记录编号', ''), []
+            ),
             # 附加题目信息（方便后续模块直接使用）
             'question_type': q_info.get('题型', ''),
             'question_text': q_info.get('题干或内容', ''),
             'reference_answer': q_info.get('参考答案', ''),
             'reference_solution': q_info.get('参考解析', ''),
-            'scoring_points_def': q_info.get('评分点', '')
+            'scoring_points_def': q_info.get('评分点', ''),
+            'question_source': q_info.get('来源或资料文件', ''),
+            'question_source_file': '题目与材料.csv'
         }
         structured_records.append(record)
 
@@ -523,6 +788,7 @@ def build_data_model(scored_records, questions, students, course_reqs, test_node
 
     data_model = {
         'meta': {
+            'schema_version': '1.1',
             'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'total_records': len(structured_records),
             'total_students': len(students),
@@ -563,6 +829,12 @@ def main():
         data['questions'],
         data['students']
     )
+    quality_audit, quality_flags_by_record = audit_source_quality(
+        data['records'],
+        data['questions'],
+        data['test_nodes']
+    )
+    quality_report['source_quality_audit'] = quality_audit
 
     # 3. 统计分析
     stats = compute_statistics(
@@ -577,7 +849,8 @@ def main():
         data['questions'],
         data['students'],
         data['course_requirements'],
-        data['test_nodes']
+        data['test_nodes'],
+        quality_flags_by_record
     )
 
     # 5. 输出文件
