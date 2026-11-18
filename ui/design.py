@@ -244,34 +244,34 @@ def identity_bar(avatar_html: str, name: str, sub: str) -> None:
 
 # ---------------------------------------------------------------------------
 # "AI 思考中" 过渡层：只在切换页面时注入，1 秒后自动淡出
-# ---------------------------------------------------------------------------
 THINK_CSS = """
 <style>
-.sa-think{position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-start;
-  justify-content:center;padding-top:22vh;pointer-events:none;
-  background:rgba(248,250,254,.42);backdrop-filter:blur(1.5px);
-  animation:sa-think-out .38s ease .78s forwards;}
+/* 默认隐藏（display:none）：只有在"允许动效"的浏览器里才淡入淡出，
+   万一动效被禁用或浏览器不执行动画，这一层永远不可见，绝不会挡住点击。 */
+.sa-think{display:none;}
+.sa-think *{pointer-events:none!important;}
+@media (prefers-reduced-motion: no-preference){
+  .sa-think{position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-start;
+    justify-content:center;padding-top:22vh;pointer-events:none;
+    background:rgba(248,250,254,.42);backdrop-filter:blur(1.5px);
+    animation:sa-think-out .38s ease .78s forwards;}
+  .sa-think-card{animation:sa-think-in .22s ease;}
+  .sa-think-bar{position:fixed;display:block;animation:sa-bar .9s cubic-bezier(.4,0,.2,1) forwards;}
+}
 .sa-think-card{display:flex;align-items:center;gap:12px;
   background:rgba(255,255,255,.95);border:1px solid #e6ebf3;border-radius:16px;
-  padding:14px 20px;box-shadow:0 18px 44px rgba(23,43,77,.14);
-  animation:sa-think-in .22s ease;}
+  padding:14px 20px;box-shadow:0 18px 44px rgba(23,43,77,.14);}
 .sa-think-card .txt{font-size:14px;color:#31415c;}
 .sa-think-card .txt b{color:#2F6FED;font-weight:600;}
-/* 顶部进度条：从左扫到右，1 秒结束 */
-.sa-think-bar{position:fixed;top:0;left:0;height:3px;z-index:10000;width:100%;
+/* 顶部进度条：从左扫到右 */
+.sa-think-bar{display:none;position:fixed;top:0;left:0;height:3px;z-index:10000;width:100%;
   transform-origin:left center;pointer-events:none;
-  background:linear-gradient(90deg,#2F6FED,#7A56FF 50%,#00A3A3);
-  animation:sa-bar .9s cubic-bezier(.4,0,.2,1) forwards;}
+  background:linear-gradient(90deg,#2F6FED,#7A56FF 50%,#00A3A3);}
 @keyframes sa-bar{0%{transform:scaleX(0);opacity:1;}70%{transform:scaleX(.86);opacity:1;}
   100%{transform:scaleX(1);opacity:0;}}
 @keyframes sa-think-in{from{opacity:0;transform:translateY(-8px) scale(.98);}
   to{opacity:1;transform:none;}}
 @keyframes sa-think-out{to{opacity:0;visibility:hidden;}}
-@media (prefers-reduced-motion: reduce){
-  .sa-think{animation:sa-think-out .05s linear 0.6s forwards;}
-  .sa-think-card{animation:none;}
-  .sa-think-bar{animation:sa-bar .3s linear forwards;}
-}
 </style>
 """
 

@@ -62,16 +62,10 @@ def current() -> tuple[str, str] | None:
 # 唤醒 / 选身份 / 选对象
 # --------------------------------------------------------------------------
 def landing() -> None:
-    # 整块可点：点智能体形象（或下方按钮）都能进入下一步
-    with st.container(key="click-hero"):
-        theme.hero()
-        if st.button("唤醒智慧学伴", key="wake_avatar"):
-            st.session_state["stage"] = "role"
-            st.rerun()
-    st.markdown('<div class="sa-hero-hint">点上面那个我，也能直接开始 ↑</div>', unsafe_allow_html=True)
+    theme.hero()
     theme.bubble(
         "我是这个系统的智能体，不是一页报表。<br>"
-        "点我或者点下面的按钮唤醒我，我们开始：<b>你会以什么身份进来？</b>")
+        "点下面的按钮唤醒我，我们开始：<b>你会以什么身份进来？</b>")
     st.write("")
     c1, c2, c3 = st.columns([1, 1.1, 1])
     with c2:
@@ -86,21 +80,18 @@ def pick_role() -> None:
     st.write("")
     c1, c2 = st.columns(2)
     with c1:
-        with st.container(key="click-role-student"):
-            theme.role_card("🧑‍🎓", "我是学生",
-                            "看自己的掌握情况、薄弱点、下一步练什么。<br>只会看到你自己的数据。")
-            if st.button("以学生身份进入", key="as_student"):
-                st.session_state.update({"role": "student", "stage": "identity"})
-                st.rerun()
+        theme.role_card("🧑‍🎓", "我是学生",
+                        "看自己的掌握情况、薄弱点、下一步练什么。<br>只会看到你自己的数据。")
+        if st.button("以学生身份进入", type="primary", width="stretch", key="as_student"):
+            st.session_state.update({"role": "student", "stage": "identity"})
+            st.rerun()
     with c2:
-        with st.container(key="click-role-teacher"):
-            theme.role_card("🧑‍🏫", "我是教师",
-                            "看班级整体、共性薄弱点、讲评顺序。<br>可以下钻到任意学生。")
-            if st.button("以教师身份进入", key="as_teacher"):
-                st.session_state.update({"role": "teacher", "stage": "identity"})
-                st.rerun()
+        theme.role_card("🧑‍🏫", "我是教师",
+                        "看班级整体、共性薄弱点、讲评顺序。<br>可以下钻到任意学生。")
+        if st.button("以教师身份进入", type="primary", width="stretch", key="as_teacher"):
+            st.session_state.update({"role": "teacher", "stage": "identity"})
+            st.rerun()
 
-    st.caption("点任意一张卡片即可进入。")
     st.write("")
     if st.button("← 返回", key="back_role"):
         st.session_state["stage"] = "landing"
@@ -206,45 +197,48 @@ def render_advice(bundle: dict, sid: str) -> None:
         st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
 
-def _nav(pages: list[str]) -> str:
-    """侧栏导航：真实按钮（点击最可靠）+ CSS 伪元素图标（保证左对齐）。
+def _nav_text(p: str) -> str:
+    """导航标签（纯文字，图标由 CSS 生成，保证同一列对齐）。"""
+    return NAV_LABELS.get(p, ("", p))[1]
 
-    图标不放进按钮文字里，而是用 ::before 生成并固定宽度，
-    这样 💬🤖📊 宽度不同也不会让文字参差。
+
+def _nav(pages: list[str]) -> str:
+    """侧栏导航：用 Streamlit 原生 st.radio（点击最可靠）。
+
+    对齐靠两件事：① 标签文本里不含 emoji（图标改由 CSS ::before 按序号生成，固定宽度）；
+    ② 固定 key、不传 index（否则控件 ID 每轮变化，会出现"要点两次"）。
     """
     if st.session_state.get("nav_page") not in pages:
         st.session_state["nav_page"] = pages[0]
-    cur = st.session_state["nav_page"]
 
     icon_rules = "".join(
-        f'div[class*="st-key-nav_btn_{NAV_KEYS.get(p, p)}"] button::before'
+        f'div[role="radiogroup"] > label:nth-of-type({i + 1})::before'
         f'{{content:"{NAV_LABELS.get(p, ("", p))[0]}";}}'
-        for p in pages)
-    active_rule = (
-        f'div[class*="st-key-nav_btn_{NAV_KEYS.get(cur, cur)}"] button{{'
-        'background:linear-gradient(135deg,#eaf1ff,#f4f0ff)!important;'
-        'color:#2F6FED!important;font-weight:600!important;}}')
+        for i, p in enumerate(pages))
     st.markdown(
         "<style>"
-        'div[class*="st-key-nav_btn_"] button{'
-        'width:100%;display:flex!important;align-items:center;justify-content:flex-start!important;'
-        'gap:10px;padding:9px 10px!important;border:0!important;border-radius:10px!important;'
-        'background:transparent!important;box-shadow:none!important;'
-        'color:#31415c!important;font-size:14px!important;text-align:left!important;'
-        'min-height:38px;}'
-        'div[class*="st-key-nav_btn_"] button:hover{background:rgba(47,111,237,.07)!important;}'
-        'div[class*="st-key-nav_btn_"] button div[data-testid="stMarkdownContainer"]{'
-        'justify-content:flex-start;text-align:left;}'
-        'div[class*="st-key-nav_btn_"] button::before{'
+        # 隐藏原生圆点
+        'div[role="radiogroup"] > label > div:first-child{display:none!important;}'
+        'div[role="radiogroup"]{gap:2px!important;}'
+        'div[role="radiogroup"] > label{'
+        'display:flex!important;align-items:center;gap:10px;'
+        'padding:9px 10px!important;border-radius:10px!important;'
+        'transition:background .15s ease;}'
+        'div[role="radiogroup"] > label:hover{background:rgba(47,111,237,.07)!important;}'
+        'div[role="radiogroup"] > label > div:last-child{font-size:14px;color:#31415c;}'
+        # 图标：固定 22px 宽，文字因此严格左对齐
+        'div[role="radiogroup"] > label::before{'
         'flex:0 0 22px;width:22px;text-align:center;font-size:15px;line-height:1;}'
-        f"{icon_rules}{active_rule}"
+        f"{icon_rules}"
+        # 选中行
+        'div[role="radiogroup"] > label:has(input:checked){'
+        'background:linear-gradient(135deg,#eaf1ff,#f4f0ff)!important;}'
+        'div[role="radiogroup"] > label:has(input:checked) > div:last-child{'
+        'color:#2F6FED!important;font-weight:600;}'
         "</style>", unsafe_allow_html=True)
 
-    for p in pages:
-        text = NAV_LABELS.get(p, ("", p))[1]
-        if st.button(text, key=f"nav_btn_{NAV_KEYS.get(p, p)}", width="stretch"):
-            st.session_state["nav_page"] = p
-            st.rerun()
+    st.radio("导航", pages, key="nav_page", format_func=_nav_text,
+             label_visibility="collapsed")
     return st.session_state["nav_page"]
 
 
