@@ -12,6 +12,7 @@ import streamlit as st
 import adapter as A
 import charts as C
 import insights as I
+import labels
 import llm
 
 BAND_TEXT = {"mastered": "已掌握", "developing": "发展中", "weak": "薄弱", "insufficient": "证据不足"}
@@ -217,7 +218,7 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
     st.markdown("##### 个性化学习建议")
     rec = _task3_for(bundle, sid)
     if rec:
-        _render_task3(rec)
+        _render_task3(rec, bundle.get("output_dir"))
     else:
         st.info("B 的 `task3_recommendations.json` 尚未提供。以下只列出**排序依据**，不是建议结论。")
         order = sorted(v["weak"] + v["developing"], key=lambda x: x["mastery"])
@@ -302,11 +303,11 @@ _BAND_CN = {"weak": "薄弱", "developing": "发展中", "mastered": "已掌握"
 
 
 def _rec_label(r: dict) -> str:
-    """展开器标题：短而完整。优先用结构化字段，旧数据回退到正则解析 reason。"""
+    """展开器标题：短而完整，只显示知识点名称（编号放正文里）。"""
     parts = [f"优先级 {r.get('priority', '-')}"]
     name = (r.get("indicator_name") or "").strip()
     code = (r.get("indicator") or "").strip()
-    parts.append(f"{code} {name}".strip() if name else code)
+    parts.append(name or code)
 
     reason = r.get("reason") or ""
     band = r.get("band") or ""
@@ -334,14 +335,14 @@ def _rec_label(r: dict) -> str:
     return " · ".join(p for p in parts if p)
 
 
-def _render_task3(rec: dict) -> None:
+def _render_task3(rec: dict, output_dir: str | None = None) -> None:
     if rec.get("diagnosis_summary"):
-        st.markdown(f"**诊断摘要**：{rec['diagnosis_summary']}")
+        st.markdown(f"**诊断摘要**：{labels.humanize(rec['diagnosis_summary'], output_dir)}")
     if rec.get("level"):
         st.caption(f"学情分层：{_LEVEL_TEXT.get(str(rec['level']).lower(), rec['level'])}")
     for r in rec.get("recommendations", []):
         with st.expander(_rec_label(r), expanded=r.get("priority") == 1):
-            st.markdown(f"**理由**：{r.get('reason', '')}")
+            st.markdown(f"**理由**：{labels.humanize(r.get('reason', ''), output_dir)}")
             if r.get("recommended_questions"):
                 details = {
                     item.get("question_id"): item.get("why_this")

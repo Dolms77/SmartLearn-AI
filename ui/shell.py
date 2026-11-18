@@ -168,7 +168,7 @@ def render_advice(bundle: dict, sid: str) -> None:
     st.subheader(f"{sid} 的学习建议")
     rec = views._task3_for(bundle, sid)
     if rec:
-        views._render_task3(rec)
+        views._render_task3(rec, bundle.get("output_dir"))
         return
 
     st.info("B 的 `task3_recommendations.json` 还没到，我先把**可执行的第一步**给你（按证据排序）。")

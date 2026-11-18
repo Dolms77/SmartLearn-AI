@@ -20,6 +20,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import re
 import sys
@@ -27,6 +28,7 @@ import traceback
 
 import streamlit as st
 
+import labels
 import theme
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -129,6 +131,21 @@ _TRACE_CSS = """
 """
 
 
+# ---------------------------------------------------------------------------
+# 代号 → 知识点名称：统一实现放在 labels.py，这里只保留薄封装
+# ---------------------------------------------------------------------------
+def _humanize(text: str, maps: tuple[dict, dict] | None = None) -> str:
+    return labels.humanize(text, DEFAULT_OUTPUT, maps)
+
+
+def _ind_label(code: str, name: str = "") -> str:
+    return labels.ind_name(code, name, DEFAULT_OUTPUT)
+
+
+def _name_maps() -> tuple[dict, dict]:
+    return labels.name_maps(DEFAULT_OUTPUT)
+
+
 def render_trace(result: dict, expanded: bool = True, compact: bool = True) -> None:
     steps = (result.get("trace") or {}).get("steps") or []
     if not steps:
@@ -146,9 +163,9 @@ def render_trace(result: dict, expanded: bool = True, compact: bool = True) -> N
             detail = ""
             if not compact:
                 if s.get("detail"):
-                    detail += f'<div class="sa-d">输入：{str(s["detail"])[:70]}</div>'
+                    detail += f'<div class="sa-d">输入：{_humanize(str(s["detail"])[:70])}</div>'
                 if s.get("output"):
-                    detail += f'<div class="sa-d">输出：{str(s["output"])[:70]}</div>'
+                    detail += f'<div class="sa-d">输出：{_humanize(str(s["output"])[:70])}</div>'
             html.append(
                 f'<div class="sa-step"><div class="sa-ico" style="border-color:{color};'
                 f'color:{color};">{icon}</div><div class="sa-body">'
@@ -180,15 +197,16 @@ def render_result(res: dict) -> None:
 
 def _render_diagnosis(res: dict) -> None:
     if res.get("summary"):
-        st.markdown(res["summary"])
+        st.markdown(_humanize(res["summary"]))
     inds = res.get("indicators") or []
     weak = [i for i in inds if i.get("band") in ("weak", "developing")
             and i.get("mastery") is not None]
     insuf = [i for i in inds if i.get("band") == "insufficient"]
     if weak:
         st.markdown("**需关注指标**")
-        st.dataframe([{"指标": i.get("indicator"), "观察指标": i.get("name", ""),
-                       "掌握度": f"{i['mastery']:.0%}", "证据": f"n={i.get('n', 0)}"}
+        st.dataframe([{"知识点": _ind_label(i.get("indicator"), i.get("name", "")),
+                       "掌握度": f"{i['mastery']:.0%}", "证据": f"n={i.get('n', 0)}",
+                       "编号": i.get("indicator")}
                       for i in weak[:5]], width="stretch", hide_index=True)
     persistent = res.get("persistent_errors") or []
     improved = res.get("improved") or []
@@ -198,22 +216,24 @@ def _render_diagnosis(res: dict) -> None:
     if improved:
         st.success("🟢 进步信号：" + "、".join(c["question_id"] for c in improved[:6]))
     if insuf:
-        st.info(f"⚪ 证据不足（n<3 不下结论）：{'、'.join(i.get('indicator', '') for i in insuf)}")
+        st.info("⚪ 证据不足（n<3 不下结论）："
+                + "、".join(_ind_label(i.get("indicator"), i.get("name", "")) for i in insuf))
 
 
 def _render_recommendation(res: dict) -> None:
     if res.get("diagnosis_summary"):
-        st.markdown(f"**诊断摘要**：{res['diagnosis_summary']}")
+        st.markdown(f"**诊断摘要**：{_humanize(res['diagnosis_summary'])}")
     if res.get("diagnosis_link"):
-        st.caption(f"↳ 已自动衔接上一步诊断：{res['diagnosis_link'][:60]}")
+        st.caption(f"↳ 已自动衔接上一步诊断：{_humanize(res['diagnosis_link'][:60])}")
     if res.get("source"):
         st.caption(f"来源：{res['source']}")
     for r in res.get("recommendations", []):
         m = r.get("mastery")
-        label = (f"优先级{r.get('priority')}｜{r.get('indicator')} "
-                 f"{r.get('indicator_name', '')[:14]}")
-        with st.expander(label, expanded=r.get("priority") == 1):
-            st.markdown(r.get("reason", ""))
+        name = _ind_label(r.get("indicator"), r.get("indicator_name", ""))
+        extra = f" · 掌握度 {m:.0%}" if isinstance(m, (int, float)) else ""
+        with st.expander(f"优先级{r.get('priority')}｜{name}{extra}",
+                         expanded=r.get("priority") == 1):
+            st.markdown(_humanize(r.get("reason", "")))
             if r.get("recommended_questions"):
                 st.markdown("**推荐题目**：" + "、".join(f"`{q}`" for q in r["recommended_questions"]))
             hints = r.get("step_hints") or []
@@ -234,10 +254,11 @@ def _render_lecture(res: dict) -> None:
             point = m.get("point") or m.get("point_id") or ""
             st.markdown(f"- `{point}` 得分率 {m.get('rate_note', m.get('rate', '—'))}")
     for g in res.get("class_gaps") or []:
-        st.markdown(f"- 两班差异：{g.get('theme', '')} 相差 {g.get('gap', '')}"
+        tname = _name_maps()[1].get(g.get("theme", ""), g.get("theme", ""))
+        st.markdown(f"- 两班差异：**{tname}** 相差 {g.get('gap', '')}"
                     f"（{g.get('weaker', '')} 班较弱）")
     if res.get("teaching_suggestion"):
-        st.info(f"💡 {res['teaching_suggestion']}")
+        st.info(f"💡 {_humanize(res['teaching_suggestion'])}")
     if res.get("warning"):
         st.caption(f"⚠️ {res['warning']}")
 
@@ -248,11 +269,12 @@ def _render_class(res: dict) -> None:
         st.info("暂无班级对比数据")
         return
     rows = []
+    theme_names = _name_maps()[1]
     for cls, themes in comp.items():
         for t, v in (themes or {}).items():
             if isinstance(v, dict) and v.get("rate") is not None:
-                rows.append({"班级": cls, "主题": t, "得分率": f"{v['rate']:.0%}",
-                             "记录数": v.get("n")})
+                rows.append({"班级": cls, "主题": theme_names.get(t, t),
+                             "得分率": f"{v['rate']:.0%}", "记录数": v.get("n")})
     if rows:
         st.dataframe(rows, width="stretch", hide_index=True)
 
@@ -291,7 +313,7 @@ def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
 
     for m in hist:
         with st.chat_message(m["role"], avatar="🧑‍🎓" if m["role"] == "user" else theme.character_path()):
-            st.markdown(m["content"])
+            st.markdown(_humanize(m["content"]) if m["role"] != "user" else m["content"])
             if m.get("result"):
                 for r in m["result"].get("results", []) or []:
                     render_result(r)
@@ -344,7 +366,7 @@ def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
         for r in result.get("results", []) or []:
             head = f"**[{r.get('agent')}]**"
             body = r.get("summary") or r.get("diagnosis_summary") or r.get("title") or ""
-            parts.append(f"{head} {body}".strip())
+            parts.append(f"{head} {_humanize(body)}".strip())
         answer_md = "\n\n".join(parts) or "（无结构化输出）"
         st.markdown(answer_md)
         for r in result.get("results", []) or []:

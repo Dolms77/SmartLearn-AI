@@ -32,12 +32,12 @@ def _student_headline(v: dict) -> tuple[str, list[tuple[str, str]], str | None]:
         top = v["weak"][0]
         rest = len(v["weak"]) + len(v["developing"]) - 1
         tail = f"另有 {rest} 个指标需要跟进。" if rest > 0 else ""
-        return (f"最需要先补的是 **{top['name']}**（{top['code']}），掌握度 {top['mastery']:.0%}。{tail}",
+        return (f"最需要先补的是 **{top['name']}**，掌握度 {top['mastery']:.0%}。{tail}",
                 [("掌握度", f"{top['mastery']:.0%}"), ("证据", f"{top['n']} 条")],
                 top["code"])
     if v["developing"]:
         top = v["developing"][0]
-        return (f"没有明显薄弱项，**{top['name']}**（{top['code']}）还在发展中，掌握度 {top['mastery']:.0%}，"
+        return (f"没有明显薄弱项，**{top['name']}**还在发展中，掌握度 {top['mastery']:.0%}，"
                 f"适合做一次变式巩固。",
                 [("掌握度", f"{top['mastery']:.0%}"), ("证据", f"{top['n']} 条")],
                 top["code"])
@@ -138,7 +138,7 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
         with st.expander("证据量分布（为什么有的指标不下结论）", expanded=False):
             st.plotly_chart(C.evidence_bars(v), width="stretch")
             st.caption("灰线为门槛 3 条；低于门槛一律「证据不足」，不参与薄弱排序。")
-        st.dataframe([{"指标": i["code"], "观察指标": i["name"],
+        st.dataframe([{"知识点": i["name"], "编号": i["code"],
                        "掌握度": None if i["mastery"] is None else round(i["mastery"], 3),
                        "证据数": i["n"],
                        "判定": {"mastered": "已掌握", "developing": "发展中", "weak": "薄弱",
@@ -172,7 +172,7 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
     with t3:
         rec = views._task3_for(bundle, sid)
         if rec:
-            views._render_task3(rec)
+            views._render_task3(rec, bundle.get("output_dir"))
         else:
             order = sorted(v["weak"] + v["developing"], key=lambda x: x["mastery"])
             if order:
@@ -181,13 +181,13 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
                     qids = [q for q, m in bundle["question_map"].items() if m.get("indicator") == x["code"]]
                     done = {r["question_id"] for r in A.indicator_evidence(bundle, sid, x["code"])}
                     todo = [q for q in qids if q not in done]
-                    st.markdown(f"{i}. **{x['code']} {x['name']}**（{x['mastery']:.0%}，n={x['n']}）"
+                    st.markdown(f"{i}. **{x['name']}**（掌握度 {x['mastery']:.0%}，证据 {x['n']} 条）"
                                 f"→ 练 {'、'.join(todo[:3]) if todo else '该指标变式题'}")
             else:
                 design.empty_state("🎉", "没有薄弱指标", "可以进入下一主题的迁移练习。")
         if v["insufficient"]:
             st.markdown("**需要先补观察的指标**")
-            st.dataframe([{"指标": x["code"], "观察指标": x["name"], "已有证据": x["n"]}
+            st.dataframe([{"知识点": x["name"], "已有证据": x["n"], "编号": x["code"]}
                           for x in v["insufficient"]], width="stretch", hide_index=True)
         st.divider()
         st.markdown("**问学伴一句**")
