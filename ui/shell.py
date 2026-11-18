@@ -14,16 +14,16 @@ import theme
 import views
 
 NAV_LABELS = {
-    "对话": "💬 与智能体对话", "智能体": "🤖 多智能体", "我的学情": "📊 我的学情",
-    "学习建议": "🎯 学习建议", "知识地图": "🗺 知识地图",
-    "班级概览": "📈 班级概览", "学生名单": "👥 学生名单",
-    "数据质量": "🧹 数据质量", "成果文件": "📁 成果文件",
+    "对话": ("💬", "与智能体对话"),
+    "智能体": ("🤖", "多智能体"),
+    "我的学情": ("📊", "我的学情"),
+    "学习建议": ("🎯", "学习建议"),
+    "知识地图": ("🗺", "知识地图"),
+    "班级概览": ("📈", "班级概览"),
+    "学生名单": ("👥", "学生名单"),
+    "数据质量": ("🧹", "数据质量"),
+    "成果文件": ("📁", "成果文件"),
 }
-
-
-def _nav_label(p: str) -> str:
-    """模块级函数（不是 lambda）：保证控件 ID 稳定。"""
-    return NAV_LABELS.get(p, p)
 
 
 STUDENT_PAGES = ["对话", "智能体", "我的学情", "学习建议", "知识地图", "成果文件"]
@@ -198,17 +198,33 @@ def render_advice(bundle: dict, sid: str) -> None:
         st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
 
+def _nav(pages: list[str]) -> str:
+    """自绘导航：固定宽度的图标列 + 文字，保证左侧完全对齐；整行可点。"""
+    if st.session_state.get("nav_page") not in pages:
+        st.session_state["nav_page"] = pages[0]
+    cur = st.session_state["nav_page"]
+    for p in pages:
+        icon, text = NAV_LABELS.get(p, ("", p))
+        with st.container(key=f"click-nav-{p}"):
+            st.markdown(
+                f'<div class="sa-nav-row{" on" if p == cur else ""}">'
+                f'<span class="ico">{icon}</span>'
+                f'<span class="t">{text}</span></div>',
+                unsafe_allow_html=True)
+            if st.button(text, key=f"nav_btn_{p}"):
+                st.session_state["nav_page"] = p
+                st.rerun()
+    return st.session_state["nav_page"]
+
+
 def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str) -> None:
     pages = STUDENT_PAGES if role == "student" else TEACHER_PAGES
-    # 导航必须用固定 key、且不传 index：否则每次 rerun 的 index/format_func 变化会让
-    # Streamlit 认为是"新控件"，把这次点击丢掉 —— 表现就是"要点两次才生效"。
     if st.session_state.get("nav_page") not in pages:
         st.session_state["nav_page"] = pages[0]
 
     with st.sidebar:
         theme.brand(sub=f"{'学生视角' if role == 'student' else '教师视角'} · {ident}")
-        page = st.radio("导航", pages, key="nav_page", format_func=_nav_label,
-                        label_visibility="collapsed")
+        page = _nav(pages)
         st.session_state["page"] = page
         st.divider()
         st.caption("智能体状态")

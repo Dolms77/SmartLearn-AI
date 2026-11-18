@@ -161,6 +161,17 @@ div[data-testid="stDataFrame"],div[data-testid="stPlotlyChart"]{
   border:1px solid rgba(255,255,255,.7);box-shadow:0 6px 18px rgba(23,43,77,.05);
 }
 
+/* ---------- 侧栏自绘导航 ---------- */
+.sa-nav-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;
+  transition:background .15s ease,color .15s ease;}
+.sa-nav-row .ico{flex:0 0 22px;width:22px;text-align:center;font-size:15px;line-height:1;
+  filter:grayscale(.15);}
+.sa-nav-row .t{font-size:14px;color:var(--ink-2);line-height:1.3;}
+.sa-nav-row:hover{background:rgba(47,111,237,.06);}
+.sa-nav-row.on{background:linear-gradient(135deg,#eaf1ff,#f4f0ff);}
+.sa-nav-row.on .t{color:var(--brand);font-weight:600;}
+.sa-nav-row.on .ico{filter:none;}
+
 /* ---------- 滚动条 ---------- */
 ::-webkit-scrollbar{width:10px;height:10px;}
 ::-webkit-scrollbar-thumb{background:rgba(47,111,237,.28);border-radius:8px;}
