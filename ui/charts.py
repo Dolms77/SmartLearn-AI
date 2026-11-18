@@ -7,6 +7,29 @@ import plotly.graph_objects as go
 BAND_COLOR = {"mastered": "#2E9E5B", "developing": "#E8A33D", "weak": "#D9534F",
               "insufficient": "#B9BFC7"}
 PALETTE = ["#2F6FED", "#7A56FF", "#00A3A3", "#E8A33D", "#D9534F", "#2E9E5B"]
+# 语义渐变：低分红 → 中段琥珀 → 高分绿（柱子按数值上色，比单一颜色更有层次）
+RATE_SCALE = [[0.0, "#E45756"], [0.35, "#F2A93B"], [0.65, "#9BC53D"], [1.0, "#2E9E5B"]]
+# 品牌渐变：浅蓝 → 靛蓝（用于计数类）
+BRAND_SCALE = [[0.0, "#A8C4FF"], [0.5, "#6C63FF"], [1.0, "#2F6FED"]]
+
+
+def _ramp(v: float) -> str:
+    """0→红、0.4→琥珀、0.7→黄绿、1→绿 的插值色（柱子逐根过渡）。"""
+    stops = [(0.0, (228, 87, 86)), (0.40, (242, 169, 59)),
+             (0.70, (155, 197, 61)), (1.0, (46, 158, 91))]
+    v = max(0.0, min(1.0, float(v)))
+    for (p0, c0), (p1, c1) in zip(stops, stops[1:]):
+        if v <= p1:
+            t = 0.0 if p1 == p0 else (v - p0) / (p1 - p0)
+            return "#%02X%02X%02X" % tuple(int(c0[i] + (c1[i] - c0[i]) * t) for i in range(3))
+    return "#2E9E5B"
+
+
+def _ramp_brand(v: float) -> str:
+    """浅蓝 → 靛蓝，用于计数类柱子。"""
+    v = max(0.0, min(1.0, float(v)))
+    c0, c1 = (168, 196, 255), (47, 111, 237)
+    return "#%02X%02X%02X" % tuple(int(c0[i] + (c1[i] - c0[i]) * v) for i in range(3))
 BAND_TEXT = {"mastered": "已掌握", "developing": "发展中", "weak": "薄弱",
              "insufficient": "证据不足"}
 INDICATORS = ["T01I1", "T01I2", "T01I3", "T02I1", "T02I2", "T02I3", "T03I1", "T03I2", "T03I3"]
@@ -29,6 +52,16 @@ def _layout(fig: go.Figure, height: int = 340, title: str = "") -> go.Figure:
                      tickfont=dict(size=11), title_font=dict(size=11))
     fig.update_yaxes(gridcolor="#eef1f6", zeroline=False, linecolor="#e6ebf3",
                      tickfont=dict(size=11), title_font=dict(size=11))
+    # 柱子圆角 + 去掉描边（Plotly 7 支持 marker.cornerradius）
+    for tr in fig.data:
+        if getattr(tr, "type", "") == "bar":
+            try:
+                tr.marker.cornerradius = 8
+                tr.marker.line = dict(width=0)
+                tr.textfont = dict(size=11, color="#31415c")
+            except Exception:  # noqa: BLE001 - 个别 trace 不支持则忽略
+                pass
+    fig.update_layout(bargap=0.38, bargroupgap=0.12)
     return fig
 
 
@@ -42,8 +75,9 @@ def student_radar(student: dict) -> go.Figure:
     fig = go.Figure()
     fig.add_trace(go.Scatterpolar(r=values + [values[0]], theta=labels + [labels[0]],
                                   fill="toself", name=student["sid"],
-                                  line=dict(color="#2F6FED", width=2),
-                                  fillcolor="rgba(47,111,237,0.18)"))
+                                  line=dict(color="#2F6FED", width=2.5),
+                                  marker=dict(size=5, color="#2F6FED"),
+                                  fillcolor="rgba(47,111,237,0.22)"))
     fig.update_layout(polar=dict(radialaxis=dict(range=[0, 1], tickvals=[0.2, 0.4, 0.6, 0.8, 1.0],
                                                   ticktext=["20%", "40%", "60%", "80%", "100%"])),
                       showlegend=False)
@@ -54,11 +88,11 @@ def indicator_bars(student: dict) -> go.Figure:
     """按指标画掌握度，颜色=分级，灰色=证据不足；hover 显示证据量。"""
     xs = [x["code"] for x in student["indicators"]]
     ys = [x["mastery"] if x["mastery"] is not None else 0 for x in student["indicators"]]
-    colors = [BAND_COLOR[x["band"]] for x in student["indicators"]]
     texts = [BAND_TEXT[x["band"]] for x in student["indicators"]]
     custom = [[x["n"], BAND_TEXT[x["band"]], x["name"]] for x in student["indicators"]]
     fig = go.Figure(go.Bar(
-        x=xs, y=ys, marker_color=colors,
+        x=xs, y=ys, marker_color=[("#E9EDF4" if v["band"] == "insufficient" else _ramp(y))
+                                  for y, v in zip(ys, student["indicators"])],
         text=[f"{y:.0%}" if v["band"] != "insufficient" else "—"
               for y, v in zip(ys, student["indicators"])],
         textposition="outside", customdata=custom,
@@ -74,8 +108,8 @@ def evidence_bars(student: dict) -> go.Figure:
     """证据量条形：直观暴露"哪几个指标其实没数据"。"""
     xs = [x["code"] for x in student["indicators"]]
     ns = [x["n"] for x in student["indicators"]]
-    colors = [BAND_COLOR[x["band"]] for x in student["indicators"]]
-    fig = go.Figure(go.Bar(x=xs, y=ns, marker_color=colors,
+    mx = max(ns) or 1
+    fig = go.Figure(go.Bar(x=xs, y=ns, marker_color=[_ramp_brand(n / mx) for n in ns],
                            text=ns, textposition="outside",
                            hovertemplate="%{x}：%{y} 条证据<extra></extra>"))
     fig.add_hline(y=3, line_dash="dot", line_color="#888",
@@ -95,6 +129,7 @@ def class_theme_chart(class_rows: dict) -> go.Figure:
             y=[class_rows[c].get(t) or 0 for c in classes],
             text=[f"{(class_rows[c].get(t) or 0):.1%}" for c in classes],
             textposition="outside",
+            marker_color=PALETTE[THEMES.index(t)],
         ))
     fig.update_yaxes(range=[0, 1], tickformat=".0%", title="得分率")
     fig.update_layout(barmode="group", legend=dict(orientation="h", y=-0.2))
@@ -110,8 +145,8 @@ def indicator_rank_chart(by_indicator: dict) -> go.Figure:
     codes = [r[0] for r in rows]
     rates = [r[1] for r in rows]
     counts = [r[2] for r in rows]
-    colors = ["#D9534F" if r < 0.5 else ("#E8A33D" if r < 0.7 else "#2E9E5B") for r in rates]
-    fig = go.Figure(go.Bar(y=codes, x=rates, orientation="h", marker_color=colors,
+    fig = go.Figure(go.Bar(y=codes, x=rates, orientation="h",
+                           marker_color=[_ramp(r) for r in rates],
                            text=[f"{r:.0%}" for r in rates], textposition="outside",
                            customdata=counts,
                            hovertemplate="%{y}：得分率 %{x:.1%}，%{customdata} 条<extra></extra>"))
@@ -129,7 +164,7 @@ def question_rate_chart(by_question: dict, top: int = 10) -> go.Figure:
     fig = go.Figure(go.Bar(
         y=[f"{q} {v['indicator']}" for q, v in rows],
         x=[v["rate"] for _, v in rows], orientation="h",
-        marker_color="#D9534F",
+        marker_color=[_ramp(v["rate"]) for _, v in rows],
         text=[f"{v['rate']:.0%} (n={v['n']})" for _, v in rows], textposition="outside",
         customdata=[v["text"][:40] for _, v in rows],
         hovertemplate="%{y}<br>%{customdata}<br>得分率 %{x:.1%}<extra></extra>",
@@ -156,9 +191,8 @@ def scoring_point_chart(rows: list[dict], height: int = 420) -> go.Figure:
         return _layout(go.Figure(), height)
     labels = [f"{r['评分点']} {r['标记']}" for r in rows]
     vals = [r["得分率"] for r in rows]
-    colors = [FLAG_COLOR.get(r["标记"], "#888") for r in rows]
     fig = go.Figure(go.Bar(
-        y=labels, x=vals, orientation="h", marker_color=colors,
+        y=labels, x=vals, orientation="h", marker_color=[_ramp(v) for v in vals],
         text=[f"{v:.0%} (n={r['样本']})" for v, r in zip(vals, rows)],
         textposition="outside",
         customdata=[[r["指标"], r["题干"]] for r in rows],
@@ -177,7 +211,7 @@ def error_type_chart(rows: list[dict]) -> go.Figure:
     fig = go.Figure(go.Bar(
         x=[f"{r['代码']} {r['类型']}" for r in rows], y=[r["条数"] for r in rows],
         text=[f"{r['条数']}（{r['占比']}%）" for r in rows], textposition="outside",
-        marker_color="#4C78A8",
+        marker_color=[_ramp_brand(r["条数"] / max(x["条数"] for x in rows)) for r in rows],
     ))
     fig.update_yaxes(title="错误记录数")
     return _layout(fig, 320)
@@ -188,7 +222,7 @@ def mastery_heatmap_chart(data: dict, height: int = 620) -> go.Figure:
     fig = go.Figure(go.Heatmap(
         z=data["z"], x=data["indicators"], y=data["students"],
         customdata=data["hover"],
-        colorscale=[[0, "#C0392B"], [0.4, "#E8A33D"], [0.7, "#9BC53D"], [1, "#2E9E5B"]],
+        colorscale=[[0, "#F2A6A4"], [0.35, "#F6C667"], [0.65, "#A8D98A"], [1, "#2E9E5B"]],
         zmin=0, zmax=1,
         hovertemplate="%{customdata}<extra></extra>",
         colorbar=dict(title="掌握度", tickformat=".0%"),
@@ -206,7 +240,7 @@ def theme_rates_chart(rates: dict) -> go.Figure:
     fig = go.Figure(go.Bar(
         x=[THEME_NAMES.get(k, k) for k in keys], y=vals,
         text=[f"{v:.0%}" for v in vals], textposition="outside",
-        marker_color=["#D9534F" if v < 0.5 else ("#E8A33D" if v < 0.7 else "#2E9E5B") for v in vals],
+        marker_color=[_ramp(v) for v in vals],
     ))
     fig.update_yaxes(range=[0, 1], tickformat=".0%")
     return _layout(fig, 260)

@@ -68,6 +68,105 @@ button[data-baseweb="tab"]{font-size:var(--f-s);}
 
 def inject_tokens() -> None:
     st.markdown(TOKENS_CSS, unsafe_allow_html=True)
+    st.markdown(PAGE_CSS, unsafe_allow_html=True)
+
+
+# ---------------------------------------------------------------------------
+# 页面底色与容器质感（渐变 + 玻璃拟态）
+# ---------------------------------------------------------------------------
+PAGE_CSS = """
+<style>
+/* ---------- 全局字体 ---------- */
+html, body, .stApp, [class*="css"]{
+  font-family:"Microsoft YaHei","PingFang SC","HarmonyOS Sans SC",system-ui,sans-serif;
+}
+h1,h2,h3{letter-spacing:.3px;color:var(--ink);}
+
+/* ---------- 页面底色：柔和渐变，替代纯白 ---------- */
+.stApp{
+  background:
+    radial-gradient(1100px 620px at 8% -10%, rgba(47,111,237,.10), transparent 60%),
+    radial-gradient(900px 520px at 100% 0%, rgba(122,86,255,.10), transparent 55%),
+    radial-gradient(800px 520px at 50% 110%, rgba(0,163,163,.08), transparent 60%),
+    linear-gradient(180deg,#f8fafe 0%,#f3f6fc 100%);
+  background-attachment: fixed;
+}
+[data-testid="stHeader"]{background:transparent;}
+[data-testid="stToolbar"]{right:1rem;}
+
+/* ---------- 侧栏：浅渐变 + 细边框 ---------- */
+section[data-testid="stSidebar"]{
+  background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(244,247,255,.92));
+  border-right:1px solid rgba(226,232,244,.9);
+  backdrop-filter:blur(10px);
+}
+section[data-testid="stSidebar"] *{color:var(--ink-2);}
+
+/* ---------- 卡片：玻璃质感 ---------- */
+.sa-kpi,.sa-concl,.sa-role-card{
+  background:rgba(255,255,255,.72);
+  backdrop-filter:blur(10px) saturate(120%);
+  border:1px solid rgba(255,255,255,.75);
+  box-shadow:0 8px 24px rgba(23,43,77,.07), 0 1px 0 rgba(255,255,255,.9) inset;
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+.sa-kpi:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(23,43,77,.12);}
+
+/* KPI 顶部一条渐变高光 */
+.sa-kpi{position:relative;overflow:hidden;}
+.sa-kpi::before{
+  content:"";position:absolute;inset:0 0 auto 0;height:3px;
+  background:linear-gradient(90deg,var(--brand),#7A56FF 55%,#00A3A3);
+  opacity:.85;
+}
+.sa-kpi.ok::before{background:linear-gradient(90deg,#2E9E5B,#7BD3A0);}
+.sa-kpi.warn::before{background:linear-gradient(90deg,#E8A33D,#F6D08A);}
+.sa-kpi.bad::before{background:linear-gradient(90deg,#D9534F,#F09B95);}
+
+/* ---------- 结论卡：渐变描边 ---------- */
+.sa-concl{
+  border:1px solid transparent;
+  background:
+    linear-gradient(rgba(255,255,255,.86),rgba(255,255,255,.86)) padding-box,
+    linear-gradient(135deg,rgba(47,111,237,.55),rgba(122,86,255,.45) 50%,rgba(0,163,163,.45)) border-box;
+  box-shadow:0 12px 34px rgba(47,111,237,.10);
+}
+
+/* ---------- Tab：胶囊化 ---------- */
+div[data-baseweb="tab-list"]{
+  gap:6px;background:rgba(255,255,255,.65);padding:5px;border-radius:999px;
+  border:1px solid rgba(226,232,244,.9);width:fit-content;
+}
+button[data-baseweb="tab"]{
+  border-radius:999px!important;padding:6px 16px!important;
+  font-size:var(--f-s)!important;color:var(--muted)!important;
+}
+button[data-baseweb="tab"][aria-selected="true"]{
+  background:linear-gradient(135deg,var(--brand),#6C63FF)!important;
+  color:#fff!important;box-shadow:0 6px 16px rgba(47,111,237,.28);
+}
+div[data-baseweb="tab-highlight"],div[data-baseweb="tab-border"]{display:none;}
+
+/* ---------- 主按钮：渐变 ---------- */
+.stButton>button[kind="primary"]{
+  background:linear-gradient(135deg,var(--brand),#6C63FF);
+  border:0;color:#fff;box-shadow:0 8px 20px rgba(47,111,237,.28);
+}
+.stButton>button[kind="primary"]:hover{filter:brightness(1.05);transform:translateY(-1px);}
+.stButton>button{border-radius:10px;border-color:rgba(226,232,244,.95);}
+
+/* ---------- 表格/图表容器：轻微玻璃感 ---------- */
+div[data-testid="stDataFrame"],div[data-testid="stPlotlyChart"]{
+  background:rgba(255,255,255,.55);border-radius:14px;padding:6px;
+  border:1px solid rgba(255,255,255,.7);box-shadow:0 6px 18px rgba(23,43,77,.05);
+}
+
+/* ---------- 滚动条 ---------- */
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:rgba(47,111,237,.28);border-radius:8px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(47,111,237,.45);}
+</style>
+"""
 
 
 # ---------------------------------------------------------------------------
