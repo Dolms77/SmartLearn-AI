@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 
 import pandas as pd
 import streamlit as st
@@ -292,14 +293,37 @@ def _task3_for(bundle: dict, sid: str) -> dict | None:
     return None
 
 
+_LEVEL_TEXT = {"high": "优势明显", "medium": "部分掌握", "low": "需要重点干预"}
+_BAND_RE = re.compile(r"「(薄弱|发展中|已掌握|证据不足)」")
+_RATE_RE = re.compile(r"掌握度\s*(\d+)%")
+
+
+def _rec_label(r: dict) -> str:
+    """展开器标题：短而完整（优先级 · 指标 · 判定 · 掌握度 · 证据数），正文再展开理由。"""
+    parts = [f"优先级 {r.get('priority', '-')}"]
+    name = (r.get("indicator_name") or "").strip()
+    code = (r.get("indicator") or "").strip()
+    parts.append(f"{code} {name}".strip() if name else code)
+    reason = r.get("reason") or ""
+    m = _BAND_RE.search(reason)
+    if m:
+        parts.append(m.group(1))
+    m2 = _RATE_RE.search(reason)
+    if m2:
+        parts.append(f"掌握度 {m2.group(1)}%")
+    n = len(r.get("evidence_ids") or [])
+    if n:
+        parts.append(f"证据 {n} 条")
+    return " · ".join(p for p in parts if p)
+
+
 def _render_task3(rec: dict) -> None:
     if rec.get("diagnosis_summary"):
         st.markdown(f"**诊断摘要**：{rec['diagnosis_summary']}")
     if rec.get("level"):
-        st.caption(f"学情分层：{rec['level']}")
+        st.caption(f"学情分层：{_LEVEL_TEXT.get(str(rec['level']).lower(), rec['level'])}")
     for r in rec.get("recommendations", []):
-        with st.expander(f"优先级 {r.get('priority', '-')}｜{r.get('indicator', '')}｜"
-                         f"{r.get('reason', '')[:40]}", expanded=r.get("priority") == 1):
+        with st.expander(_rec_label(r), expanded=r.get("priority") == 1):
             st.markdown(f"**理由**：{r.get('reason', '')}")
             if r.get("recommended_questions"):
                 details = {
