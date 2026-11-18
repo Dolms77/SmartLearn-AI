@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 
 BAND_COLOR = {"mastered": "#2E9E5B", "developing": "#E8A33D", "weak": "#D9534F",
               "insufficient": "#B9BFC7"}
+PALETTE = ["#2F6FED", "#7A56FF", "#00A3A3", "#E8A33D", "#D9534F", "#2E9E5B"]
 BAND_TEXT = {"mastered": "已掌握", "developing": "发展中", "weak": "薄弱",
              "insufficient": "证据不足"}
 INDICATORS = ["T01I1", "T01I2", "T01I3", "T02I1", "T02I2", "T02I3", "T03I1", "T03I2", "T03I3"]
@@ -14,9 +15,20 @@ THEME_NAMES = {"T01": "代数式与整式", "T02": "方程与方程组", "T03": 
 
 
 def _layout(fig: go.Figure, height: int = 340, title: str = "") -> go.Figure:
-    fig.update_layout(height=height, title=title, margin=dict(l=10, r=10, t=40 if title else 10, b=10),
-                      font=dict(family="Microsoft YaHei, SimHei, sans-serif", size=12),
-                      paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+    """统一图表主题：色板、字体、留白、网格线（所有图都走这里）。"""
+    fig.update_layout(
+        height=height, title=dict(text=title, font=dict(size=14, color="#16233a")) if title else None,
+        margin=dict(l=14, r=14, t=44 if title else 14, b=14),
+        colorway=PALETTE,
+        font=dict(family="Microsoft YaHei, PingFang SC, sans-serif", size=12, color="#31415c"),
+        hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e6ebf3", font_size=12),
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        legend=dict(orientation="h", yanchor="bottom", y=-0.22, x=0, font=dict(size=11)),
+    )
+    fig.update_xaxes(gridcolor="#eef1f6", zeroline=False, linecolor="#e6ebf3",
+                     tickfont=dict(size=11), title_font=dict(size=11))
+    fig.update_yaxes(gridcolor="#eef1f6", zeroline=False, linecolor="#e6ebf3",
+                     tickfont=dict(size=11), title_font=dict(size=11))
     return fig
 
 

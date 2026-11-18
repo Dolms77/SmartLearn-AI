@@ -18,6 +18,7 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
 import adapter as A     # noqa: E402
+import design            # noqa: E402
 import llm               # noqa: E402
 import shell             # noqa: E402
 import theme             # noqa: E402
@@ -39,6 +40,7 @@ BUNDLE_FILES = (
 
 st.set_page_config(page_title="智慧学伴 · 学情诊断智能体", page_icon=(theme.icon_path() or "🤖"), layout="wide")
 theme.inject()
+design.inject_tokens()
 st.markdown("""
 <style>
   .block-container {padding-top: 1.6rem; padding-bottom: 4rem; max-width: 1180px;}

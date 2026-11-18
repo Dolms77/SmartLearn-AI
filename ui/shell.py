@@ -7,6 +7,7 @@ import streamlit as st
 
 import adapter as A
 import chat
+import home
 import insights as I
 import theme
 import views
@@ -208,13 +209,13 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
     if page == "对话":
         chat.render(bundle, role, ident, key, cache_dir)
     elif page == "我的学情":
-        views.render_diagnosis(bundle, ident, key, cache_dir)
+        home.render_student_home(bundle, ident, key, cache_dir)
     elif page == "学习建议":
         render_advice(bundle, ident)
     elif page == "知识地图":
         views.render_knowledge(bundle)
     elif page == "班级概览":
-        views.render_class(bundle, ident)
+        home.render_teacher_home(bundle, ident)
     elif page == "学生名单":
         render_students_list(bundle)
     elif page == "数据质量":
