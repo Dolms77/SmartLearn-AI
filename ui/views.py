@@ -298,20 +298,37 @@ _BAND_RE = re.compile(r"「(薄弱|发展中|已掌握|证据不足)」")
 _RATE_RE = re.compile(r"掌握度\s*(\d+)%")
 
 
+_BAND_CN = {"weak": "薄弱", "developing": "发展中", "mastered": "已掌握", "insufficient": "证据不足"}
+
+
 def _rec_label(r: dict) -> str:
-    """展开器标题：短而完整（优先级 · 指标 · 判定 · 掌握度 · 证据数），正文再展开理由。"""
+    """展开器标题：短而完整。优先用结构化字段，旧数据回退到正则解析 reason。"""
     parts = [f"优先级 {r.get('priority', '-')}"]
     name = (r.get("indicator_name") or "").strip()
     code = (r.get("indicator") or "").strip()
     parts.append(f"{code} {name}".strip() if name else code)
+
     reason = r.get("reason") or ""
-    m = _BAND_RE.search(reason)
-    if m:
-        parts.append(m.group(1))
-    m2 = _RATE_RE.search(reason)
-    if m2:
-        parts.append(f"掌握度 {m2.group(1)}%")
-    n = len(r.get("evidence_ids") or [])
+    band = r.get("band") or ""
+    if not band:                                   # 兼容旧产物
+        m = _BAND_RE.search(reason)
+        band = m.group(1) if m else ""
+    band_cn = _BAND_CN.get(str(band).lower(), band)
+    if band_cn:
+        parts.append(band_cn)
+
+    mastery = r.get("mastery")
+    if mastery is None:                            # 兼容旧产物
+        m2 = _RATE_RE.search(reason)
+        mastery_txt = f"掌握度 {m2.group(1)}%" if m2 else ""
+    else:
+        mastery_txt = f"掌握度 {float(mastery):.0%}"
+    if mastery_txt:
+        parts.append(mastery_txt)
+
+    n = r.get("evidence_n")
+    if n is None:
+        n = len(r.get("evidence_ids") or [])
     if n:
         parts.append(f"证据 {n} 条")
     return " · ".join(p for p in parts if p)

@@ -18,6 +18,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.2864,
+          "evidence_n": 4,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 4 条记录，加权掌握度 29%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。特别提示：Q004 已两次犯同样的错误（作答「9x-4」），建议教师直接就该题进行一次面谈式追问，弄清学生的真实想法。",
           "recommended_questions": [
             "Q010",
@@ -78,6 +81,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.99,
+          "evidence_n": 4,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=4）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q013",
@@ -108,6 +114,9 @@
           "priority": 2,
           "indicator": "T02I1",
           "indicator_name": "运用等式性质解一元一次方程",
+          "mastery": 0.99,
+          "evidence_n": 5,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=5）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q021",
@@ -154,6 +163,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.3579,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 36%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q014",
@@ -192,6 +204,9 @@
           "priority": 2,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.2858,
+          "evidence_n": 7,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 7 条记录，加权掌握度 29%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q008",
@@ -253,6 +268,9 @@
           "priority": 1,
           "indicator": "T01I3",
           "indicator_name": "用整式解释具体问题",
+          "mastery": 0.2875,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 29%）。表达规范问题。数学结论需要单位、格式和完整性，这直接影响得分但最容易通过示范和对照来纠正。",
           "recommended_questions": [
             "Q018",
@@ -287,6 +305,9 @@
           "priority": 2,
           "indicator": "T02I1",
           "indicator_name": "运用等式性质解一元一次方程",
+          "mastery": 0.4978,
+          "evidence_n": 5,
+          "band": "developing",
           "reason": "该生在此指标上判定为「发展中」（得分依据 5 条记录，加权掌握度 50%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q023",
@@ -343,6 +364,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.99,
+          "evidence_n": 5,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=5）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q003",
@@ -373,6 +397,9 @@
           "priority": 2,
           "indicator": "T03I1",
           "indicator_name": "运用不等式性质求解",
+          "mastery": 0.8938,
+          "evidence_n": 3,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 89%，n=3）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q038",
@@ -420,6 +447,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.287,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 29%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q002",
@@ -459,6 +489,9 @@
           "priority": 2,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.3378,
+          "evidence_n": 4,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 4 条记录，加权掌握度 34%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q010",
@@ -516,6 +549,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.3623,
+          "evidence_n": 5,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 5 条记录，加权掌握度 36%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q007",
@@ -550,6 +586,9 @@
           "priority": 2,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.2867,
+          "evidence_n": 8,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 8 条记录，加权掌握度 29%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q016",
@@ -608,6 +647,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.2857,
+          "evidence_n": 6,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 6 条记录，加权掌握度 29%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。特别提示：Q002 已两次犯同样的错误（作答「14」），建议教师直接就该题进行一次面谈式追问，弄清学生的真实想法。",
           "recommended_questions": [
             "Q007"
@@ -658,6 +700,9 @@
           "priority": 1,
           "indicator": "T02I1",
           "indicator_name": "运用等式性质解一元一次方程",
+          "mastery": 0.4481,
+          "evidence_n": 4,
+          "band": "developing",
           "reason": "该生在此指标上判定为「发展中」（得分依据 4 条记录，加权掌握度 45%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q023",
@@ -716,6 +761,9 @@
           "priority": 1,
           "indicator": "T02I2",
           "indicator_name": "用消元法解二元一次方程组",
+          "mastery": 0.6747,
+          "evidence_n": 4,
+          "band": "developing",
           "reason": "该生在此指标上判定为「发展中」（得分依据 4 条记录，加权掌握度 67%）。解题结构不完整——会做主体步骤，但缺少检验、解释或规范表达。这反映学生把'解出答案'当成任务终点，还没有建立'完整作答'的习惯。",
           "recommended_questions": [
             "Q030",
@@ -767,6 +815,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.3244,
+          "evidence_n": 4,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 4 条记录，加权掌握度 32%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q006",
@@ -801,6 +852,9 @@
           "priority": 2,
           "indicator": "T02I2",
           "indicator_name": "用消元法解二元一次方程组",
+          "mastery": 0.4841,
+          "evidence_n": 3,
+          "band": "developing",
           "reason": "该生在此指标上判定为「发展中」（得分依据 3 条记录，加权掌握度 48%）。解题结构不完整——会做主体步骤，但缺少检验、解释或规范表达。这反映学生把'解出答案'当成任务终点，还没有建立'完整作答'的习惯。",
           "recommended_questions": [
             "Q029",
@@ -856,6 +910,9 @@
           "priority": 1,
           "indicator": "T02I1",
           "indicator_name": "运用等式性质解一元一次方程",
+          "mastery": 0.286,
+          "evidence_n": 4,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 4 条记录，加权掌握度 29%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q025",
@@ -896,6 +953,9 @@
           "priority": 2,
           "indicator": "T03I1",
           "indicator_name": "运用不等式性质求解",
+          "mastery": 0.2878,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 29%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q043",
@@ -953,6 +1013,9 @@
           "priority": 1,
           "indicator": "T02I1",
           "indicator_name": "运用等式性质解一元一次方程",
+          "mastery": 0.99,
+          "evidence_n": 7,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=7）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q019"
@@ -978,6 +1041,9 @@
           "priority": 2,
           "indicator": "T02I2",
           "indicator_name": "用消元法解二元一次方程组",
+          "mastery": 0.99,
+          "evidence_n": 3,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=3）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q028",
@@ -1024,6 +1090,9 @@
           "priority": 1,
           "indicator": "T02I2",
           "indicator_name": "用消元法解二元一次方程组",
+          "mastery": 0.99,
+          "evidence_n": 4,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=4）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q028",
@@ -1054,6 +1123,9 @@
           "priority": 2,
           "indicator": "T03I2",
           "indicator_name": "求两个不等式解集的交集",
+          "mastery": 0.99,
+          "evidence_n": 2,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=2）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q045",
@@ -1102,6 +1174,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.99,
+          "evidence_n": 8,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=8）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q008",
@@ -1132,6 +1207,9 @@
           "priority": 2,
           "indicator": "T03I2",
           "indicator_name": "求两个不等式解集的交集",
+          "mastery": 0.99,
+          "evidence_n": 3,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=3）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q044",
@@ -1178,6 +1256,9 @@
           "priority": 1,
           "indicator": "T03I2",
           "indicator_name": "求两个不等式解集的交集",
+          "mastery": 0.3307,
+          "evidence_n": 4,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 4 条记录，加权掌握度 33%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q046",
@@ -1235,6 +1316,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.99,
+          "evidence_n": 7,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=7）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q005",
@@ -1265,6 +1349,9 @@
           "priority": 2,
           "indicator": "T02I1",
           "indicator_name": "运用等式性质解一元一次方程",
+          "mastery": 0.99,
+          "evidence_n": 7,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=7）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q020"
@@ -1307,6 +1394,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.3579,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 36%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q002",
@@ -1362,6 +1452,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.9869,
+          "evidence_n": 2,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=2）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q003",
@@ -1392,6 +1485,9 @@
           "priority": 2,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.9735,
+          "evidence_n": 2,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 97%，n=2）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q001",
@@ -1443,6 +1539,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.99,
+          "evidence_n": 3,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=3）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q002",
@@ -1473,6 +1572,9 @@
           "priority": 2,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.99,
+          "evidence_n": 5,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=5）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q004",
@@ -1522,6 +1624,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.4613,
+          "evidence_n": 6,
+          "band": "developing",
           "reason": "该生在此指标上判定为「发展中」（得分依据 6 条记录，加权掌握度 46%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q014",
@@ -1556,6 +1661,9 @@
           "priority": 2,
           "indicator": "T02I1",
           "indicator_name": "运用等式性质解一元一次方程",
+          "mastery": 0.2877,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 29%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q025",
@@ -1612,6 +1720,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.4685,
+          "evidence_n": 3,
+          "band": "developing",
           "reason": "该生在此指标上判定为「发展中」（得分依据 3 条记录，加权掌握度 47%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q014",
@@ -1669,6 +1780,9 @@
           "priority": 1,
           "indicator": "T02I2",
           "indicator_name": "用消元法解二元一次方程组",
+          "mastery": 0.98,
+          "evidence_n": 2,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 98%，n=2）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q028",
@@ -1699,6 +1813,9 @@
           "priority": 2,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.9262,
+          "evidence_n": 1,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 93%，n=1）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q003",
@@ -1750,6 +1867,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.3623,
+          "evidence_n": 5,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 5 条记录，加权掌握度 36%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q007",
@@ -1784,6 +1904,9 @@
           "priority": 2,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.4734,
+          "evidence_n": 6,
+          "band": "developing",
           "reason": "该生在此指标上判定为「发展中」（得分依据 6 条记录，加权掌握度 47%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q010",
@@ -1842,6 +1965,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.2896,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 29%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q012",
@@ -1881,6 +2007,9 @@
           "priority": 2,
           "indicator": "T03I3",
           "indicator_name": "根据实际限制列不等式",
+          "mastery": 0.2867,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 29%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q054"
@@ -1928,6 +2057,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.3208,
+          "evidence_n": 5,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 5 条记录，加权掌握度 32%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q010",
@@ -1968,6 +2100,9 @@
           "priority": 2,
           "indicator": "T03I2",
           "indicator_name": "求两个不等式解集的交集",
+          "mastery": 0.491,
+          "evidence_n": 3,
+          "band": "developing",
           "reason": "该生在此指标上判定为「发展中」（得分依据 3 条记录，加权掌握度 49%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q046",
@@ -2022,6 +2157,9 @@
           "priority": 1,
           "indicator": "T02I2",
           "indicator_name": "用消元法解二元一次方程组",
+          "mastery": 0.3805,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 38%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q028",
@@ -2060,6 +2198,9 @@
           "priority": 2,
           "indicator": "T03I1",
           "indicator_name": "运用不等式性质求解",
+          "mastery": 0.3796,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 38%）。学生对符号规则处于'知道但不会用'的状态——课堂上能复述规则，独立解题时就会遗漏。这需要在出错的当下被'拦住一次'，形成深刻印象。",
           "recommended_questions": [
             "Q037",
@@ -2115,6 +2256,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.9869,
+          "evidence_n": 2,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=2）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q003",
@@ -2145,6 +2289,9 @@
           "priority": 2,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.9735,
+          "evidence_n": 2,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 97%，n=2）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q001",
@@ -2194,6 +2341,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.99,
+          "evidence_n": 4,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=4）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q008",
@@ -2224,6 +2374,9 @@
           "priority": 2,
           "indicator": "T02I2",
           "indicator_name": "用消元法解二元一次方程组",
+          "mastery": 0.9607,
+          "evidence_n": 5,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 96%，n=5）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q031"
@@ -2268,6 +2421,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.5849,
+          "evidence_n": 4,
+          "band": "developing",
           "reason": "该生在此指标上判定为「发展中」（得分依据 4 条记录，加权掌握度 58%）。表达规范问题。数学结论需要单位、格式和完整性，这直接影响得分但最容易通过示范和对照来纠正。",
           "recommended_questions": [
             "Q001",
@@ -2316,6 +2472,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.287,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 29%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q002",
@@ -2355,6 +2514,9 @@
           "priority": 2,
           "indicator": "T01I3",
           "indicator_name": "用整式解释具体问题",
+          "mastery": 0.2875,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 29%）。解题结构不完整——会做主体步骤，但缺少检验、解释或规范表达。这反映学生把'解出答案'当成任务终点，还没有建立'完整作答'的习惯。",
           "recommended_questions": [
             "Q018",
@@ -2405,6 +2567,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.937,
+          "evidence_n": 3,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 94%，n=3）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q003",
@@ -2435,6 +2600,9 @@
           "priority": 2,
           "indicator": "T03I3",
           "indicator_name": "根据实际限制列不等式",
+          "mastery": 0.8369,
+          "evidence_n": 1,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 84%，n=1）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q051",
@@ -2485,6 +2653,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.99,
+          "evidence_n": 7,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=7）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q010",
@@ -2515,6 +2686,9 @@
           "priority": 2,
           "indicator": "T02I2",
           "indicator_name": "用消元法解二元一次方程组",
+          "mastery": 0.99,
+          "evidence_n": 5,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=5）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q035"
@@ -2556,6 +2730,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.99,
+          "evidence_n": 5,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=5）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q013",
@@ -2586,6 +2763,9 @@
           "priority": 2,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.99,
+          "evidence_n": 7,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=7）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q004",
@@ -2634,6 +2814,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.3244,
+          "evidence_n": 4,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 4 条记录，加权掌握度 32%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q006",
@@ -2668,6 +2851,9 @@
           "priority": 2,
           "indicator": "T02I3",
           "indicator_name": "列方程或方程组解决实际问题",
+          "mastery": 0.2876,
+          "evidence_n": 3,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 3 条记录，加权掌握度 29%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q033"
@@ -2714,6 +2900,9 @@
           "priority": 1,
           "indicator": "T02I2",
           "indicator_name": "用消元法解二元一次方程组",
+          "mastery": 0.98,
+          "evidence_n": 2,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 98%，n=2）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q029",
@@ -2744,6 +2933,9 @@
           "priority": 2,
           "indicator": "T02I1",
           "indicator_name": "运用等式性质解一元一次方程",
+          "mastery": 0.9789,
+          "evidence_n": 2,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 98%，n=2）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q019",
@@ -2794,6 +2986,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.99,
+          "evidence_n": 4,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=4）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q004",
@@ -2824,6 +3019,9 @@
           "priority": 2,
           "indicator": "T03I2",
           "indicator_name": "求两个不等式解集的交集",
+          "mastery": 0.99,
+          "evidence_n": 2,
+          "band": "mastered",
           "reason": "该生已稳定掌握此指标（掌握度 99%，n=2）。建议进行拓展性任务：不是再做同类型题，而是转向'能讲给别人听'的输出式训练——给学生一道该指标的中等题，让他给同伴讲解完整思路，讲得清才算真掌握。",
           "recommended_questions": [
             "Q044",
@@ -2871,6 +3069,9 @@
           "priority": 1,
           "indicator": "T03I1",
           "indicator_name": "运用不等式性质求解",
+          "mastery": 0.3033,
+          "evidence_n": 4,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 4 条记录，加权掌握度 30%）。学生对符号规则处于'知道但不会用'的状态——课堂上能复述规则，独立解题时就会遗漏。这需要在出错的当下被'拦住一次'，形成深刻印象。",
           "recommended_questions": [
             "Q039",
@@ -2927,6 +3128,9 @@
           "priority": 1,
           "indicator": "T01I1",
           "indicator_name": "表示数量关系并代入求值",
+          "mastery": 0.3244,
+          "evidence_n": 4,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 4 条记录，加权掌握度 32%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q014",
@@ -2961,6 +3165,9 @@
           "priority": 2,
           "indicator": "T02I1",
           "indicator_name": "运用等式性质解一元一次方程",
+          "mastery": 0.286,
+          "evidence_n": 4,
+          "band": "weak",
           "reason": "该生在此指标上判定为「薄弱」（得分依据 4 条记录，加权掌握度 29%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q024",
@@ -3017,6 +3224,9 @@
           "priority": 1,
           "indicator": "T01I2",
           "indicator_name": "识别同类项、去括号并化简",
+          "mastery": 0.5919,
+          "evidence_n": 5,
+          "band": "developing",
           "reason": "该生在此指标上判定为「发展中」（得分依据 5 条记录，加权掌握度 59%）。运算基本功的问题。学生思路是对的，但每一步的准确性不稳定。这类问题适合通过'放慢速度、逐步验算'来改善，不适合加大题量。",
           "recommended_questions": [
             "Q012",
@@ -3056,6 +3266,9 @@
           "priority": 2,
           "indicator": "T02I1",
           "indicator_name": "运用等式性质解一元一次方程",
+          "mastery": 0.4481,
+          "evidence_n": 4,
+          "band": "developing",
           "reason": "该生在此指标上判定为「发展中」（得分依据 4 条记录，加权掌握度 45%）。这不是粗心，而是对概念本身的理解还没有建立起来——学生记住的是'操作步骤'，没有理解'为什么这样操作'。这类问题靠多做题目收效很慢，需要先回到概念的直观理解。",
           "recommended_questions": [
             "Q025",
