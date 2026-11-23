@@ -459,7 +459,25 @@ def _pct(v) -> str:
     return f"{v:.0%}" if isinstance(v, (int, float)) else "—"
 
 
-def _teacher_answer(question: str, facts: dict) -> str:
+_BAND_CN = {"mastered": "已掌握", "developing": "发展中",
+            "weak": "薄弱", "insufficient": "证据不足"}
+
+
+def _band_cn(band) -> str:
+    return _BAND_CN.get(str(band or ""), "")
+
+
+def _band_clause(item: dict) -> str:
+    """把 band 说成一句人话；证据不足时明确说“暂不下结论”。"""
+    band = str(item.get("band") or "")
+    if band == "insufficient":
+        return "该指标证据还不够 3 条，暂不下结论；"
+    cn = _band_cn(band)
+    return f"判定为{cn}；" if cn else ""
+
+
+def _teacher_answer(question: str, facts: dict,
+                    history: list[dict] | None = None) -> str:
     """教师视角：按意图分派——讲评排序 / 评分点 / 关注名单 / 证据覆盖 / 两班对比 / 指标。"""
     cls = facts.get("class", "这个班")
     n = facts.get("students")
@@ -472,7 +490,37 @@ def _teacher_answer(question: str, facts: dict) -> str:
     cmp_ = facts.get("class_compare") or {}
     q = question or ""
 
-    # ① 评分点：讲评“哪一步”
+    # ⓪ 追问：第 N 弱的指标
+    idx = _ordinal_index(q)
+    if idx is not None:
+        if len(inds) > idx:
+            x = inds[idx]
+            return (f"排在第 {idx + 1} 位的是{x['indicator']}（{_pct(x['rate'])}）。"
+                    f"和第一位相比，差距主要在支撑它的题目上；建议按这个指标再准备一组变式题。")
+        if len(qs) > idx:
+            x = qs[idx]
+            return (f"排在第 {idx + 1} 位的题目是 {x['question']}（得分率 {_pct(x['rate'])}，"
+                    f"{x['n']} 人作答）。")
+
+    # ① 追问：把刚才提到的内容讲细
+    if any(k in q for k in _FOLLOWUP_HINTS):
+        last = ""
+        for msg in reversed(history or []):
+            if msg.get("role") == "assistant":
+                last = str(msg.get("content") or "")
+                break
+        for x in inds:
+            if x["indicator"] in last:
+                return (f"刚才提到的 {x['indicator']} 是 {cls} 本周最弱的指标之一，"
+                        f"得分率 {_pct(x['rate'])}，样本 {x['n']} 条。"
+                        f"建议先看它在评分点上的分布，再决定讲哪一步。")
+        for s in sps:
+            if s["评分点"] in last:
+                return (f"刚才提到的 {s['评分点']} 来自 {s['题号']}，"
+                        f"全班 {s['正确/总数']} 做对，题干是「{s['题干']}」。"
+                        f"讲评时先让学生复述这一步的推理，再给一道同型变式。")
+
+    # ② 评分点：讲评“哪一步”
     if any(k in q for k in ("评分点", "扣分", "丢分", "哪一步", "步骤")):
         if not sps:
             return f"{cls} 暂时没有可用的评分点统计，可以先用题目级结论。"
@@ -481,7 +529,7 @@ def _teacher_answer(question: str, facts: dict) -> str:
                 f"讲评时只讲这三步：先让学生写出自己的步骤，再对照评分点看丢在哪一步，"
                 f"最后当堂做一道同类型变式。")
 
-    # ② 关注名单
+    # ③ 关注名单
     if any(k in q for k in ("关注", "学生", "谁", "名单")):
         if not risky:
             return f"{cls} 目前没有“证据不足”或掌握度明显偏低的学生。"
@@ -490,7 +538,7 @@ def _teacher_answer(question: str, facts: dict) -> str:
         return (f"需要单独关注的有 {len(risky)} 人：{names}。"
                 f"建议先给“证据不足”的学生补 3 道同指标题，再谈掌握度。")
 
-    # ③ 证据覆盖
+    # ④ 证据覆盖
     if any(k in q for k in ("覆盖", "证据", "格子", "够不够", "准不准", "可信")):
         decided, stud, rate = cov.get("decided"), cov.get("students"), cov.get("rate")
         if decided and stud:
@@ -499,7 +547,7 @@ def _teacher_answer(question: str, facts: dict) -> str:
                     f"其余格子证据不足，我不下结论。")
         return f"{cls} 暂无可用的覆盖统计。"
 
-    # ④ 两班对比
+    # ⑤ 两班对比
     if any(k in q for k in ("两个班", "对比", "比较", "差在哪", "哪边")):
         diffs = []
         for t in ("T01", "T02", "T03"):
@@ -516,7 +564,7 @@ def _teacher_answer(question: str, facts: dict) -> str:
                     f"建议按这个主题分层布置作业。")
         return f"{cls} 暂无可比的两班数据。"
 
-    # ⑤ 讲评排序
+    # ⑥ 讲评排序
     if any(k in q for k in ("讲", "上课", "安排", "备课")):
         parts = []
         if qs:
@@ -530,7 +578,7 @@ def _teacher_answer(question: str, facts: dict) -> str:
         return ("建议这样排：" + "；".join(parts) +
                 "。每题先让学生说思路，再对照评分点讲丢分的那一步，最后当堂做一道同类型变式。")
 
-    # ⑥ 指标级
+    # ⑦ 指标级
     if any(k in q for k in ("指标", "最弱", "薄弱", "哪块", "哪个知识点")):
         if not inds:
             return f"{cls} 目前没有证据充分的共性薄弱指标。"
@@ -543,16 +591,70 @@ def _teacher_answer(question: str, facts: dict) -> str:
     return head + "。" + extra + "可以问我「下周该讲哪几道题」「哪个评分点全班都错」或「哪些学生要单独关注」。"
 
 
-def _answer_from_facts(question: str, facts: dict) -> str:
-    """确定性兜底回答：模型输出不可用时，用事实拼一段人话。"""
+_ORDINALS = (("第二", 1), ("第三", 2), ("第四", 3), ("第2", 1), ("第3", 2), ("第4", 3))
+_FOLLOWUP_HINTS = ("再详细", "展开", "具体一点", "具体点", "多说", "刚才", "上面", "那个指标", "这一个")
+
+
+def _ordinal_index(q: str) -> int | None:
+    for key, idx in _ORDINALS:
+        if key in q:
+            return idx
+    return None
+
+
+def _last_topic(history: list[dict] | None, facts: dict) -> dict | None:
+    """从最近一条助手回答里找出刚才在讲哪个指标（按中文名匹配）。"""
+    if not history:
+        return None
+    last = ""
+    for msg in reversed(history):
+        if msg.get("role") == "assistant":
+            last = str(msg.get("content") or "")
+            break
+    if not last:
+        return None
+    pool = ((facts.get("weak_indicators") or []) + (facts.get("developing_indicators") or [])
+            + (facts.get("insufficient_indicators") or []))
+    hits = [x for x in pool if (x.get("name") or "") and x["name"] in last]
+    if hits:
+        return max(hits, key=lambda x: len(x["name"]))
+    return None
+
+
+def _answer_from_facts(question: str, facts: dict,
+                       history: list[dict] | None = None) -> str:
+    """确定性兜底回答：模型输出不可用时，用事实拼一段人话。
+
+    history：最近几轮问答，用于处理“那第二薄弱呢”“再详细点”这类追问。
+    """
     if "class" in facts and "student" not in facts:      # 教师视角的班级事实
-        return _teacher_answer(question, facts)
+        return _teacher_answer(question, facts, history)
     s = facts.get("student", {})
     sid = s.get("student_id", "该生")
     weak = facts.get("weak_indicators") or []
     ins = facts.get("insufficient_indicators") or []
     errs = facts.get("error_types") or []
     q = question or ""
+
+    # ⓪ 追问：按序数取第 N 个薄弱/发展中指标
+    idx = _ordinal_index(q)
+    if idx is not None:
+        pool = weak + (facts.get("developing_indicators") or []) + ins
+        if len(pool) > idx:
+            w = pool[idx]
+            return (f"排在第 {idx + 1} 位的是{w.get('name') or w['indicator']}，"
+                    f"掌握度 {w.get('mastery', 0):.0%}、证据 {w.get('n', 0)} 条。"
+                    f"{_band_clause(w)}"
+                    f"要不要我把它前面的那道也一起排进这周的计划？")
+
+    # ① 追问：把刚才提到的那个指标讲细一点
+    if any(k in q for k in _FOLLOWUP_HINTS):
+        topic = _last_topic(history, facts)
+        if topic:
+            return (f"刚才说的是{topic.get('name') or topic['indicator']}："
+                    f"掌握度 {topic.get('mastery', 0):.0%}，有 {topic.get('n', 0)} 条作答证据，"
+                    f"{_band_clause(topic)}"
+                    f"想深入的话，打开「我的学情」看这个指标的题目明细，能看到每题丢在哪个评分点。")
 
     if any(k in q for k in ("证据不足", "不足", "看不出", "哪些结论", "不确定")):
         if not ins:
@@ -605,7 +707,11 @@ REWRITE_PROMPT_STUDENT = """你是"智慧学伴"，正在跟一位七年级学�
 
 下面【事实结论】已经核实过，**数字和结论一个字都不能改**，你只负责把语气改得更像人话。
 不要输出思考过程，不要解释你在做什么，不要复述问题；也不要用「根据已核实」「根据分析」这类空话开头，直接说结论（不超过 3 句）；
-不要推测原因，只陈述事实与建议；不要把「证据条数」说成「错题数」或「做题数」。
+不要推测原因，只陈述事实与建议；不要把「证据条数」说成「错题数」或「做题数」；
+不要编造【事实结论】里没有的细分信息（例如每条证据分别对应哪个评分点、错误的具体环节）。
+如果【上文】里已经讲过某个指标，直接用"刚才提到的…"衔接，不要重复寒暄。
+
+【上文】{context}
 
 【事实结论】{draft}
 
@@ -622,6 +728,9 @@ REWRITE_PROMPT_TEACHER = """你是"智慧学伴"的教师端助手，正在向�
 不要编造学生姓名或班级里不存在的信息，只能用【事实结论】里的数字；
 涉及两个班对比时，必须保留班级编号（如 DC01、DC02），不要用「这个班」「您班上」代指，避免指代混乱；
 不要推测原因（如「因为学生粗心」「思路错误」），只陈述事实与建议。
+如果【上文】里已经点名某个指标或评分点，用"刚才提到的…"衔接，不要重复开场。
+
+【上文】{context}
 
 【事实结论】{draft}
 
@@ -650,11 +759,26 @@ def _has_placeholder(text: str) -> bool:
     return bool(_PLACEHOLDER_RE.search(text or ""))
 
 
-def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "student") -> str:
+def _context_block(history: list[dict] | None) -> str:
+    """把最近两轮问答压成提示词里的【上文】。只保留文字，不做任何推理。"""
+    if not history:
+        return "（这是第一轮，没有上文）"
+    lines = []
+    for msg in history[-4:]:
+        role = "用户" if msg.get("role") == "user" else "助手"
+        text = re.sub(r"\s+", " ", str(msg.get("content") or ""))[:120]
+        if text:
+            lines.append(f"{role}：{text}")
+    return "\n".join(lines) if lines else "（这是第一轮，没有上文）"
+
+
+def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "student",
+                  context: str = "") -> str:
     """让模型改写 draft；改坏了（新增数字 / 编造指标 / 带思考链）就退回 draft。"""
     try:
-        raw = _chat(key, _rewrite_prompt(role).format(draft=draft, question=question),
-                    temperature=0.3, max_tokens=300)
+        raw = _chat(key, _rewrite_prompt(role).format(
+            draft=draft, question=question, context=context or "（这是第一轮，没有上文）"),
+            temperature=0.3, max_tokens=300)
         text = _clean_answer(raw)
     except Exception:  # noqa: BLE001
         return ""
@@ -676,22 +800,32 @@ def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "stude
     cls_draft = set(re.findall(r"DC\d{2}", draft))
     if len(cls_draft) >= 2 and not cls_draft <= set(re.findall(r"DC\d{2}", text)):
         return ""                                    # 两班对比丢了班级编号 → 指代会混乱，拒
+    if "评分点" in text and "评分点" not in draft:
+        return ""                                    # 草稿没有评分点明细，模型编不出来 → 拒
     return text
 
 
 def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
-                    role: str = "student") -> str:
+                    role: str = "student", history: list[dict] | None = None) -> str:
     """先由事实生成"不会错"的草稿，再让模型改写口吻；改写不达标就用草稿。
 
     role: student / teacher —— 决定改写提示词与缓存分桶（两种口吻互不串用）。
+    history: 最近几轮问答，用于指代消解（“那第二薄弱呢”“再详细点”）与提示词的【上文】。
     """
-    ident = f"{role}|" + question + json.dumps(facts, ensure_ascii=False, sort_keys=True)
+    context = _context_block(history)
+    hist_key = hashlib.md5(context.encode("utf-8")).hexdigest()[:8] if history else "0"
+    ident = (f"{role}|{hist_key}|" + question
+             + json.dumps(facts, ensure_ascii=False, sort_keys=True))
     cached = read_cache(cache_dir, "qa", ident)
     if cached:
         return cached.get("answer", "")
 
-    draft = _answer_from_facts(question, facts)
-    text = _safe_rewrite(draft, question, key, role=role) or draft
+    draft = _answer_from_facts(question, facts, history)
+    # 指代类追问（“那第二薄弱呢”“再详细点”）草稿已经足够自然，且模型改写容易编细节 → 不交给模型
+    is_followup = _ordinal_index(question) is not None or any(
+        k in question for k in _FOLLOWUP_HINTS)
+    text = draft if is_followup else (
+        _safe_rewrite(draft, question, key, role=role, context=context) or draft)
     source = "model" if text != draft else "template"
     write_cache(cache_dir, "qa", ident,
                 {"question": question, "role": role, "answer": text,
@@ -702,9 +836,10 @@ def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
 # --------------------------------------------------------------------------
 # 离线兜底
 # --------------------------------------------------------------------------
-def offline_answer(question: str, facts: dict) -> str:
+def offline_answer(question: str, facts: dict,
+                   history: list[dict] | None = None) -> str:
     """没有可用模型时的确定性回答：直接复述事实，绝不编造。"""
-    body = _answer_from_facts(question, facts)
+    body = _answer_from_facts(question, facts, history)
     return f"{body}\n\n（离线模式：以上内容全部来自结构化统计，未经模型改写。）"
 
 
@@ -729,14 +864,16 @@ def build_facts(student: dict, stats_student: dict | None, class_rows: dict | No
             "threshold": 3,
         },
         "weak_indicators": [
-            {"indicator": w["code"], "n": w["n"], "mastery": w["mastery"], "name": w["name"]}
+            {"indicator": w["code"], "n": w["n"], "mastery": w["mastery"],
+             "name": w["name"], "band": w.get("band", "weak")}
             for w in student["weak"]
         ],
         "developing_indicators": [
-            {"indicator": w["code"], "n": w["n"], "mastery": w["mastery"], "name": w["name"]}
+            {"indicator": w["code"], "n": w["n"], "mastery": w["mastery"],
+             "name": w["name"], "band": w.get("band", "developing")}
             for w in student["developing"]
         ],
-        "insufficient_indicators": ins,
+        "insufficient_indicators": [{**i, "band": "insufficient"} for i in ins],
         "error_summary": {"total": len(errs), "by_type": by_type},
         "error_types": [
             {"type": d.get("error_type"), "code": d.get("error_type_code"),

@@ -67,7 +67,8 @@ def _teacher_facts(bundle: dict, cls: str) -> dict:
     }
 
 
-def _answer(question: str, role: str, ident: str, bundle: dict, key: str | None, cache_dir: str) -> str:
+def _answer(question: str, role: str, ident: str, bundle: dict, key: str | None, cache_dir: str,
+            history: list[dict] | None = None) -> str:
     if role == "student":
         stt = (bundle.get("statistics") or {}).get("by_student", {}).get(ident, {})
         v = A.student_view(bundle, ident)
@@ -77,11 +78,12 @@ def _answer(question: str, role: str, ident: str, bundle: dict, key: str | None,
 
     if key:
         try:
-            return llm.answer_question(question, facts, key, cache_dir, role=role)
+            return llm.answer_question(question, facts, key, cache_dir,
+                                       role=role, history=history)
         except Exception as e:  # noqa: BLE001 - 网络/额度问题一律降级
-            return (llm.offline_answer(question, facts)
+            return (llm.offline_answer(question, facts, history)
                     + f"\n\n（本地模型调用失败：{type(e).__name__}，已回退离线回答）")
-    return llm.offline_answer(question, facts)
+    return llm.offline_answer(question, facts, history)
 
 
 def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str) -> None:
@@ -126,8 +128,9 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
     with placeholder.container():
         with st.chat_message("assistant", avatar=theme.character_path()):
             st.markdown(theme.typing(), unsafe_allow_html=True)
-    answer = labels.humanize(_answer(question, role, ident, bundle, key, cache_dir),
-                             bundle.get("output_dir"))
+    answer = labels.humanize(
+        _answer(question, role, ident, bundle, key, cache_dir, history=hist[:-1][-4:]),
+        bundle.get("output_dir"))
     time.sleep(0.35)
     placeholder.empty()
     hist.append({"role": "assistant", "content": answer})
