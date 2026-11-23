@@ -573,7 +573,7 @@ def render_knowledge(bundle: dict) -> None:
             {
                 "来源类型": "课标",
                 "文件": curriculum.get("file", "—"),
-                "行号": curriculum.get("row", "—"),
+                "行号": str(curriculum.get("row", "—")),
                 "引用": curriculum.get("standard_id", ""),
                 "页码": curriculum.get("page_reference", ""),
             },
@@ -589,7 +589,7 @@ def render_knowledge(bundle: dict) -> None:
             source_rows.extend({
                 "来源类型": f"题目 {source.get('question_id', '')}",
                 "文件": source.get("source_file", "—"),
-                "行号": source.get("source_row", "—"),
+                "行号": str(source.get("source_row", "—")),
                 "引用": source.get("material_source", ""),
                 "页码": "",
             } for source in question_sources)

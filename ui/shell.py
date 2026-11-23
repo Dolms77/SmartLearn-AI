@@ -149,14 +149,13 @@ def render_students_list(bundle: dict) -> None:
         rows.append({
             "学生": sid, "班级": v["cls"], "有效记录": v["evidence_total"],
             "可判定指标": f"{v['coverage']['decided']}/9",
-            "可判定掌握度": None if v["overall"] is None else round(v["overall"], 3),
+            "可判定掌握度": "—" if v["overall"] is None else f"{v['overall']:.0%}",
             "错因条数": len(v["errors"]),
             "状态": "证据不足" if v["coverage"]["decided"] == 0 else
                     ("需关注" if (v["overall"] or 1) < 0.4 else "正常"),
         })
     df = pd.DataFrame(rows)
-    st.dataframe(df, width="stretch", hide_index=True,
-                 column_config={"可判定掌握度": st.column_config.NumberColumn(format="%.0f%%")})
+    st.dataframe(df, width="stretch", hide_index=True)
     st.caption("点击下方可下钻到某个学生；证据不足的学生不会被排名成「最差」。")
     sid = st.selectbox("下钻查看", [r["学生"] for r in rows], key="teacher_drill")
     with st.expander(f"打开 {sid} 的完整学情", expanded=False):
@@ -276,7 +275,7 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
     sub = (f"{ident} · {A.student_class(bundle, ident)}" if role == "student" else f"{ident} 班级视角")
     st.markdown(
         f"""<div class="sa-brand" style="border-bottom:1px solid #eaeff7;padding-bottom:10px;margin-bottom:14px">
-              {theme.avatar_svg(38)}
+              {theme.avatar_img(38)}
               <div><div class="sa-brand-t">{page}</div>
                    <div class="sa-brand-s">{sub} · 证据门槛 3 条 · 结论可下钻到记录编号</div></div>
             </div>""",
