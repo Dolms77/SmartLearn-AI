@@ -455,40 +455,92 @@ def _clean_answer(text: str) -> str:
     return out
 
 
+def _pct(v) -> str:
+    return f"{v:.0%}" if isinstance(v, (int, float)) else "—"
+
+
 def _teacher_answer(question: str, facts: dict) -> str:
-    """教师视角：用班级事实拼一段讲评话术。"""
+    """教师视角：按意图分派——讲评排序 / 评分点 / 关注名单 / 证据覆盖 / 两班对比 / 指标。"""
     cls = facts.get("class", "这个班")
     n = facts.get("students")
     ov = facts.get("overall")
     qs = facts.get("weakest_questions") or []
     inds = facts.get("weakest_indicators") or []
+    sps = facts.get("scoring_points") or []
+    risky = facts.get("students_at_risk") or []
+    cov = facts.get("coverage") or {}
+    cmp_ = facts.get("class_compare") or {}
     q = question or ""
 
-    if any(k in q for k in ("讲", "讲评", "上课", "安排")):
+    # ① 评分点：讲评“哪一步”
+    if any(k in q for k in ("评分点", "扣分", "丢分", "哪一步", "步骤")):
+        if not sps:
+            return f"{cls} 暂时没有可用的评分点统计，可以先用题目级结论。"
+        body = "、".join(f"{s['评分点']}（{s['正确/总数']}）" for s in sps[:3])
+        return (f"全班最集中的失分点在 {body}。"
+                f"讲评时只讲这三步：先让学生写出自己的步骤，再对照评分点看丢在哪一步，"
+                f"最后当堂做一道同类型变式。")
+
+    # ② 关注名单
+    if any(k in q for k in ("关注", "学生", "谁", "名单")):
+        if not risky:
+            return f"{cls} 目前没有“证据不足”或掌握度明显偏低的学生。"
+        names = "；".join(f"{r['student']}（{r['reason']}，{r['decided']}/9 可判定）"
+                          for r in risky[:4])
+        return (f"需要单独关注的有 {len(risky)} 人：{names}。"
+                f"建议先给“证据不足”的学生补 3 道同指标题，再谈掌握度。")
+
+    # ③ 证据覆盖
+    if any(k in q for k in ("覆盖", "证据", "格子", "够不够", "准不准", "可信")):
+        decided, stud, rate = cov.get("decided"), cov.get("students"), cov.get("rate")
+        if decided and stud:
+            return (f"{cls} 共 {stud} 名学生、{stud * 9} 个「学生×指标」格子，"
+                    f"其中 {decided} 个达到 3 条证据门槛（{_pct(rate)}）；"
+                    f"其余格子证据不足，我不下结论。")
+        return f"{cls} 暂无可用的覆盖统计。"
+
+    # ④ 两班对比
+    if any(k in q for k in ("两个班", "对比", "比较", "差在哪", "哪边")):
+        diffs = []
+        for t in ("T01", "T02", "T03"):
+            vals = {c: cmp_[c].get(t) for c in cmp_ if cmp_.get(c, {}).get(t) is not None}
+            if len(vals) == 2:
+                (c1, v1), (c2, v2) = list(vals.items())
+                diffs.append((abs(v1 - v2), t, c1, v1, c2, v2))
+        if diffs:
+            diffs.sort(reverse=True)
+            _, t, c1, v1, c2, v2 = diffs[0]
+            higher = c1 if v1 >= v2 else c2
+            return (f"两班差异最大的是 {t}：{c1} {_pct(v1)}、{c2} {_pct(v2)}，"
+                    f"相差 {abs(v1 - v2) * 100:.0f} 个百分点（{higher} 更高）。"
+                    f"建议按这个主题分层布置作业。")
+        return f"{cls} 暂无可比的两班数据。"
+
+    # ⑤ 讲评排序
+    if any(k in q for k in ("讲", "上课", "安排", "备课")):
         parts = []
         if qs:
             parts.append("先讲 " + "、".join(
-                f"{x['question']}（得分率 {x['rate']:.0%}，{x['n']} 人作答）" for x in qs[:3]))
+                f"{x['question']}（得分率 {_pct(x['rate'])}，{x['n']} 人作答）" for x in qs[:3]))
         if inds:
             parts.append("再补指标 " + "、".join(
-                f"{x['indicator']}（{x['rate']:.0%}）" for x in inds[:2]))
+                f"{x['indicator']}（{_pct(x['rate'])}）" for x in inds[:2]))
         if not parts:
             return f"{cls} 暂时没有足够数据支持讲评排序。"
         return ("建议这样排：" + "；".join(parts) +
                 "。每题先让学生说思路，再对照评分点讲丢分的那一步，最后当堂做一道同类型变式。")
 
-    if any(k in q for k in ("关注", "学生", "谁")):
+    # ⑥ 指标级
+    if any(k in q for k in ("指标", "最弱", "薄弱", "哪块", "哪个知识点")):
         if not inds:
             return f"{cls} 目前没有证据充分的共性薄弱指标。"
-        return (f"{cls} 的共性薄弱点是 " + "、".join(
-            f"{x['indicator']}（{x['rate']:.0%}）" for x in inds[:3]) +
-            "。建议按这三个指标分组，把证据不足（n<3）的学生单独列出来做补充观察。")
+        return (f"{cls} 最弱的指标是 " + "、".join(
+            f"{x['indicator']}（{_pct(x['rate'])}）" for x in inds[:3]) +
+            "。建议按指标分组补练，证据不足的学生单独做补充观察。")
 
-    head = f"{cls}：{n} 名学生" + (f"，班级得分率 {ov:.0%}" if ov is not None else "")
-    extra = ""
-    if qs:
-        extra = f"最薄弱的题是 {qs[0]['question']}（{qs[0]['rate']:.0%}）。"
-    return head + "。" + extra + "可以问我「下周该讲哪几道题」或「哪些学生要单独关注」。"
+    head = f"{cls}：{n} 名学生" + (f"，班级得分率 {_pct(ov)}" if ov is not None else "")
+    extra = f"最薄弱的题是 {qs[0]['question']}（{_pct(qs[0]['rate'])}）。" if qs else ""
+    return head + "。" + extra + "可以问我「下周该讲哪几道题」「哪个评分点全班都错」或「哪些学生要单独关注」。"
 
 
 def _answer_from_facts(question: str, facts: dict) -> str:
@@ -568,6 +620,7 @@ REWRITE_PROMPT_TEACHER = """你是"智慧学伴"的教师端助手，正在向�
 下面【事实结论】已经核实过，**数字和结论一个字都不能改**，你只负责把语气改得更自然。
 不要输出思考过程，不要解释你在做什么，不要复述问题；也不要用「根据已核实」「根据分析」这类空话开头，直接说结论。
 不要编造学生姓名或班级里不存在的信息，只能用【事实结论】里的数字；
+涉及两个班对比时，必须保留班级编号（如 DC01、DC02），不要用「这个班」「您班上」代指，避免指代混乱；
 不要推测原因（如「因为学生粗心」「思路错误」），只陈述事实与建议。
 
 【事实结论】{draft}
@@ -620,6 +673,9 @@ def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "stude
     for word in ("因为", "导致", "由于", "部分学生"):
         if word in text and word not in draft:
             return ""                                # 草稿里没有的因果/范围 → 视为推测，拒
+    cls_draft = set(re.findall(r"DC\d{2}", draft))
+    if len(cls_draft) >= 2 and not cls_draft <= set(re.findall(r"DC\d{2}", text)):
+        return ""                                    # 两班对比丢了班级编号 → 指代会混乱，拒
     return text
 
 
