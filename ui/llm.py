@@ -470,7 +470,7 @@ def _teacher_answer(question: str, facts: dict) -> str:
             parts.append("先讲 " + "、".join(
                 f"{x['question']}（得分率 {x['rate']:.0%}，{x['n']} 人作答）" for x in qs[:3]))
         if inds:
-            parts.append("再补 " + "、".join(
+            parts.append("再补指标 " + "、".join(
                 f"{x['indicator']}（{x['rate']:.0%}）" for x in inds[:2]))
         if not parts:
             return f"{cls} 暂时没有足够数据支持讲评排序。"
@@ -548,10 +548,12 @@ def _answer_from_facts(question: str, facts: dict) -> str:
             f"{len(ins)} 个证据不足。可以问我「哪里最薄弱」或「哪些结论证据不足」。")
 
 
-REWRITE_PROMPT = """你是"智慧学伴"，说话像老师课间跟七年级学生聊天，用第二人称，语气亲切但不啰嗦。
+REWRITE_PROMPT_STUDENT = """你是"智慧学伴"，正在跟一位七年级学生说话：用第二人称"你"，语气亲切、短句，不啰嗦。
+学生看到的是自己的数据，可以直接说"你哪块薄弱""你该练哪几题"。
 
 下面【事实结论】已经核实过，**数字和结论一个字都不能改**，你只负责把语气改得更像人话。
-不要输出思考过程，不要解释你在做什么，不要复述问题，直接给最终回答（不超过 3 句）。
+不要输出思考过程，不要解释你在做什么，不要复述问题；也不要用「根据已核实」「根据分析」这类空话开头，直接说结论（不超过 3 句）；
+不要推测原因，只陈述事实与建议；不要把「证据条数」说成「错题数」或「做题数」。
 
 【事实结论】{draft}
 
@@ -559,15 +561,46 @@ REWRITE_PROMPT = """你是"智慧学伴"，说话像老师课间跟七年级学�
 
 直接给回答："""
 
+REWRITE_PROMPT_TEACHER = """你是"智慧学伴"的教师端助手，正在向一位中学数学老师口头汇报班级学情。
+用第三人称称呼班级（"这个班""您班上"），**不要用"你"去指代学生或老师本人**；
+语气专业、克制，像教研组内的简短沟通，不超过 3 句。
+
+下面【事实结论】已经核实过，**数字和结论一个字都不能改**，你只负责把语气改得更自然。
+不要输出思考过程，不要解释你在做什么，不要复述问题；也不要用「根据已核实」「根据分析」这类空话开头，直接说结论。
+不要编造学生姓名或班级里不存在的信息，只能用【事实结论】里的数字；
+不要推测原因（如「因为学生粗心」「思路错误」），只陈述事实与建议。
+
+【事实结论】{draft}
+
+【教师问】{question}
+
+直接给回答："""
+
+# 兼容旧引用：默认学生版
+REWRITE_PROMPT = REWRITE_PROMPT_STUDENT
+
+
+def _rewrite_prompt(role: str) -> str:
+    """按角色取改写提示词：学生=第二人称，教师=第三人称讲评口吻。"""
+    return REWRITE_PROMPT_TEACHER if str(role).lower().startswith("teacher") else REWRITE_PROMPT_STUDENT
+
 
 def _numbers(text: str) -> set[str]:
     return set(re.findall(r"\d+", text or ""))
 
 
-def _safe_rewrite(draft: str, question: str, key: str | None) -> str:
+_PLACEHOLDER_RE = re.compile(r"[\[\]【】]|占位|待补充|XX|具体丢分步骤")
+
+
+def _has_placeholder(text: str) -> bool:
+    """模型偶尔会吐出 [具体丢分步骤] 这类占位符，一律判为不合格。"""
+    return bool(_PLACEHOLDER_RE.search(text or ""))
+
+
+def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "student") -> str:
     """让模型改写 draft；改坏了（新增数字 / 编造指标 / 带思考链）就退回 draft。"""
     try:
-        raw = _chat(key, REWRITE_PROMPT.format(draft=draft, question=question),
+        raw = _chat(key, _rewrite_prompt(role).format(draft=draft, question=question),
                     temperature=0.3, max_tokens=300)
         text = _clean_answer(raw)
     except Exception:  # noqa: BLE001
@@ -580,21 +613,33 @@ def _safe_rewrite(draft: str, question: str, key: str | None) -> str:
     codes = set(re.findall(r"T0[123]I[123]", text))
     if codes - set(re.findall(r"T0[123]I[123]", draft)):
         return ""                                    # 编造指标编号 → 拒
+    if _has_placeholder(text):
+        return ""                                    # 出现占位符 → 拒
+    if re.search(r"T0[123]I[123][^。；]{0,6}道题", text):
+        return ""                                    # 把指标说成题目 → 拒（教师端常见）
+    for word in ("因为", "导致", "由于", "部分学生"):
+        if word in text and word not in draft:
+            return ""                                # 草稿里没有的因果/范围 → 视为推测，拒
     return text
 
 
-def answer_question(question: str, facts: dict, key: str | None, cache_dir: str) -> str:
-    """先由事实生成"不会错"的草稿，再让模型改写口吻；改写不达标就用草稿。"""
-    ident = question + json.dumps(facts, ensure_ascii=False, sort_keys=True)
+def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
+                    role: str = "student") -> str:
+    """先由事实生成"不会错"的草稿，再让模型改写口吻；改写不达标就用草稿。
+
+    role: student / teacher —— 决定改写提示词与缓存分桶（两种口吻互不串用）。
+    """
+    ident = f"{role}|" + question + json.dumps(facts, ensure_ascii=False, sort_keys=True)
     cached = read_cache(cache_dir, "qa", ident)
     if cached:
         return cached.get("answer", "")
 
     draft = _answer_from_facts(question, facts)
-    text = _safe_rewrite(draft, question, key) or draft
+    text = _safe_rewrite(draft, question, key, role=role) or draft
     source = "model" if text != draft else "template"
     write_cache(cache_dir, "qa", ident,
-                {"question": question, "answer": text, "source": source, "draft": draft})
+                {"question": question, "role": role, "answer": text,
+                 "source": source, "draft": draft})
     return text
 
 

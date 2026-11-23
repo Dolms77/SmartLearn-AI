@@ -86,7 +86,7 @@ def _answer(question: str, role: str, ident: str, bundle: dict, key: str | None,
 
     if key:
         try:
-            return llm.answer_question(question, facts, key, cache_dir)
+            return llm.answer_question(question, facts, key, cache_dir, role=role)
         except Exception as e:  # noqa: BLE001 - 网络/额度问题一律降级
             base = llm.offline_answer(question, facts) if role == "student" else _teacher_offline(facts)
             return base + f"\n\n（本地模型调用失败：{type(e).__name__}，已回退离线回答）"
