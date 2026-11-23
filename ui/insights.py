@@ -65,13 +65,16 @@ def class_scoring_points(bundle: dict, cls: str, limit: int | None = None) -> li
         qid = pid.split("P")[0]
         q = qmap.get(qid, {})
         full = float(v.get("full") or 0)
+        rate = round(float(v.get("score_rate") or 0), 4)
+        flag = "critical" if rate == 0 else ("weak" if rate < 0.3 else "normal")
         out.append({
             "评分点": pid,
             "题号": qid,
             "指标": q.get("indicator", ""),
-            "得分率": round(float(v.get("score_rate") or 0), 4),
+            "得分率": rate,
             "正确/总数": f"{int(v.get('score') or 0)}/{int(full)}",
             "样本": int(v.get("count") or 0),
+            "标记": flag,
             "题干": (q.get("question_text") or "")[:30],
         })
     out.sort(key=lambda r: (r["得分率"], -r["样本"]))
