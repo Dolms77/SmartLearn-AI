@@ -7,7 +7,6 @@ import time
 import streamlit as st
 
 import adapter as A
-import insights as I
 import labels
 import llm
 import theme
@@ -40,35 +39,44 @@ def history(role: str, ident: str) -> list[dict]:
 
 
 def _teacher_facts(bundle: dict, cls: str) -> dict:
-    """教师端事实白名单：全部按“本班”口径，含评分点、学生名单与证据覆盖。"""
     cv = A.class_view(bundle, cls)
     row = cv["class_theme"].get(cls, {})
-    qrates = I.class_question_rates(bundle, cls)
-    irates = I.class_indicator_rates(bundle, cls)
-    cov = I.class_mastery_summary(bundle).get(cls, {})
-
-    weak_q = sorted(qrates.items(), key=lambda kv: kv[1]["rate"])[:5]
-    weak_i = sorted(((c, v) for c, v in irates.items() if v["rate"] is not None),
-                    key=lambda kv: kv[1]["rate"])[:5]
+    stats = (bundle.get("statistics") or {})
+    by_q = sorted(cv["by_question"].items(), key=lambda kv: kv[1]["rate"])[:5]
+    ind = sorted((stats.get("by_indicator") or {}).items(), key=lambda kv: kv[1].get("score_rate", 1))[:5]
     return {
         "class": cls,
         "students": row.get("students"),
         "overall": row.get("overall"),
         "theme_rates": {t: row.get(t) for t in ("T01", "T02", "T03")},
-        "weakest_indicators": [{"indicator": c, "rate": v["rate"], "n": v["n"]} for c, v in weak_i],
-        "weakest_questions": [{"question": k, "rate": v["rate"], "n": v["n"],
-                               "text": v.get("text", "")} for k, v in weak_q],
-        "scoring_points": I.class_scoring_points(bundle, cls, limit=8),
-        "students_at_risk": I.students_at_risk(bundle, cls),
-        "coverage": {"decided": cov.get("decided"), "students": cov.get("students"),
-                     "rate": cov.get("decided_rate")},
-        "class_compare": {c: cv["class_theme"].get(c, {}) for c in cv["classes"]},
-        "note": "全部为班级口径；证据不足（n<3）的指标不得下结论。",
+        "weakest_indicators": [{"indicator": k, "rate": v.get("score_rate"), "n": v.get("count")}
+                               for k, v in ind],
+        "weakest_questions": [{"question": k, "rate": v.get("rate"), "n": v.get("n")}
+                              for k, v in by_q],
+        "note": "只允许引用这些统计；证据不足的指标不得下结论。",
     }
 
 
-def _answer(question: str, role: str, ident: str, bundle: dict, key: str | None, cache_dir: str,
-            history: list[dict] | None = None) -> str:
+def _teacher_offline(facts: dict) -> str:
+    lines = [f"【离线模式】{facts['class']}：{facts['students']} 名学生，"
+             f"班级得分率 {facts['overall']:.0%}。" if facts.get("overall") is not None
+             else f"【离线模式】{facts['class']} 暂无班级统计。"]
+    tr = facts.get("theme_rates") or {}
+    if tr:
+        lines.append("三主题：" + "；".join(f"{k} {v:.0%}" for k, v in tr.items() if v is not None))
+    qs = facts.get("weakest_questions") or []
+    if qs:
+        lines.append("最薄弱题目：" + "；".join(
+            f"{q['question']}（{q['rate']:.0%}，n={q['n']}）" for q in qs[:3]))
+    ind = facts.get("weakest_indicators") or []
+    if ind:
+        lines.append("最薄弱指标：" + "；".join(
+            f"{i['indicator']}（{i['rate']:.0%}）" for i in ind[:3]))
+    lines.append("接入本地模型后这些数字会被整理成讲评话术；当前回答纯来自统计。")
+    return "\n\n".join(lines)
+
+
+def _answer(question: str, role: str, ident: str, bundle: dict, key: str | None, cache_dir: str) -> str:
     if role == "student":
         stt = (bundle.get("statistics") or {}).get("by_student", {}).get(ident, {})
         v = A.student_view(bundle, ident)
@@ -78,12 +86,11 @@ def _answer(question: str, role: str, ident: str, bundle: dict, key: str | None,
 
     if key:
         try:
-            return llm.answer_question(question, facts, key, cache_dir,
-                                       role=role, history=history)
+            return llm.answer_question(question, facts, key, cache_dir)
         except Exception as e:  # noqa: BLE001 - 网络/额度问题一律降级
-            return (llm.offline_answer(question, facts, history)
-                    + f"\n\n（本地模型调用失败：{type(e).__name__}，已回退离线回答）")
-    return llm.offline_answer(question, facts, history)
+            base = llm.offline_answer(question, facts) if role == "student" else _teacher_offline(facts)
+            return base + f"\n\n（本地模型调用失败：{type(e).__name__}，已回退离线回答）"
+    return llm.offline_answer(question, facts) if role == "student" else _teacher_offline(facts)
 
 
 def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str) -> None:
@@ -128,10 +135,9 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
     with placeholder.container():
         with st.chat_message("assistant", avatar=theme.character_path()):
             st.markdown(theme.typing(), unsafe_allow_html=True)
-    answer = labels.humanize(
-        _answer(question, role, ident, bundle, key, cache_dir, history=hist[:-1][-4:]),
-        bundle.get("output_dir"))
-    time.sleep(0.35)
+    answer = labels.humanize(_answer(question, role, ident, bundle, key, cache_dir),
+                             bundle.get("output_dir"))
+    time.sleep(0.15)
     placeholder.empty()
     hist.append({"role": "assistant", "content": answer})
     with st.chat_message("assistant", avatar=theme.character_path()):

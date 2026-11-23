@@ -12,7 +12,6 @@ import adapter as A
 import charts as C
 import design
 import insights as I
-import labels
 import llm
 import theme
 import views
@@ -49,10 +48,9 @@ def _student_headline(v: dict) -> tuple[str, list[tuple[str, str]], str | None]:
 
 
 def _teacher_headline(bundle: dict, cls: str) -> tuple[str, list[tuple[str, str]], str | None]:
-    """教师端结论卡：全部用本班口径，指标显示中文名称而不是代号。"""
     cv = A.class_view(bundle, cls)
     row = cv["class_theme"].get(cls, {})
-    sp = I.class_scoring_points(bundle, cls, limit=3)
+    sp = I.scoring_points(bundle, limit=3)
     others = [c for c in cv["classes"] if c != cls]
     gap = ""
     if others:
@@ -60,11 +58,12 @@ def _teacher_headline(bundle: dict, cls: str) -> tuple[str, list[tuple[str, str]
         gap = f"，比 {others[0]} 高 {d:+.1%}"
     if sp:
         top = sp[0]
-        ind_name = labels.ind_name(top.get("指标", ""), "", bundle.get("output_dir"))
-        return (f"最该先讲 **{top['评分点']}**（{ind_name}），全班得分率 {top['得分率']:.0%}"
+        point_name = I.scoring_point_name(bundle, top["评分点"])
+        ind_name = A.INDICATOR_NAMES.get(top["指标"], top["指标"])
+        return (f"最该先讲 **{point_name}**（{ind_name}），全班得分率 {top['得分率']:.0%}"
                 f"（{top['正确/总数']}）。讲评按「评分点 → 题目 → 变式」推进。",
                 [("班级得分率", f"{(row.get('overall') or 0):.0%}"),
-                 ("薄弱评分点", f"{len(I.class_scoring_points(bundle, cls))} 个")],
+                 ("薄弱评分点", f"{len(sp)} 个")],
                 None)
     return (f"{cls}：{row.get('students', 0)} 名学生，班级得分率 {(row.get('overall') or 0):.0%}{gap}。",
             [("学生数", f"{row.get('students', 0)}"),
@@ -210,9 +209,6 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
     cv = A.class_view(bundle, cls)
     row = cv["class_theme"].get(cls, {})
     cms = I.class_mastery_summary(bundle).get(cls, {})
-    sp_all = I.class_scoring_points(bundle, cls)
-    ind_rates = I.class_indicator_rates(bundle, cls)
-    q_rates = I.class_question_rates(bundle, cls)
 
     design.identity_bar(
         theme.avatar_img(40), f"{cls} · 教师视角",
@@ -223,7 +219,7 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
         ("班级得分率", f"{(row.get('overall') or 0):.0%}", "Σ得分/Σ满分"),
         ("学生数", f"{row.get('students', 0)}", ""),
         ("可判定格子", f"{cms.get('decided', 0)}", f"共 {cms.get('students', 0) * 9} 个"),
-        ("薄弱评分点", f"{len([x for x in sp_all if x['得分率'] < 0.3])}", "得分率 <30% 的评分点"),
+        ("薄弱评分点", f"{len(I.scoring_points(bundle, limit=None))}", "<30% 的评分点"),
     ])
 
     headline, metrics, _ = _teacher_headline(bundle, cls)
@@ -235,12 +231,10 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
         with c1:
             st.plotly_chart(C.class_theme_chart(cv["class_theme"]), width="stretch")
         with c2:
-            st.plotly_chart(C.indicator_rank_chart(
-                {c: {"score_rate": v["rate"], "count": v["n"]}
-                 for c, v in ind_rates.items() if v.get("rate") is not None}), width="stretch")
-        st.plotly_chart(C.question_rate_chart(q_rates), width="stretch")
+            st.plotly_chart(C.indicator_rank_chart(cv["by_indicator"]), width="stretch")
+        st.plotly_chart(C.question_rate_chart(cv["by_question"]), width="stretch")
     with t2:
-        sp = sp_all[:12]
+        sp = I.scoring_points(bundle, limit=12)
         if sp:
             st.plotly_chart(C.scoring_point_chart(sp), width="stretch")
         et = I.error_types(bundle)
@@ -265,11 +259,9 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
         rows = []
         for sid in A.list_students(bundle):
             sv = A.student_view(bundle, sid)
-            if sv["cls"] != cls:
-                continue
             rows.append({"学生": sid, "班级": sv["cls"], "有效记录": sv["evidence_total"],
                          "可判定": f"{sv['coverage']['decided']}/9",
-                         "可判定掌握度": "—" if sv["overall"] is None else f"{sv['overall']:.0%}",
+                         "可判定掌握度": None if sv["overall"] is None else f"{sv['overall']:.0%}",
                          "状态": "证据不足" if sv["coverage"]["decided"] == 0 else
                                  ("需关注" if (sv["overall"] or 1) < 0.4 else "正常")})
         st.dataframe(rows, width="stretch", hide_index=True)

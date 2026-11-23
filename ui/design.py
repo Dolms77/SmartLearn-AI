@@ -11,6 +11,9 @@
 from __future__ import annotations
 
 import streamlit as st
+import html as _html
+import re as _re
+
 
 # ---------------------------------------------------------------------------
 # 设计 token（CSS 变量）
@@ -217,6 +220,8 @@ def evidence_badge(n: int, threshold: int = 3, weak: bool = False) -> str:
 def conclusion_card(tag: str, headline: str,
                     metrics: list[tuple[str, str]] | None = None) -> None:
     """核心结论卡：一句话 + 至多 2 个数字。"""
+    safe_headline = _html.escape(headline)
+    safe_headline = _re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", safe_headline)
     m = ""
     if metrics:
         m = '<div class="m">' + "".join(
@@ -224,7 +229,7 @@ def conclusion_card(tag: str, headline: str,
         ) + "</div>"
     st.markdown(
         f'<div class="sa-concl"><div class="t">{tag}</div>'
-        f'<div class="h">{headline}</div>{m}</div>',
+        f'<div class="h">{safe_headline}</div>{m}</div>',
         unsafe_allow_html=True)
 
 
