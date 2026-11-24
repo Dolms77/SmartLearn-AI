@@ -166,31 +166,99 @@ _HATCH = dict(shape="/", solidity=0.30, fillmode="overlay")
 # ============================================================
 
 def student_radar(student: dict) -> go.Figure:
-    """掌握度直线谱图：每条水平直线是一个指标，替代标签拥挤的雷达图。"""
-    inds = student['indicators']
-    by_code = {x['code']: x for x in inds}
-    ordered = [by_code[c] for c in INDICATORS if c in by_code]
-    ordered.sort(key=lambda x: (x['band'] == 'insufficient', x.get('mastery') if x.get('mastery') is not None else 2))
-    labels = [x['name'] or x['code'] for x in ordered]
+    """学生掌握度雷达图；证据不足的指标留空，不当作零掌握度。"""
+    by_code = {
+        x["code"]: x
+        for x in student.get("indicators", [])
+    }
+    ordered = [
+        by_code[code]
+        for code in INDICATORS
+        if code in by_code
+    ]
+
     fig = go.Figure()
-    for x, label in zip(ordered, labels):
-        mastery = x.get('mastery')
-        color = '#B7BFCA' if x['band'] == 'insufficient' else BAND_COLOR.get(x['band'], '#3E7CB1')
-        fig.add_shape(type='line', x0=0, x1=1, y0=label, y1=label, line=dict(color='#E4EAF1', width=2))
-        if mastery is not None:
-            fig.add_trace(go.Scatter(x=[mastery], y=[label], mode='markers+text', showlegend=False,
-                marker=dict(size=14, color=color, line=dict(color='white', width=2)), text=[f'{mastery:.0%}'], textposition='middle right',
-                customdata=[[x['n'], BAND_TEXT[x['band']], x['code']]],
-                hovertemplate='%{customdata[2]} · %{customdata[1]}<br>掌握度 %{x:.0%} · 证据 %{customdata[0]} 条<extra></extra>'))
-        else:
-            fig.add_trace(go.Scatter(x=[0.02], y=[label], mode='markers+text', showlegend=False,
-                marker=dict(size=11, color='white', symbol='circle-open', line=dict(color='#B7BFCA', width=2)), text=['证据不足'], textposition='middle right',
-                customdata=[[x['n'], x['code']]], hovertemplate='%{customdata[1]} · 证据 %{customdata[0]} 条，暂不判定<extra></extra>'))
-    for xval, txt in ((0.4, '40%'), (0.7, '70%')):
-        fig.add_vline(x=xval, line=dict(color=FAINT, width=1, dash='dot'), annotation_text=txt, annotation_position='top')
-    fig.update_xaxes(range=[0, 1.16], tickformat='.0%', title='掌握度')
-    fig.update_yaxes(autorange='reversed', tickfont=dict(size=10.5, color=SUB))
-    return _layout(fig, max(360, 42 * len(ordered) + 60))
+    if not ordered:
+        return _layout(fig, 380)
+
+    labels = [x.get("name") or x["code"] for x in ordered]
+    values = [
+        x.get("mastery")
+        if x.get("band") != "insufficient"
+        else None
+        for x in ordered
+    ]
+    colors = [
+        BAND_COLOR.get(x.get("band"), "#B7BFCA")
+        for x in ordered
+    ]
+    symbols = [
+        "circle-open"
+        if x.get("band") == "insufficient"
+        else "circle"
+        for x in ordered
+    ]
+    custom = [
+        [
+            x.get("n", 0),
+            x["code"],
+            BAND_TEXT.get(x.get("band"), "暂不判定"),
+        ]
+        for x in ordered
+    ]
+
+    fig.add_trace(
+        go.Scatterpolar(
+            r=values + [values[0]],
+            theta=labels + [labels[0]],
+            mode="lines+markers",
+            fill="toself",
+            connectgaps=False,
+            name=student.get("sid", "学生"),
+            line=dict(
+                color="#3E7CB1",
+                width=2.2,
+                shape="linear",
+            ),
+            fillcolor="rgba(62,124,177,0.14)",
+            marker=dict(
+                size=6,
+                color=colors + [colors[0]],
+                symbol=symbols + [symbols[0]],
+                line=dict(width=1.6, color="#3E7CB1"),
+            ),
+            customdata=custom + [custom[0]],
+            hovertemplate=(
+                "%{customdata[1]} · %{customdata[2]}"
+                "<br>掌握度 %{r:.0%}"
+                " · 证据 %{customdata[0]} 条"
+                "<extra></extra>"
+            ),
+        )
+    )
+
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                range=[0, 1],
+                tickvals=[0.2, 0.4, 0.6, 0.8, 1.0],
+                ticktext=["20%", "40%", "60%", "80%", "100%"],
+                tickfont=dict(size=9, color=FAINT),
+                gridcolor=GRID,
+                linecolor=AXIS,
+            ),
+            angularaxis=dict(
+                gridcolor=GRID,
+                linecolor=AXIS,
+                tickfont=dict(size=10, color=SUB),
+            ),
+            bgcolor="rgba(0,0,0,0)",
+        ),
+        showlegend=False,
+    )
+
+    return _layout(fig, 380)
+
 
 
 def indicator_bars(student: dict) -> go.Figure:
