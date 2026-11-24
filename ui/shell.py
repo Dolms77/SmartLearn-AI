@@ -195,49 +195,21 @@ def render_advice(bundle: dict, sid: str) -> None:
         st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
 
-def _nav_text(p: str) -> str:
-    """导航标签（纯文字，图标由 CSS 生成，保证同一列对齐）。"""
-    return NAV_LABELS.get(p, ("", p))[1]
+def _select_page(page: str) -> None:
+    st.session_state["nav_page"] = page
 
 
 def _nav(pages: list[str]) -> str:
-    """侧栏导航：用 Streamlit 原生 st.radio（点击最可靠）。
-
-    对齐靠两件事：① 标签文本里不含 emoji（图标改由 CSS ::before 按序号生成，固定宽度）；
-    ② 固定 key、不传 index（否则控件 ID 每轮变化，会出现"要点两次"）。
-    """
-    if st.session_state.get("nav_page") not in pages:
-        st.session_state["nav_page"] = pages[0]
-
-    icon_rules = "".join(
-        f'[data-testid="stSidebar"] div[role="radiogroup"] > label:nth-of-type({i + 1})::before'
-        f'{{content:"{NAV_LABELS.get(p, ("", p))[0]}";}}'
-        for i, p in enumerate(pages))
-    st.markdown(
-        "<style>"
-        # 隐藏原生圆点
-        '[data-testid="stSidebar"] div[role="radiogroup"] > label > div:first-child{display:none!important;}'
-        '[data-testid="stSidebar"] div[role="radiogroup"]{gap:2px!important;}'
-        '[data-testid="stSidebar"] div[role="radiogroup"] > label{'
-        'display:flex!important;align-items:center;gap:10px;'
-        'padding:9px 10px!important;border-radius:10px!important;'
-        'transition:background .15s ease;}'
-        '[data-testid="stSidebar"] div[role="radiogroup"] > label:hover{background:rgba(47,111,237,.07)!important;}'
-        '[data-testid="stSidebar"] div[role="radiogroup"] > label > div:last-child{font-size:14px;color:#31415c;}'
-        # 图标：固定 22px 宽，文字因此严格左对齐
-        '[data-testid="stSidebar"] div[role="radiogroup"] > label::before{'
-        'flex:0 0 22px;width:22px;text-align:center;font-size:15px;line-height:1;}'
-        f"{icon_rules}"
-        # 选中行
-        '[data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked){'
-        'background:linear-gradient(135deg,#eaf1ff,#f4f0ff)!important;}'
-        '[data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked) > div:last-child{'
-        'color:#2F6FED!important;font-weight:600;}'
-        "</style>", unsafe_allow_html=True)
-
-    st.radio("导航", pages, key="nav_page", format_func=_nav_text,
-             label_visibility="collapsed")
-    return st.session_state["nav_page"]
+    """Use one native button per page and a stable route key."""
+    active = st.session_state["nav_page"]
+    for page in pages:
+        icon, label = NAV_LABELS[page]
+        st.button(
+            f"{icon} {label}", key=f"nav_{NAV_KEYS[page]}",
+            type="primary" if page == active else "secondary", width="stretch",
+            on_click=_select_page, args=(page,),
+        )
+    return active
 
 
 def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str) -> None:
