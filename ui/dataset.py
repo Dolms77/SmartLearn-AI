@@ -226,51 +226,38 @@ def read_status(status_file: str) -> dict:
 def _enter(output_dir: str) -> None:
     st.session_state["output_dir"] = output_dir
     st.session_state["stage"] = "landing"
+    st.session_state["show_upload"] = False
+    st.session_state.pop("ds_run", None)
     st.rerun()
 
 
-def render_dataset_stage() -> None:
-    """首屏：选择数据集。完成后写入 session_state['output_dir']。"""
-    st.markdown("## 智慧学伴 · 数据入口")
-    st.caption("先选择或上传一份学情数据；分析完成后进入智能体查看诊断结果。")
+def render_upload_panel() -> None:
+    """欢迎页右侧「提交学情数据」展开的面板（同页内联，不用弹窗）。"""
+    st.divider()
+    head1, head2 = st.columns([4, 1])
+    head1.markdown("### 📤 提交学情数据")
+    if head2.button("收起", key="ds_close", width="stretch"):
+        st.session_state["show_upload"] = False
+        st.rerun()
+    st.caption("固定模板（5 个 CSV）：校验通过后勾选要跑的脚本；分析在后台进行，完成后自动切到新结果。")
 
-    # 有正在运行的任务时，优先展示进度（刷新/切标签都不影响后台进程）
     if st.session_state.get("ds_run"):
         render_progress()
         st.divider()
 
-    sample_ok = os.path.isfile(os.path.join(SAMPLE_OUTPUT, "cleaned_data.json"))
     runs = latest_runs()
-
-    tab_exist, tab_upload = st.tabs(["已有分析结果", "上传新数据"])
-
-    with tab_exist:
-        if sample_ok:
-            st.success("检测到内置示例数据的分析结果（790 条记录 / 40 名学生 / 54 道题）。", icon="✅")
-            c1, c2 = st.columns([1, 2])
-            if c1.button("直接进入智能体", type="primary", width="stretch", key="ds_enter_sample"):
-                _enter(SAMPLE_OUTPUT)
-            c2.caption("不需要上传，也不需要重新跑脚本。")
-        else:
-            st.info("还没有可用的分析结果，请到右侧上传数据并运行分析。", icon="ℹ️")
-
-        if runs:
-            st.divider()
-            st.markdown("**最近的分析记录**")
+    if runs:
+        with st.expander("最近的分析记录", expanded=False):
             for r in runs:
                 ok = r.get("status") == "done"
-                label = (f"{r.get('started_at', '')} · {r.get('run_id', '')} · "
-                         f"{'完成' if ok else r.get('status', '')}")
                 cols = st.columns([4, 1])
-                cols[0].caption(label)
+                cols[0].caption(f"{r.get('started_at', '')} · {r.get('run_id', '')} · "
+                                f"{'完成' if ok else r.get('status', '')}")
                 if ok and os.path.isfile(os.path.join(r["out_dir"], "cleaned_data.json")):
-                    if cols[1].button("进入", key=f"ds_enter_{r['run_id']}", width="stretch"):
+                    if cols[1].button("使用", key=f"ds_use_{r['run_id']}", width="stretch"):
                         _enter(r["out_dir"])
-        else:
-            st.caption("还没有上传过数据。")
 
-    with tab_upload:
-        _render_upload(tab_upload)
+    _render_upload(None)
 
 
 def _render_upload(_container) -> None:

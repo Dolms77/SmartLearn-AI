@@ -59,12 +59,8 @@ def cached_bundle(output_dir: str, file_signature: tuple) -> dict:
 
 
 # --------------------------------------------------------------------------
-# 第一步：选数据集（已有结果 / 上传新数据），完成后写 session_state["output_dir"]
+# 第一步：选数据集（欢迎页右侧「提交学情数据」按钮展开），完成后写 session_state["output_dir"]
 # --------------------------------------------------------------------------
-if st.session_state.get("stage", "dataset") == "dataset":
-    DS.render_dataset_stage()
-    st.stop()
-
 OUTPUT_DIR = st.session_state.get("output_dir") or DEFAULT_OUTPUT
 
 
@@ -143,6 +139,8 @@ else:
         shell.pick_identity(bundle)
     else:
         shell.landing()
+        if st.session_state.get("show_upload"):
+            DS.render_upload_panel()
 
 # --------------------------------------------------------------------------
 # 侧栏页脚：模型与数据（放在最后，保证出现在导航下方）
@@ -192,9 +190,10 @@ with st.sidebar:
             st.warning(stt["reason"] or "模型不可用", icon="⚠️")
             st.code("ollama pull deepseek-r1:8b", language="powershell")
             st.caption("拉取后无需重启界面，点右上角 Rerun 即可。")
-    if st.button("🔄 切换数据集", width="stretch", key="switch_dataset"):
+    if st.button("🔄 提交 / 切换学情数据", width="stretch", key="switch_dataset"):
         st.session_state.pop("ident", None)
-        st.session_state["stage"] = "dataset"
+        st.session_state["stage"] = "landing"
+        st.session_state["show_upload"] = True
         st.rerun()
     st.caption(f"产物目录：`{OUTPUT_DIR}`")
     st.caption("数据仅用于本赛题演示；不写入、不上传任何学生个人信息。")

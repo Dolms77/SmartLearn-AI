@@ -67,12 +67,17 @@ def landing() -> None:
         "我是这个系统的智能体，不是一页报表。<br>"
         "点下面的按钮唤醒我，我们开始：<b>你会以什么身份进来？</b>")
     st.write("")
-    c1, c2, c3 = st.columns([1, 1.1, 1])
+    c1, c2, c3 = st.columns([0.9, 1.1, 1])
     with c2:
         if st.button("👋 唤醒智慧学伴", type="primary", width="stretch", key="wake"):
             st.session_state["stage"] = "role"
             st.rerun()
-    st.caption("提示：唤醒后可以选择「学生」看个人学情，或「教师」看班级讲评。")
+    with c3:
+        if st.button("📤 提交学情数据", width="stretch", key="open_upload"):
+            st.session_state["show_upload"] = True
+            st.rerun()
+    st.caption("提示：唤醒后可以选择「学生」看个人学情，或「教师」看班级讲评；"
+               "也可以先提交自己的学情数据，分析完再进入。")
 
 
 def pick_role() -> None:
