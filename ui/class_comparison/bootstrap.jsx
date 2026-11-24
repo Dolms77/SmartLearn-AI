@@ -2,19 +2,22 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { ClassComparison } from "./main.jsx";
 import { ScoringReview } from "./ScoringReview.jsx";
+import { ErrorWaffle } from "./ErrorWaffle.jsx";
 
 const root = createRoot(document.getElementById("root"));
 if (window.parent === window) {
-  const review = new URLSearchParams(window.location.search).get("view") === "scoring-review";
-  root.render(review ? <ScoringReview /> : <ClassComparison />);
+  const view = new URLSearchParams(window.location.search).get("view");
+  if (view === "scoring-review") root.render(<ScoringReview />);
+  else if (view === "error-waffle") root.render(<ErrorWaffle />);
+  else root.render(<ClassComparison />);
 } else {
   const send = (type, fields = {}) => window.parent.postMessage({ isStreamlitMessage: true, type, ...fields }, "*");
   window.addEventListener("message", ({ source, data }) => {
     if (source === window.parent && data?.type === "streamlit:render") {
-      const { dashboard, scoringRows } = data.args;
-      root.render(Array.isArray(scoringRows)
-        ? <ScoringReview rows={scoringRows} />
-        : <ClassComparison data={dashboard} />);
+      const { dashboard, scoringRows, errorRows } = data.args;
+      if (Array.isArray(scoringRows)) root.render(<ScoringReview rows={scoringRows} />);
+      else if (Array.isArray(errorRows)) root.render(<ErrorWaffle rows={errorRows} />);
+      else root.render(<ClassComparison data={dashboard} />);
     }
   });
   new ResizeObserver(([entry]) => {

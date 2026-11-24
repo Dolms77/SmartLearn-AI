@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "./main.jsx";
 @source "./ScoringReview.jsx";
+@source "./ErrorWaffle.jsx";
 
 @layer base {
   body {

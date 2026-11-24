@@ -10,7 +10,7 @@ import streamlit as st
 
 import adapter as A
 import charts as C
-from comparison_dashboard import render_comparison
+from comparison_dashboard import render_comparison, render_error_waffle
 import design
 import insights as I
 import labels
@@ -252,16 +252,14 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
         counts = {}
         for d in bundle.get('diagnoses', []):
             if d.get('student_id') in class_students:
-                code = d.get('error_type_code') or d.get('error_type', '未分类')
-                counts.setdefault(code, {'代码': code, '类型': d.get('error_type', code), '条数': 0})['条数'] += 1
-        total_errors = sum(r['条数'] for r in counts.values())
-        et = [{**r, '占比': 100 * r['条数'] / total_errors} for r in counts.values()] if total_errors else []
-        if et:
-            st.markdown("**本班错因构成**")
-            st.caption("每条诊断计一次。悬停查看各类条数与占比。")
-            _, ring, _ = st.columns([1, 3, 1])
-            with ring:
-                C.show(C.error_type_chart(et))
+                code = d.get('error_type_code') or d.get('error_type') or '未分类'
+                counts.setdefault(code, {'代码': code, '类型': d.get('error_type') or code, '条数': 0})['条数'] += 1
+        st.markdown("**本班错因构成**")
+        if counts:
+            st.caption("每条诊断计一次。每格约代表 1%，图例显示实际占比。")
+            render_error_waffle(cls, list(counts.values()))
+        else:
+            st.info("本班暂无错因记录。")
         st.markdown(f"**{cls} 班全员掌握度矩阵**")
         sort_mode = st.radio(
             "矩阵排序",

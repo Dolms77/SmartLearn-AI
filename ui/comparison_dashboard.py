@@ -35,3 +35,8 @@ def comparison_data(class_rates: dict, indicators: dict, questions: dict, names:
 def render_comparison(cls: str, class_rates: dict, indicators: dict, questions: dict, names: dict) -> None:
     dashboard_component(dashboard=comparison_data(class_rates, indicators, questions, names),
                         key=f"class_comparison_{cls}")
+
+
+def render_error_waffle(cls: str, rows: list[dict]) -> None:
+    error_rows = [{"id": row["代码"], "label": row["类型"], "count": row["条数"]} for row in rows]
+    dashboard_component(errorRows=error_rows, key=f"class_error_waffle_{cls}")
