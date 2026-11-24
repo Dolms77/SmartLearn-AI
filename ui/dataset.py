@@ -261,14 +261,20 @@ def render_upload_panel() -> None:
 
 
 def _render_upload(_container) -> None:
-    c1, c2 = st.columns([1, 1])
-    c1.markdown("**1. 下载模板**")
-    c1.download_button("下载 CSV 模板（zip）", template_zip(), file_name="学情数据模板.zip",
-                       mime="application/zip", width="stretch", key="ds_tpl")
-    c2.markdown("**2. 上传数据**")
-    up = st.file_uploader(
-        "上传 5 个 CSV，或一个包含它们的 zip",
-        type=["csv", "zip"], accept_multiple_files=True, key="ds_upload")
+    # 两列等高：标题和控件都放在同一列里，左右按钮基线一致
+    c1, c2 = st.columns([1, 1], gap="large")
+    with c1:
+        st.markdown("**1. 下载模板**")
+        st.download_button("下载 CSV 模板（zip）", template_zip(), file_name="学情数据模板.zip",
+                           mime="application/zip", width="stretch", key="ds_tpl")
+        st.caption("5 个 CSV 的表头模板，按列名填写即可。")
+    with c2:
+        st.markdown("**2. 上传数据**")
+        up = st.file_uploader(
+            "上传 5 个 CSV，或一个包含它们的 zip",
+            type=["csv", "zip"], accept_multiple_files=True, key="ds_upload",
+            label_visibility="collapsed")
+        st.caption("支持 5 个 CSV 或一个 zip；校验通过后才能启动。")
 
     saved_dir = st.session_state.get("ds_saved_dir")
     if up:
