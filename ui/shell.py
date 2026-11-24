@@ -302,6 +302,6 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
     elif page == "智能体":
         import agent_bridge as AB
 
-        AB.render_agent_page()
+        AB.render_agent_page(bundle.get("output_dir"))
     else:
         views.render_artifacts(bundle)

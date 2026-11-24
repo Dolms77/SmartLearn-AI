@@ -18,6 +18,7 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
 import adapter as A     # noqa: E402
+import dataset as DS     # noqa: E402
 import design            # noqa: E402
 import llm               # noqa: E402
 import shell             # noqa: E402
@@ -57,6 +58,16 @@ def cached_bundle(output_dir: str, file_signature: tuple) -> dict:
     return A.load_bundle(output_dir)
 
 
+# --------------------------------------------------------------------------
+# 第一步：选数据集（已有结果 / 上传新数据），完成后写 session_state["output_dir"]
+# --------------------------------------------------------------------------
+if st.session_state.get("stage", "dataset") == "dataset":
+    DS.render_dataset_stage()
+    st.stop()
+
+OUTPUT_DIR = st.session_state.get("output_dir") or DEFAULT_OUTPUT
+
+
 def output_signature(output_dir: str) -> tuple:
     signature = []
     for name in BUNDLE_FILES:
@@ -70,11 +81,11 @@ def output_signature(output_dir: str) -> tuple:
     return tuple(signature)
 
 
-if not os.path.isdir(DEFAULT_OUTPUT):
-    st.error(f"产物目录不存在：{DEFAULT_OUTPUT}\n请先运行 01–03 脚本。")
+if not os.path.isdir(OUTPUT_DIR):
+    st.error(f"产物目录不存在：{OUTPUT_DIR}\n请先运行 01–03 脚本。")
     st.stop()
 
-bundle = cached_bundle(DEFAULT_OUTPUT, output_signature(DEFAULT_OUTPUT))
+bundle = cached_bundle(OUTPUT_DIR, output_signature(OUTPUT_DIR))
 if not bundle.get("records"):
     st.error("cleaned_data.json 缺失或为空，请先运行 01_data_loader.py。")
     st.stop()
@@ -115,7 +126,7 @@ else:
     llm_flag = "local" if online else None
 
 st.session_state["_key"] = llm_flag
-st.session_state["_cache"] = os.path.join(DEFAULT_OUTPUT, "llm_cache")
+st.session_state["_cache"] = os.path.join(OUTPUT_DIR, "llm_cache")
 
 # --------------------------------------------------------------------------
 # 路由：未登录走唤醒流程，已登录进主界面
@@ -181,5 +192,9 @@ with st.sidebar:
             st.warning(stt["reason"] or "模型不可用", icon="⚠️")
             st.code("ollama pull deepseek-r1:8b", language="powershell")
             st.caption("拉取后无需重启界面，点右上角 Rerun 即可。")
-    st.caption(f"产物目录：`{DEFAULT_OUTPUT}`")
+    if st.button("🔄 切换数据集", width="stretch", key="switch_dataset"):
+        st.session_state.pop("ident", None)
+        st.session_state["stage"] = "dataset"
+        st.rerun()
+    st.caption(f"产物目录：`{OUTPUT_DIR}`")
     st.caption("数据仅用于本赛题演示；不写入、不上传任何学生个人信息。")

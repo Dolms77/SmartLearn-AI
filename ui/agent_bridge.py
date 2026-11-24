@@ -99,6 +99,7 @@ def _build_coordinator(mod, output_dir: str):
 
 
 def ask(question: str, output_dir: str | None = None) -> dict:
+    _set_active_dir(output_dir)
     try:
         coord = load_coordinator(output_dir or DEFAULT_OUTPUT)
         return coord.run(question)
@@ -140,16 +141,29 @@ _TRACE_CSS = """
 # ---------------------------------------------------------------------------
 # 代号 → 知识点名称：统一实现放在 labels.py，这里只保留薄封装
 # ---------------------------------------------------------------------------
+_ACTIVE_DIR: str | None = None
+
+
+def _set_active_dir(output_dir: str | None) -> None:
+    """当前会话使用的产物目录：上传的数据集与示例数据各用各的名称映射。"""
+    global _ACTIVE_DIR
+    _ACTIVE_DIR = output_dir or DEFAULT_OUTPUT
+
+
+def _dir() -> str:
+    return _ACTIVE_DIR or DEFAULT_OUTPUT
+
+
 def _humanize(text: str, maps: tuple[dict, dict] | None = None) -> str:
-    return labels.humanize(text, DEFAULT_OUTPUT, maps)
+    return labels.humanize(text, _dir(), maps)
 
 
 def _ind_label(code: str, name: str = "") -> str:
-    return labels.ind_name(code, name, DEFAULT_OUTPUT)
+    return labels.ind_name(code, name, _dir())
 
 
 def _name_maps() -> tuple[dict, dict]:
-    return labels.name_maps(DEFAULT_OUTPUT)
+    return labels.name_maps(_dir())
 
 
 def render_trace_cards(steps: list[dict], *, evidence: list[str] | None = None,
