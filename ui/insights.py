@@ -12,91 +12,11 @@
 from __future__ import annotations
 
 import os
+import re
 
 import adapter as A
 
 IND = A.INDICATORS
-
-
-# --------------------------------------------------------------------------
-# 班级口径（statistics 里只有 by_class_question / by_class_scoring_point，
-# 指标级与题目级都由它们按班级现算，避免拿全校数字回答“我们班”的问题）
-# --------------------------------------------------------------------------
-def class_question_rates(bundle: dict, cls: str) -> dict[str, dict]:
-    rows = (bundle.get("statistics") or {}).get("by_class_question", {}).get(cls) or {}
-    qmap = bundle["question_map"]
-    out: dict[str, dict] = {}
-    for qid, v in rows.items():
-        q = qmap.get(qid, {})
-        out[qid] = {
-            "rate": round(float(v.get("score_rate") or 0), 4),
-            "n": int(v.get("count") or 0),
-            "indicator": q.get("indicator", ""),
-            "type": q.get("type", ""),
-            "text": (q.get("question_text") or "")[:40],
-        }
-    return out
-
-
-def class_indicator_rates(bundle: dict, cls: str) -> dict[str, dict]:
-    """班级 × 指标得分率：由 by_class_question 按题目所属指标加权合成。"""
-    qmap = bundle["question_map"]
-    rows = (bundle.get("statistics") or {}).get("by_class_question", {}).get(cls) or {}
-    agg: dict[str, dict] = {}
-    for qid, v in rows.items():
-        code = (qmap.get(qid) or {}).get("indicator")
-        if not code:
-            continue
-        cell = agg.setdefault(code, {"score": 0.0, "full": 0.0, "n": 0})
-        cell["score"] += float(v.get("score") or 0)
-        cell["full"] += float(v.get("full") or 0)
-        cell["n"] += int(v.get("count") or 0)
-    for c in agg.values():
-        c["rate"] = round(c["score"] / c["full"], 4) if c["full"] else None
-    return agg
-
-
-def class_scoring_points(bundle: dict, cls: str, limit: int | None = None) -> list[dict]:
-    """班级 × 评分点排行（含题号与题干），用于讲评“该讲哪一步”。"""
-    rows = (bundle.get("statistics") or {}).get("by_class_scoring_point", {}).get(cls) or {}
-    qmap = bundle["question_map"]
-    out = []
-    for pid, v in rows.items():
-        qid = pid.split("P")[0]
-        q = qmap.get(qid, {})
-        full = float(v.get("full") or 0)
-        rate = round(float(v.get("score_rate") or 0), 4)
-        flag = "critical" if rate == 0 else ("weak" if rate < 0.3 else "normal")
-        out.append({
-            "评分点": pid,
-            "题号": qid,
-            "指标": q.get("indicator", ""),
-            "得分率": rate,
-            "正确/总数": f"{int(v.get('score') or 0)}/{int(full)}",
-            "样本": int(v.get("count") or 0),
-            "标记": flag,
-            "题干": (q.get("question_text") or "")[:30],
-        })
-    out.sort(key=lambda r: (r["得分率"], -r["样本"]))
-    return out[:limit] if limit else out
-
-
-def students_at_risk(bundle: dict, cls: str, limit: int = 6) -> list[dict]:
-    """班级内需要单独关注的学生：证据不足（0 个可判定）或可判定掌握度 < 0.4。"""
-    rows = []
-    for sid in A.list_students(bundle):
-        v = A.student_view(bundle, sid)
-        if v["cls"] != cls:
-            continue
-        decided = v["coverage"]["decided"]
-        if decided == 0:
-            rows.append({"student": sid, "reason": "证据不足", "decided": 0,
-                         "records": v["evidence_total"], "mastery": None})
-        elif v["overall"] is not None and v["overall"] < 0.4:
-            rows.append({"student": sid, "reason": "掌握度偏低", "decided": decided,
-                         "records": v["evidence_total"], "mastery": round(v["overall"], 3)})
-    rows.sort(key=lambda r: (r["mastery"] is not None, r["mastery"] or 0))
-    return rows[:limit]
 
 
 def scoring_points(bundle: dict, limit: int | None = None,
@@ -134,6 +54,16 @@ def scoring_point_definition(bundle: dict, pid: str) -> str:
         if line.strip().startswith(pid):
             return line.strip()
     return ""
+
+
+def scoring_point_name(bundle: dict, pid: str) -> str:
+    """把评分点编号转成教师能读懂的步骤名称。"""
+    text = scoring_point_definition(bundle, pid)
+    if not text:
+        return "该题关键评分步骤"
+    text = re.sub(rf"^{re.escape(pid)}\s*", "", text)
+    text = re.sub(r"\s*\d+(?:\.\d+)?\s*分\s*$", "", text)
+    return text.strip() or "该题关键评分步骤"
 
 
 def error_types(bundle: dict) -> list[dict]:

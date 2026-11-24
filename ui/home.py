@@ -60,8 +60,10 @@ def _teacher_headline(bundle: dict, cls: str) -> tuple[str, list[tuple[str, str]
         gap = f"，比 {others[0]} 高 {d:+.1%}"
     if sp:
         top = sp[0]
+        # 评分点用中文定义（来自 fix 分支的改进），指标名走统一的名称映射
+        point_name = I.scoring_point_name(bundle, top["评分点"]) or top["评分点"]
         ind_name = labels.ind_name(top.get("指标", ""), "", bundle.get("output_dir"))
-        return (f"最该先讲 **{top['评分点']}**（{ind_name}），全班得分率 {top['得分率']:.0%}"
+        return (f"最该先讲 **{point_name}**（{ind_name}），全班得分率 {top['得分率']:.0%}"
                 f"（{top['正确/总数']}）。讲评按「评分点 → 题目 → 变式」推进。",
                 [("班级得分率", f"{(row.get('overall') or 0):.0%}"),
                  ("薄弱评分点", f"{sum(1 for x in I.class_scoring_points(bundle, cls) if x['得分率'] < 0.3)} 个")],

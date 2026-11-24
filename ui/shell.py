@@ -170,7 +170,7 @@ def render_advice(bundle: dict, sid: str) -> None:
         views._render_task3(rec, bundle.get("output_dir"))
         return
 
-    st.info("B 的 `task3_recommendations.json` 还没到，我先把**可执行的第一步**给你（按证据排序）。")
+    st.info("正式学习建议尚未生成。先按证据给你可执行的第一步。")
     order = sorted(v["weak"] + v["developing"], key=lambda x: x["mastery"])
     if order:
         for i, x in enumerate(order, 1):
@@ -261,15 +261,16 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
     # NotFoundError: removeChild。页面切换改为原生、稳定的即时渲染。
 
     # 顶部状态条
-    sub = (f"{ident} · {A.student_class(bundle, ident)}" if role == "student" else f"{ident} 班级视角")
-    st.markdown(
-        f"""<div class="sa-brand" style="border-bottom:1px solid #eaeff7;padding-bottom:10px;margin-bottom:14px">
-              {theme.avatar_img(38)}
-              <div><div class="sa-brand-t">{page}</div>
-                   <div class="sa-brand-s">{sub} · 证据门槛 3 条 · 结论可下钻到记录编号</div></div>
-            </div>""",
-        unsafe_allow_html=True)
-
+    if page not in {"我的学情", "班级概览"}:
+        sub = (f"{ident} · {A.student_class(bundle, ident)}" if role == "student" else f"{ident} 班级视角")
+        st.markdown(
+            f"""<div class="sa-brand" style="border-bottom:1px solid #eaeff7;padding-bottom:10px;margin-bottom:14px">
+                  {theme.avatar_svg(38)}
+                  <div><div class="sa-brand-t">{page}</div>
+                       <div class="sa-brand-s">{sub} · 证据门槛 3 条 · 结论可下钻到记录编号</div></div>
+                </div>""",
+            unsafe_allow_html=True)
+    
     if page == "对话":
         chat.render(bundle, role, ident, key, cache_dir)
     elif page == "我的学情":

@@ -221,7 +221,7 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
     if rec:
         _render_task3(rec, bundle.get("output_dir"))
     else:
-        st.info("B 的 `task3_recommendations.json` 尚未提供。以下只列出**排序依据**，不是建议结论。")
+        st.info("正式学习建议尚未生成。以下先按证据列出可执行的第一步，不替代完整建议。")
         order = sorted(v["weak"] + v["developing"], key=lambda x: x["mastery"])
         if order:
             rows = []
@@ -539,8 +539,9 @@ def render_knowledge(bundle: dict) -> None:
         trows = [r for r in rows if r["theme"] == t]
         if not trows:
             continue
-        with st.expander(f"{t} {trows[0]['theme_name']} · 课标 {trows[0]['course_standard']} · "
+        with st.expander(f"{trows[0]['theme_name']} · 课标 {trows[0]['course_standard']} · "
                          f"教材 {trows[0]['textbook_pages']}", expanded=True):
+            st.caption(f"主题编号：{t}")
             st.markdown(f"**主题目标**：{trows[0]['theme_goal']}")
             df = pd.DataFrame([{
                 "指标": r["code"], "观察指标": r["name"],
@@ -611,7 +612,7 @@ def render_knowledge(bundle: dict) -> None:
         data=json.dumps(export_data, ensure_ascii=False, indent=2),
         file_name=export_name, mime="application/json")
     if not task1_export:
-        st.caption("正式成果包请以 B 的 `task1_knowledge_structure.json` 为准；当前文件由清洗数据临时组装。")
+        st.caption("当前显示的是由清洗数据自动汇总的知识结构；正式成果文件生成后将优先使用。")
 
 
 # --------------------------------------------------------------------------
@@ -688,7 +689,7 @@ def render_artifacts(bundle: dict) -> None:
                     "knowledge_graph.html": "运行 05 需要 `pip install pyvis`",
                     "knowledge_base.json": "04 需要 `pip install -r requirements-rag.txt` 且下载 embedding 模型",
                     "task1_knowledge_structure.json": "运行 09 生成任务1结构化成果",
-                    "task3_recommendations.json": "归属 B，界面在建议区显示「待 B 交付」占位",
+                    "task3_recommendations.json": "尚未生成；建议区会先展示按证据排序的第一步",
                 }.get(r["file"], "尚未运行对应脚本")
                 st.markdown(f"- `{r['file']}`：{hint}")
 
