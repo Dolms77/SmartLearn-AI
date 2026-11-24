@@ -9,7 +9,7 @@ from math import ceil, isfinite
 CSS = """
 <style>
 .sa-review {
-  display:grid; grid-template-columns:minmax(0,1.7fr) minmax(3rem,1fr) 4.5rem;
+  display:grid; grid-template-columns:minmax(0,1.35fr) minmax(3rem,1fr) 4.5rem;
   column-gap:clamp(.35rem,2vw,1.25rem); align-items:center;
   padding:.75rem clamp(.5rem,2vw,1.25rem); border:1px solid #e6ebf3;
   border-radius:12px; background:#fff; color:#243247;
@@ -32,7 +32,7 @@ CSS = """
 .sa-review .guide::before {content:""; position:absolute; left:var(--threshold); top:0; bottom:0;
   border-left:1px dashed #d7aa79;}
 @media (max-width:520px) {
-  .sa-review {grid-template-columns:minmax(0,1.6fr) minmax(2.5rem,1fr) 3.6rem;}
+  .sa-review {grid-template-columns:minmax(0,1.35fr) minmax(2.5rem,1fr) 3.6rem;}
 }
 </style>
 """

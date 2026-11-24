@@ -39,7 +39,7 @@ TEXT_EXT = {".py", ".md", ".txt", ".json", ".html", ".ps1", ".bat", ".csv", ".ym
 
 def keep(rel: str) -> bool:
     low = rel.lower()
-    return not any(p.lower() in low for p in EXCLUDE_PARTS)
+    return "node_modules" not in low.split(os.sep) and not any(p.lower() in low for p in EXCLUDE_PARTS)
 
 
 def main() -> int:

@@ -10,6 +10,7 @@ import streamlit as st
 
 import adapter as A
 import charts as C
+from comparison_dashboard import render_comparison
 import design
 import insights as I
 import labels
@@ -235,15 +236,7 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
 
     t1, t2, t3 = st.tabs(["📈 班级对比", "🔍 薄弱点", "👥 学生"])
     with t1:
-        C.show(C.class_theme_chart(cv["class_theme"]))
-        c1, c2 = st.columns([1, 1])
-        with c1:
-            C.show(C.indicator_rank_chart(
-                {c: {"score_rate": v["rate"], "count": v["n"]}
-                 for c, v in ind_rates.items() if v.get("rate") is not None},
-                names=A.INDICATOR_NAMES))
-        with c2:
-            C.show(C.question_rate_chart(q_rates, names=A.INDICATOR_NAMES))
+        render_comparison(cls, cv["class_theme"], ind_rates, q_rates, A.INDICATOR_NAMES)
     with t2:
         st.markdown("**本班优先复盘的评分步骤**")
         st.caption("按得分率从低到高展示最多 12 项。低于 30% 的步骤优先复盘。")
@@ -312,11 +305,16 @@ def _scoring_review_rows(bundle: dict, cls: str) -> tuple[list[dict], list[dict]
         rate = record.get("score_rate")
         if not ((record.get("count") or 0) > 0 and (record.get("full") or 0) > 0 and valid_rate(rate)):
             rate = None
-        definition = (bundle["question_map"].get(pid.split("P")[0], {})
-                      .get("scoring_point_definitions") or {}).get(pid) or {}
+        question = bundle["question_map"].get(pid.split("P")[0], {})
+        definition = (question.get("scoring_point_definitions") or {}).get(pid) or {}
+        description = definition.get("description") or I.scoring_point_name(bundle, pid)
+        if description.strip(" \t。；") == "答案正确":
+            indicator = question.get("indicator", "")
+            prompt = question.get("question_text") or A.INDICATOR_NAMES.get(indicator, "")
+            description = " · ".join(filter(None, [question.get("type"), prompt])) or description
         item = {
             "id": pid,
-            "description": definition.get("description") or I.scoring_point_name(bundle, pid),
+            "description": description,
             "rate": rate,
         }
         (missing if rate is None else measured).append(item)
