@@ -59,11 +59,16 @@ TEMPLATE = {
 # 目录与状态
 # ---------------------------------------------------------------------------
 def runs_root() -> str:
-    """运行目录：优先 SA_RUNS_DIR，其次项目 runs/，不可写则退到用户目录。"""
-    for cand in (os.environ.get("SA_RUNS_DIR"),
-                 os.path.join(ROOT, "runs"),
-                 os.path.join(os.environ.get("LOCALAPPDATA") or os.path.expanduser("~"),
-                              "SmartLearn", "runs")):
+    """运行目录：优先 SA_RUNS_DIR，其次项目 runs/，再退到用户目录/临时目录。"""
+    import tempfile
+    candidates = [
+        os.environ.get("SA_RUNS_DIR"),
+        os.path.join(ROOT, "runs"),
+        os.path.join(os.environ.get("LOCALAPPDATA") or os.path.expanduser("~"),
+                     "SmartLearn", "runs"),
+        os.path.join(tempfile.gettempdir(), "smartlearn_runs"),
+    ]
+    for cand in candidates:
         if not cand:
             continue
         try:
