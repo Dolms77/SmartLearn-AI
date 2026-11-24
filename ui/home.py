@@ -234,19 +234,24 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
 
     t1, t2, t3 = st.tabs(["📈 班级对比", "🔍 薄弱点", "👥 学生"])
     with t1:
+        C.show(C.class_theme_chart(cv["class_theme"]))
         c1, c2 = st.columns([1, 1])
         with c1:
-            C.show(C.class_theme_chart(cv["class_theme"]))
-        with c2:
             C.show(C.indicator_rank_chart(
                 {c: {"score_rate": v["rate"], "count": v["n"]}
                  for c, v in ind_rates.items() if v.get("rate") is not None},
                 names=A.INDICATOR_NAMES))
-        C.show(C.question_rate_chart(q_rates, names=A.INDICATOR_NAMES))
+        with c2:
+            C.show(C.question_rate_chart(q_rates, names=A.INDICATOR_NAMES))
     with t2:
         sp = sp_all[:12]
         if sp:
-            C.show(C.scoring_point_chart(sp, names=A.INDICATOR_NAMES))
+            st.markdown("**本班优先复盘的评分步骤**")
+            st.caption("浅色区标出得分率低于 30% 的步骤。悬停可查看完整评分要求与作答条数。")
+            C.show(C.scoring_point_chart(
+                sp, names=A.INDICATOR_NAMES,
+                definitions={r["评分点"]: I.scoring_point_name(bundle, r["评分点"]) for r in sp},
+            ))
         class_students = {r['student_id'] for r in bundle['records'] if r.get('class_id') == cls}
         counts = {}
         for d in bundle.get('diagnoses', []):
@@ -256,8 +261,11 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
         total_errors = sum(r['条数'] for r in counts.values())
         et = [{**r, '占比': 100 * r['条数'] / total_errors} for r in counts.values()] if total_errors else []
         if et:
-            st.caption(f'{cls} 本班错因构成；每条诊断计一次，不代表错误因果比例。')
-            C.show(C.error_type_chart(et))
+            st.markdown("**本班错因构成**")
+            st.caption("每条诊断计一次。悬停查看各类条数与占比。")
+            _, ring, _ = st.columns([1, 3, 1])
+            with ring:
+                C.show(C.error_type_chart(et))
         st.markdown(f"**{cls} 班全员掌握度矩阵**")
         sort_mode = st.radio(
             "矩阵排序",

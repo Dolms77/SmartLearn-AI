@@ -461,7 +461,7 @@ def render_class(bundle: dict, cls: str | None) -> None:
         with right:
             st.dataframe(pd.DataFrame([{
                 "评分点": r["评分点"], "指标": r["指标"], "得分率": f"{r['得分率']:.0%}",
-                "正确/总数": r["正确/总数"], "标记": r["标记"],
+                "正确/总数": r["正确/总数"], "讲评提示": C.SCORING_STATUS.get(r["标记"], "—"),
             } for r in sp]), width="stretch", hide_index=True)
         with st.expander("这 12 个评分点的官方定义（可直接写进报告）", expanded=False):
             for r in sp:
