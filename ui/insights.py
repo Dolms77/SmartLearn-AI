@@ -274,12 +274,13 @@ def artifact_files(bundle: dict) -> list[dict]:
     d = bundle.get("output_dir", "")
     items = [
         ("knowledge_graph.html", "05 交互式知识图谱", "text/html"),
+        ("dashboard.html", "06 学情仪表盘（8 类图表）", "text/html"),
         ("bkt_summary.txt", "02 掌握度矩阵摘要", "text/plain"),
         ("statistics_summary.txt", "01 统计摘要", "text/plain"),
         ("error_diagnosis_summary.txt", "03 错因摘要", "text/plain"),
         ("knowledge_base.json", "04 RAG 知识库索引（可选）", "application/json"),
-        ("task1_knowledge_structure.json", "任务1 成果（B）", "application/json"),
-        ("task3_recommendations.json", "任务3 建议（B）", "application/json"),
+        ("task1_knowledge_structure.json", "任务1 知识结构成果", "application/json"),
+        ("task3_recommendations.json", "任务3 个性化建议", "application/json"),
     ]
     out = []
     for name, desc, mime in items:

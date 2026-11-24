@@ -56,7 +56,7 @@
 
   <h3><span class="num">2</span>跑流水线（约 30 秒）</h3>
   <p>双击 <code>2_一键运行全部.bat</code>，或：</p>
-<pre>.\scripts\run_all.ps1            <span class="c"># 01–05、07–09（04 需向量库、05 需 pyvis，缺依赖自动跳过；06 不在一键流程）</span></pre>
+<pre>.\scripts\run_all.ps1            <span class="c"># 01–09（04 需向量库、05 需 pyvis，缺依赖自动跳过）</span></pre>
   <p>最后看到 <code>[OK] 产物齐全且关键数字一致</code> 就算成功。</p>
 
   <h3><span class="num">3</span>启动界面</h3>
@@ -85,7 +85,7 @@ ollama list                     <span class="c"># 确认在列表里，回界面
   <tr><td><code>requirements-rag.txt</code></td><td>04 向量库依赖（约 2 GB）</td><td>可选</td></tr>
 <tr><td><code>requirements-build.txt</code></td><td>打包 exe 用（PyInstaller）</td><td>可选</td></tr>
   <tr><td><code>scripts/</code></td><td>bootstrap / run_all / verify</td><td>必需</td></tr>
-  <tr><td><code>已完成脚本/01…09.py</code></td><td>治理→BKT→错因→RAG→图谱→多智能体→任务3→任务1；06 仪表盘不在默认流程</td><td>必需</td></tr>
+  <tr><td><code>已完成脚本/01…09.py</code></td><td>治理→BKT→错因→RAG→图谱→仪表盘→多智能体→任务3→任务1</td><td>必需</td></tr>
   <tr><td><code>ui/</code></td><td>Streamlit 界面（含 run.bat）</td><td>必需</td></tr>
   <tr><td><code>output/</code></td><td><b>已预生成的全部产物</b>（790 条记录、385 诊断、40×9 矩阵）</td><td>建议保留</td></tr>
   <tr><td><code>赛题材料/</code></td><td>课程要求、题目、作答记录、课标与教材切片（73 MB）</td><td>必需</td></tr>
