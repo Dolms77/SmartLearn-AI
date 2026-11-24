@@ -19,23 +19,22 @@ NAV_LABELS = {
     "智能体": ("🤖", "多智能体"),
     "我的学情": ("📊", "我的学情"),
     "学习建议": ("🎯", "学习建议"),
-    "知识地图": ("🗺", "知识地图"),
+    "知识与成果": ("🗺", "知识与成果"),
     "班级概览": ("📈", "班级概览"),
     "学生名单": ("👥", "学生名单"),
     "数据质量": ("🧹", "数据质量"),
-    "成果文件": ("📁", "成果文件"),
 }
 
 # 控件 key 用 ASCII slug：Streamlit 的 st-key-* 类名对非 ASCII 不保证，CSS 会匹配不到
 NAV_KEYS = {
     "对话": "chat", "智能体": "agent", "我的学情": "diagnosis",
-    "学习建议": "advice", "知识地图": "kmap", "班级概览": "class",
-    "学生名单": "students", "数据质量": "quality", "成果文件": "files",
+    "学习建议": "advice", "知识与成果": "knowledge", "班级概览": "class",
+    "学生名单": "students", "数据质量": "quality",
 }
 
 
-STUDENT_PAGES = ["对话", "智能体", "我的学情", "学习建议", "知识地图", "成果文件"]
-TEACHER_PAGES = ["对话", "智能体", "班级概览", "学生名单", "数据质量", "成果文件"]
+STUDENT_PAGES = ["对话", "智能体", "我的学情", "学习建议", "知识与成果"]
+TEACHER_PAGES = ["对话", "智能体", "班级概览", "学生名单", "数据质量", "知识与成果"]
 
 
 # --------------------------------------------------------------------------
@@ -270,11 +269,10 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
             design.thinking_overlay(
                 {"我的学情": "正在核对证据链…",
                  "学习建议": "正在按优先级排学习路径…",
-                 "知识地图": "正在梳理知识谱系…",
+                 "知识与成果": "正在梳理知识谱系…",
                  "班级概览": "正在汇总班级数据…",
                  "学生名单": "正在读取学生档案…",
                  "数据质量": "正在复核 8 条清洗规则…",
-                 "成果文件": "正在整理产物清单…",
                  "智能体": "正在唤醒多智能体…",
                  "对话": "正在准备对话…"}.get(page, f"正在打开「{page}」…"))
         except Exception as exc:  # noqa: BLE001 - 动画失败不能影响页面
@@ -297,8 +295,8 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
         home.render_student_home(bundle, ident, key, cache_dir)
     elif page == "学习建议":
         render_advice(bundle, ident)
-    elif page == "知识地图":
-        views.render_knowledge(bundle)
+    elif page == "知识与成果":
+        views.render_knowledge_and_artifacts(bundle)
     elif page == "班级概览":
         home.render_teacher_home(bundle, ident)
     elif page == "学生名单":
@@ -309,5 +307,3 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
         import agent_bridge as AB
 
         AB.render_agent_page(bundle.get("output_dir"))
-    else:
-        views.render_artifacts(bundle)

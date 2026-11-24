@@ -525,9 +525,8 @@ def render_class(bundle: dict, cls: str | None) -> None:
 # --------------------------------------------------------------------------
 # 页面 3：任务 1 知识结构
 # --------------------------------------------------------------------------
-def render_knowledge(bundle: dict) -> None:
+def render_knowledge(bundle: dict, rows: list[dict]) -> None:
     st.subheader("任务 1 · 学习内容与要求梳理")
-    rows = A.knowledge_rows(bundle)
     if not rows:
         st.error("cleaned_data.json 缺少 knowledge_structure，无法渲染。")
         return
@@ -654,8 +653,27 @@ def render_quality(bundle: dict) -> None:
 
 
 # --------------------------------------------------------------------------
-# 页面 5：成果文件（集中提供结构化产物与知识图谱）
+# 页面 5：知识图谱、知识结构与成果下载
 # --------------------------------------------------------------------------
+def render_knowledge_and_artifacts(bundle: dict) -> None:
+    rows = A.knowledge_rows(bundle)
+    st.subheader("知识图谱")
+    if rows and (bundle.get("knowledge") or (bundle.get("task1_json") or {}).get("themes")):
+        themes = {row["theme"]: row["theme_name"] for row in rows}
+        selected = st.selectbox("学习主题", list(themes), format_func=themes.__getitem__)
+        st.caption("拖动画布平移，滚轮或右上角 + / − 缩放。将鼠标移到节点上查看详情。")
+        fig = C.knowledge_graph([row for row in rows if row["theme"] == selected])
+        C.show(fig, config={"scrollZoom": True, "displayModeBar": True, "displaylogo": False})
+    else:
+        st.info("知识结构数据生成后，可在这里浏览图谱。")
+
+    knowledge, artifacts = st.tabs(["知识结构", "成果下载"])
+    with knowledge:
+        render_knowledge(bundle, rows)
+    with artifacts:
+        render_artifacts(bundle)
+
+
 def render_artifacts(bundle: dict) -> None:
     st.subheader("成果文件与外部产物")
     st.caption("05 知识图谱与 06 学情仪表盘都由一键流程生成；图表字段说明见前端数据契约。")
@@ -692,19 +710,3 @@ def render_artifacts(bundle: dict) -> None:
                     "task3_recommendations.json": "尚未生成；建议区会先展示按证据排序的第一步",
                 }.get(r["file"], "尚未运行对应脚本")
                 st.markdown(f"- `{r['file']}`：{hint}")
-
-    # 05 的图谱可以直接内嵌预览（离线时若依赖 CDN 可能显示空白）
-    kg = os.path.join(bundle["output_dir"], "knowledge_graph.html")
-    if os.path.exists(kg):
-        st.markdown("##### 知识图谱预览")
-        if st.toggle("在页面内渲染（依赖 HTML 内的 CDN，离线可能空白）", key="kg_preview"):
-            try:
-                import streamlit.components.v1 as components
-
-                with open(kg, encoding="utf-8") as f:
-                    components.html(f.read(), height=620, scrolling=True)
-            except OSError:
-                st.warning("读取 knowledge_graph.html 失败。")
-    else:
-        st.info("`knowledge_graph.html` 尚未生成：先 `pip install pyvis`，再运行 "
-                "`python 已完成脚本\\05_knowledge_graph.py`。")

@@ -89,16 +89,72 @@ def _st_ge(major: int, minor: int) -> bool:
         return True
 
 
-def show(fig: go.Figure) -> None:
+def show(fig: go.Figure, *, config: dict | None = None) -> None:
     """跨 Streamlit 版本渲染图表，撑满容器且不触发弃用警告。
 
     - Streamlit >= 1.52：width="stretch"（新 API）
     - Streamlit <= 1.50：直接调用（默认即撑满容器，width 参数不存在）
     """
     if _st_ge(1, 52):
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, width="stretch", config=config)
     else:
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, config=config)
+
+
+def knowledge_graph(rows: list[dict]) -> go.Figure:
+    """按主题、指标、题目三列排布，保持每个指标下的题目相邻。"""
+    theme = rows[0]
+    nodes = [
+        [(0, 0.5, theme["theme_name"], f"课标：{theme['course_standard']}<br>教材：{theme['textbook_pages']}")],
+        [],
+        [],
+    ]
+    edge_x, edge_y = [], []
+    slots = sum(max(1, len(row["questions"])) for row in rows)
+    offset = 0
+    for row in rows:
+        questions = row["questions"]
+        count = max(1, len(questions))
+        center = 1 - (offset + count / 2) / slots
+        nodes[1].append((1, center, row["code"], row["name"]))
+        edge_x.extend((0, 1, None))
+        edge_y.extend((0.5, center, None))
+        for index, question in enumerate(questions):
+            position = 1 - (offset + index + 0.5) / slots
+            nodes[2].append((2, position, question, f"对应指标：{row['name']}"))
+            edge_x.extend((1, 2, None))
+            edge_y.extend((center, position, None))
+        offset += count
+
+    fig = go.Figure(go.Scatter(x=edge_x, y=edge_y, mode="lines",
+                               line=dict(color=AXIS, width=1), hoverinfo="skip"))
+    for layer, (label, color, size) in zip(nodes, [
+        ("学习主题", "#2C5F8A", 18),
+        ("观察指标", "#3E7CB1", 13),
+        ("关联题目", "#3E8E62", 8),
+    ]):
+        if layer:
+            x, y, text, detail = zip(*layer)
+            fig.add_scatter(
+                x=x, y=y, text=text, customdata=detail, name=label,
+                mode="markers+text", textposition="middle right",
+                textfont=dict(color=INK, size=12),
+                marker=dict(color=color, size=size, line=dict(color="white", width=1)),
+                hovertemplate="<b>%{text}</b><br>%{customdata}<extra></extra>",
+            )
+
+    _layout(fig, height=min(700, max(360, slots * 24 + 82)))
+    fig.update_layout(
+        dragmode="pan", showlegend=False, plot_bgcolor="#F6F8FC",
+        margin=dict(l=8, r=8, t=42, b=12),
+        modebar_remove=["select2d", "lasso2d", "autoScale2d", "toImage"],
+    )
+    fig.update_xaxes(visible=False, range=[-0.25, 2.45])
+    fig.update_yaxes(visible=False, range=[-0.05, 1.12])
+    for index, label in enumerate(("学习主题", "观察指标", "关联题目")):
+        fig.add_annotation(x=index, y=1.07, text=label, xanchor="left",
+                           showarrow=False, font=dict(color=SUB, size=12))
+    return fig
 
 
 # ============================================================
