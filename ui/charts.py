@@ -200,7 +200,10 @@ def student_radar(student: dict) -> go.Figure:
                                     tickfont=dict(size=10, color=SUB)),
                    bgcolor="rgba(0,0,0,0)"),
         showlegend=False)
-    return _layout(fig, 380)
+    fig = _layout(fig, 420)
+    # 边距：默认 8px 会把四周的指标名（6 字 + 代号副行）裁掉，这里留出文字空间
+    fig.update_layout(margin=dict(l=72, r=72, t=48, b=48))
+    return fig
 
 
 def indicator_bars(student: dict) -> go.Figure:
