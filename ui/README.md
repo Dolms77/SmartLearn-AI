@@ -75,18 +75,18 @@ Set-Content "$env:USERPROFILE\.streamlit\credentials.toml" "[general]`nemail = `
 
 ```powershell
 # 一次性准备（已装过可跳过）
-ollama pull deepseek-r1:8b        # ≈5.2 GB；也可用 deepseek-r1:7b
+ollama pull qwen3.5:4b            # 当前项目优先使用的本地模型
 ollama list                       # 确认模型在列表里
 ```
 
-界面启动后侧栏「⚙ 模型与数据」会显示 `✅ 本地 · deepseek-r1:8b 已就绪`。
-模型名字不用改代码：`llm.status()` 会自动在 `deepseek-r1:8b → 7b → 任意 deepseek-r1 → 第一个模型` 里挑。
+界面启动后侧栏「⚙ 模型与数据」会显示 `✅ 本地 · qwen3.5:4b 已就绪`。
+模型选择顺序为 `qwen3.5:4b`、DeepSeek-R1 兼容模型、`qwen2.5:7b`，最后才回退到本机列表中的第一个模型。可用 `SA_OLLAMA_MODEL` 指定模型名。
 
 | 环境变量 | 默认 | 作用 |
 |---|---|---|
 | `SA_LLM_PROVIDER` | `ollama` | 设成 `api` 才走云端 DeepSeek |
 | `SA_OLLAMA_MODEL` | 自动探测 | 指定模型名 |
-| `SA_OLLAMA_THINK` | `0` | 设 `1` 打开 R1 思考链（更慢，约 6 倍） |
+| `SA_OLLAMA_THINK` | `0` | 设 `1` 开启模型思考模式（耗时更长） |
 | `SA_OLLAMA_NUM_CTX` | `4096` | 上下文窗口；8 GB 显存不够就降到 `2048` |
 | `SA_OLLAMA_TIMEOUT` | `180` | 单次调用超时（秒），冷启动需要 |
 
@@ -94,6 +94,19 @@ ollama list                       # 确认模型在列表里
 
 - **学生诊断页 → 错因诊断**：点「让本地模型复核这条诊断」，右栏显示模型是**同意**还是**改判**（改判会写明"规则 C1 → 模型 C2"及理由）；
 - **对话窗口**：预设问题或自定义提问，答案受"事实白名单"约束（只允许使用结构化统计里的数字）。
+- **多智能体建议（07）**：本地模型根据规则产出的事实生成简短建议摘要；结构化证据、指标和题号仍由规则层提供，模型失败时保留规则摘要。
+
+任务 3（08）可在生成案例时启用本地模型生成个性化摘要并改写逐条建议理由；建议顺序、指标、分步提示、证据和推荐题目仍由规则确定。生成结果缓存于 `output/llm_cache`。
+
+```powershell
+# 先生成 3 个典型案例；每名学生会进行一次本地模型调用
+.\.venv-ui\Scripts\python.exe .\已完成脚本\08_task3_generator.py --use-llm --cases D14,D01,D03
+
+# 需要指定模型时
+.\.venv-ui\Scripts\python.exe .\已完成脚本\08_task3_generator.py --use-llm --model qwen3.5:4b --cases D14,D01,D03
+```
+
+`--all-students --use-llm` 会对所有学生逐一生成，耗时更长；不加 `--use-llm` 时维持原有规则/模板生成。07 的命令行演示可用 `--no-llm` 显式关闭模型。
 
 批量预生成（演示时不用现场等）：
 

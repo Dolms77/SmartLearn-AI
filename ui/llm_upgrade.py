@@ -37,7 +37,7 @@ def main() -> None:
     ap.add_argument("--only", default="解答题", choices=["解答题", "全部"], help="只处理解答题可显著省时省钱")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--sleep", type=float, default=0.0, help="每条之间的间隔秒数（本地模型可设 0）")
-    ap.add_argument("--model", default=None, help="指定本地模型名，如 deepseek-r1:8b")
+    ap.add_argument("--model", default=None, help="指定本地模型名，如 qwen3.5:4b")
     ap.add_argument("--think", action="store_true", help="开启 R1 思考链（更慢，约 6 倍）")
     a = ap.parse_args()
 
@@ -78,7 +78,7 @@ def main() -> None:
 
     if not stt["online"]:
         print(f"模型不可用：{stt['label']}（{stt['reason']}）")
-        print("本地模式请先启动 Ollama 并拉取模型：ollama pull deepseek-r1:8b")
+        print("本地模式请先启动 Ollama 并拉取模型：ollama pull qwen3.5:4b")
         return
     print(f"后端：{stt['label']} | 思考链：{'开' if llm.OLLAMA_THINK else '关'} | 间隔 {a.sleep}s")
 

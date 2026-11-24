@@ -7,20 +7,28 @@
   2. Agent 协作链：诊断Agent结果自动流入建议Agent（级联调用，不是各干各的）
   3. 新增讲评稿Agent（LectureAgent）：教师端"下周怎么讲"直接生成结构化讲评稿
   4. 执行轨迹 Trace：每步Agent调用记录成日志，答辩演示"智能体思考过程"的素材
-  5. 规则路由与模板生成，不依赖外部模型或 API Key
+  5. 规则确定数据事实，建议摘要可由本地 Ollama 动态生成
   6. 意图识别升级：复合意图自动级联（"D01哪里薄弱，该练什么"→诊断+建议链）
 
 运行：
   python 07_multi_agent.py --demo
   python 07_multi_agent.py --chat
+  python 07_multi_agent.py --demo --no-llm
 """
 
 import json
 import os
 import re
 import argparse
+import sys
 from collections import defaultdict, Counter
 from datetime import datetime
+
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
+from ui import llm
 
 MIN_EVIDENCE = 3
 INDICATOR_NAMES = {
@@ -129,11 +137,11 @@ class Coordinator:
     STUDENT_RE = re.compile(r'D\d{2}')
     DETAIL_RE = re.compile(r'详细|具体|再说说|展开')
 
-    def __init__(self, bundle: Bundle):
+    def __init__(self, bundle: Bundle, use_llm=True):
         self.b = bundle
         self.agents = {
             'diagnosis': DiagnosisAgent(bundle),
-            'recommend': RecommendationAgent(bundle),
+            'recommend': RecommendationAgent(bundle, use_llm=use_llm),
             'lecture': LectureAgent(bundle),
             'class': ClassAgent(bundle),
         }
@@ -268,8 +276,9 @@ class RecommendationAgent:
     """建议Agent：支持两个入口——task3成果优先，无成果时现场生成；
     接收诊断Agent的级联上下文（协作链）"""
 
-    def __init__(self, bundle: Bundle):
+    def __init__(self, bundle: Bundle, use_llm=True):
         self.b = bundle
+        self.use_llm = use_llm
 
     def run(self, intent, chain_ctx, trace):
         sid = intent['student_id']
@@ -293,6 +302,7 @@ class RecommendationAgent:
             rec['source'] = 'task3_recommendations.json（教育话语版）'
             if prev.get('summary'):
                 rec['diagnosis_link'] = prev['summary']
+            self._generate_summary(rec, intent, trace)
             trace.log('RecommendationAgent', '建议输出', f'{sid}',
                       f"命中正式成果，{len(rec.get('recommendations', []))} 条建议")
             return rec
@@ -326,10 +336,71 @@ class RecommendationAgent:
                 'step_hints': ["人工审校后补充分步提示（当前为现场轻量版）"],
                 'follow_up_condition': "正确率≥80%进入下一优先级",
             })
-        return {'agent': 'RecommendationAgent', 'student_id': sid,
-                'source': '现场轻量生成（建议运行08V2生成正式话语版）',
-                'diagnosis_summary': f"整体掌握度 {p.get('overall_mastery', 0):.0%}",
-                'recommendations': recs}
+        result = {
+            'agent': 'RecommendationAgent', 'student_id': sid,
+            'source': '现场轻量生成（建议运行08V2生成正式话语版）',
+            'diagnosis_summary': f"整体掌握度 {p.get('overall_mastery', 0):.0%}",
+            'recommendations': recs,
+        }
+        self._generate_summary(result, intent, trace)
+        return result
+
+    def _generate_summary(self, result, intent, trace):
+        if not self.use_llm or not result.get('recommendations'):
+            return
+        if result.get('narrative_model'):
+            trace.log('RecommendationAgent', '复用本地模型建议', '',
+                      str(result['narrative_model']))
+            return
+
+        original = str(result.get('diagnosis_summary') or '').strip()
+        if not original:
+            return
+        facts = {
+            'question': intent.get('question', ''),
+            'rule_summary': original,
+            'recommendations': [
+                {
+                    'indicator_name': rec.get('indicator_name', ''),
+                    'reason': rec.get('reason', ''),
+                    'step_hints': rec.get('step_hints', [])[:2],
+                }
+                for rec in result.get('recommendations', [])[:3]
+            ],
+        }
+        facts_text = json.dumps(facts, ensure_ascii=False)
+        prompt = (
+            "你是七年级数学教师。请根据给定的规则结论和建议，针对教师的问题写一段简短的"
+            "教学建议摘要，最多 100 个汉字。不得增加输入中没有的事实、数字、题号、指标编号或答案；"
+            "不要重复列举原始字段。只输出摘要正文。\n事实："
+            + facts_text
+        )
+        try:
+            summary = llm.generate_local_text(
+                prompt, temperature=0.3, max_tokens=220).strip().strip('"')
+            if not summary or len(summary) > 400:
+                raise ValueError('模型摘要为空或过长')
+            allowed_numbers = set(re.findall(r'\d+(?:\.\d+)?', facts_text))
+            generated_numbers = set(re.findall(r'\d+(?:\.\d+)?', summary))
+            if not generated_numbers.issubset(allowed_numbers):
+                raise ValueError('模型摘要包含输入中没有的数字')
+            token = r'\b(?:D\d{2}|T\d{2}I\d|Q\d+[A-Za-z]?)\b'
+            allowed_ids = set(re.findall(token, facts_text))
+            generated_ids = set(re.findall(token, summary))
+            if not generated_ids.issubset(allowed_ids):
+                raise ValueError('模型摘要包含输入中没有的学生、指标或题目编号')
+            for meta in self.b.question_map.values():
+                answer = (meta.get('reference_answer') or '').strip()
+                if len(answer) >= 2 and answer in summary:
+                    raise ValueError('模型摘要命中参考答案')
+            result['rule_diagnosis_summary'] = original
+            result['diagnosis_summary'] = summary
+            result['narrative_model'] = llm.pick_model()
+            trace.log('RecommendationAgent', '本地模型生成建议摘要', '',
+                      str(result['narrative_model']))
+        except Exception as exc:
+            trace.log('RecommendationAgent', '本地模型不可用，保留规则摘要',
+                      type(exc).__name__, str(exc)[:160])
 
 
 class LectureAgent:
@@ -412,6 +483,12 @@ class ValidatorAgent:
 
     def check(self, result, trace):
         issues = []
+        if result.get('narrative_model') and result.get('rule_diagnosis_summary'):
+            summary = result.get('diagnosis_summary') or ''
+            if any(answer in summary for answer in self.ref_answers):
+                result['diagnosis_summary'] = result['rule_diagnosis_summary']
+                result.pop('narrative_model', None)
+                issues.append('模型摘要命中参考答案，已恢复规则摘要')
         for rec in result.get('recommendations', []):
             for i, h in enumerate(rec.get('step_hints', [])):
                 for ans in self.ref_answers:
@@ -438,9 +515,11 @@ def main():
     ap.add_argument('--output-dir', default=default_output_dir)
     ap.add_argument('--demo', action='store_true')
     ap.add_argument('--chat', action='store_true')
+    ap.add_argument('--no-llm', action='store_true',
+                    help='禁用建议Agent的本地 Ollama 动态摘要')
     a = ap.parse_args()
 
-    coord = Coordinator(Bundle(a.output_dir))
+    coord = Coordinator(Bundle(a.output_dir), use_llm=not a.no_llm)
 
     if a.demo:
         print('=' * 62)

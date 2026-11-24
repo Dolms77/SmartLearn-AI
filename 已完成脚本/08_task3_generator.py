@@ -13,12 +13,22 @@
 运行：
   python 08_task3_generator_v2.py --output-dir ../SmartLearn-AI/output --all-students
   python 08_task3_generator_v2.py --output-dir ../SmartLearn-AI/output --cases D14,D01,D03
+  python 08_task3_generator.py --use-llm --cases D14,D01,D03
 """
 
 import json
 import os
 import argparse
+import hashlib
+import re
+import sys
 from collections import defaultdict, Counter
+
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
+from ui import llm
 
 MIN_EVIDENCE = 3
 LEARNING_PATH = ['T01I1', 'T01I2', 'T01I3', 'T02I1', 'T02I2', 'T02I3',
@@ -365,6 +375,115 @@ def generate_for_student(sid, profiles, records_by_student, error_diag,
     }
 
 
+def enrich_with_local_model(result, cache_dir, model, reference_answers):
+    """生成个性化摘要；逐条建议、证据和推荐题目继续由规则确定。"""
+    source = {
+        'level': result.get('level'),
+        'diagnosis_summary': result.get('diagnosis_summary'),
+        'insufficient_note': result.get('insufficient_note'),
+        'recommendations': [
+            {
+                'priority': rec.get('priority'),
+                'indicator': rec.get('indicator'),
+                'indicator_name': rec.get('indicator_name', ''),
+                'mastery': rec.get('mastery'),
+                'evidence_n': rec.get('evidence_n'),
+                'rule_reason': rec.get('reason', ''),
+            }
+            for rec in result.get('recommendations', [])
+        ],
+    }
+    prompt = (
+        "你是七年级数学教师。请根据输入改写学情摘要和每条建议理由，写得自然、具体、"
+        "适合教师阅读。不得增加事实、输入中没有的数字或编号、不得给出题目答案；"
+        "保持建议顺序、指标、掌握度、证据量和证据不足结论不变。摘要不超过80字，"
+        "每条理由不超过70字。严格按以下格式逐行输出，不要 JSON、Markdown 或额外解释："
+        "\nSUMMARY: 摘要正文"
+        + ''.join('\nREASON_{}: 建议理由'.format(i)
+                  for i in range(1, len(source['recommendations']) + 1))
+        + "\n输入："
+        + json.dumps(source, ensure_ascii=False)
+    )
+    cache_id = 'task3-narrative-v1:{}:{}'.format(
+        model, hashlib.sha256(prompt.encode('utf-8')).hexdigest())
+    cache_name = hashlib.sha256(cache_id.encode('utf-8')).hexdigest()
+    cache_path = os.path.join(cache_dir, 'task3_narrative_{}.json'.format(cache_name))
+    os.makedirs(cache_dir, exist_ok=True)
+    cached = None
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, encoding='utf-8') as cache_file:
+                cached = json.load(cache_file)
+        except (OSError, json.JSONDecodeError) as exc:
+            print('  模型缓存读取失败，将重新生成：{}: {}'.format(
+                type(exc).__name__, str(exc)[:160]))
+    try:
+        summary = cached.get('summary') if isinstance(cached, dict) else None
+        replacements = cached.get('reasons') if isinstance(cached, dict) else None
+        if not isinstance(summary, str) or not isinstance(replacements, list):
+            raw = llm.generate_local_text(prompt, temperature=0.3, max_tokens=300)
+            fields = {}
+            current = None
+            for line in raw.splitlines():
+                match = re.match(r'^\s*(SUMMARY|REASON_\d+)\s*[:：]\s*(.+)$',
+                                 line.strip(), re.IGNORECASE)
+                if match:
+                    current = match.group(1).upper()
+                    fields[current] = match.group(2).strip()
+                elif current and line.strip():
+                    fields[current] += ' ' + line.strip()
+            summary = fields.get('SUMMARY')
+            replacements = [
+                fields.get('REASON_{}'.format(i))
+                for i in range(1, len(result.get('recommendations', [])) + 1)
+            ]
+        if not summary or len(summary) > 240:
+            raise ValueError('模型摘要为空或过长')
+        recommendations = result.get('recommendations', [])
+        if not isinstance(replacements, list) or len(replacements) != len(recommendations):
+            raise ValueError('模型返回的建议条数不匹配')
+        checked_reasons = []
+        for reason in replacements:
+            if not isinstance(reason, str) or not reason.strip() or len(reason) > 320:
+                raise ValueError('模型建议理由格式无效')
+            checked_reasons.append(reason.strip())
+
+        generated_text = [summary.strip(), *checked_reasons]
+        source_text = json.dumps(source, ensure_ascii=False)
+        allowed_numbers = set(re.findall(r'\d+(?:\.\d+)?', source_text))
+        generated_numbers = set(re.findall(
+            r'\d+(?:\.\d+)?', ' '.join(generated_text)))
+        if not generated_numbers.issubset(allowed_numbers):
+            raise ValueError('模型摘要包含输入中没有的数字')
+        identifier_pattern = r'\b(?:D\d{2}|T\d{2}I\d|Q\d+[A-Za-z]?)\b'
+        allowed_ids = set(re.findall(identifier_pattern, source_text))
+        generated_ids = set(re.findall(identifier_pattern, ' '.join(generated_text)))
+        if not generated_ids.issubset(allowed_ids):
+            raise ValueError('模型摘要包含输入中没有的学生、指标或题目编号')
+        if any(answer in text for answer in reference_answers for text in generated_text):
+            raise ValueError('模型摘要命中参考答案，已拒绝覆盖模板')
+
+        if (not isinstance(cached, dict) or not isinstance(cached.get('summary'), str)
+                or not isinstance(cached.get('reasons'), list)):
+            try:
+                with open(cache_path, 'w', encoding='utf-8') as cache_file:
+                    json.dump({'summary': summary.strip(), 'reasons': checked_reasons},
+                              cache_file, ensure_ascii=False)
+            except OSError as exc:
+                print('  模型缓存写入失败：{}: {}'.format(type(exc).__name__, str(exc)[:160]))
+        result['rule_diagnosis_summary'] = result['diagnosis_summary']
+        result['diagnosis_summary'] = summary.strip()
+        for original, reason in zip(recommendations, checked_reasons):
+            original['rule_reason'] = original['reason']
+            original['reason'] = reason
+        result['narrative_model'] = model
+        return True
+    except Exception as exc:
+        print('  本地模型生成失败，保留规则模板：{}: {}'.format(
+            type(exc).__name__, str(exc)[:180]))
+        return False
+
+
 def select_cases(profiles, manual=None):
     if manual:
         return [s for s in manual if s in profiles]
@@ -418,7 +537,19 @@ def main():
     ap.add_argument('--output-dir', default=default_output_dir)
     ap.add_argument('--cases', default=None)
     ap.add_argument('--all-students', action='store_true', help='同时生成全班学生建议')
+    ap.add_argument('--use-llm', action='store_true',
+                    help='使用本机 Ollama 模型动态润色建议文本')
+    ap.add_argument('--model', default=None, help='指定本地模型名，如 qwen3.5:4b')
     a = ap.parse_args()
+
+    model = None
+    if a.use_llm:
+        local_models = llm.list_local_models(force=True)
+        if a.model:
+            llm.OLLAMA_MODEL_ENV = a.model
+        model = llm.pick_model(local_models)
+        if not model or model not in local_models:
+            raise SystemExit('指定的 Ollama 模型不可用；请先运行 ollama list 检查本机模型。')
 
     cleaned = load(a.output_dir, 'cleaned_data.json', {})
     stats = load(a.output_dir, 'statistics.json', {})
@@ -447,14 +578,24 @@ def main():
         'meta': {'version': '2.0-edu', 'generated_by': '08_task3_generator.py',
                  'evidence_threshold': MIN_EVIDENCE,
                  'style': '教师话语体系：教学归因+干预动作+情感支持',
-                 'human_review_note': '所有标有【人工审校点】处需B核对后定稿'},
+                 'human_review_note': '所有标有【人工审校点】处需B核对后定稿',
+                 'narrative_model': 'template'},
         'cases': {}, 'all_students': {},
         'class_advice': build_class_advice(stats),
     }
 
+    reference_answers = {
+        (meta.get('reference_answer') or '').strip()
+        for meta in question_map.values()
+        if len((meta.get('reference_answer') or '').strip()) >= 2
+    }
+    cache_dir = os.path.join(a.output_dir, 'llm_cache')
+
     for sid in case_sids:
         rec = generate_for_student(sid, profiles, records_by_student, error_diag,
                                    stats, question_map, questions_by_indicator, point_stats)
+        if model:
+            enrich_with_local_model(rec, cache_dir, model, reference_answers)
         task3['cases'][sid] = rec
         print(f'\n── {sid}（{rec["level"]}）──')
         print(f'  摘要：{rec["diagnosis_summary"][:120]}...')
@@ -469,13 +610,19 @@ def main():
             rec = generate_for_student(sid, profiles, records_by_student, error_diag,
                                        stats, question_map, questions_by_indicator, point_stats)
             rec['recommendations'] = rec['recommendations'][:2]
+            if model:
+                enrich_with_local_model(rec, cache_dir, model, reference_answers)
             task3['all_students'][sid] = rec
         print(f'\n  全班轻量建议：{len(task3["all_students"])} 人')
 
+    model_used = any(
+        student.get('narrative_model')
+        for student in list(task3['cases'].values()) + list(task3['all_students'].values())
+    )
+    task3['meta']['narrative_model'] = model if model and model_used else 'template'
+
     # 答案泄露检测
-    ref_answers = {(m.get('reference_answer') or '').strip()
-                   for m in question_map.values()}
-    ref_answers = {x for x in ref_answers if len(x) >= 2}
+    ref_answers = reference_answers
     replaced = 0
     def scan(recs):
         nonlocal replaced

@@ -124,7 +124,7 @@ with st.sidebar:
         else:
             st.warning(stt["reason"] or "模型不可用", icon="⚠️")
             if stt["provider"] == "ollama":
-                st.code("ollama pull deepseek-r1:8b", language="powershell")
+                st.code("ollama pull qwen3.5:4b", language="powershell")
                 st.caption("拉取后无需重启界面，点右上角 Rerun 即可。")
 
         with st.expander("切回云端 API（可选）", expanded=False):

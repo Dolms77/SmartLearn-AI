@@ -118,6 +118,14 @@ def main() -> int:
         if len(C.mastery_bubble_matrix_chart(mock).data[-1].x) != 1:
             fails.append("无作答模拟格未生成占位点")
 
+    preferred_model = llm.OLLAMA_MODEL_ENV
+    try:
+        llm.OLLAMA_MODEL_ENV = ""
+        if llm.pick_model(["deepseek-r1:8b", "qwen3.5:4b"]) != "qwen3.5:4b":
+            fails.append("本地模型未优先选择 qwen3.5:4b")
+    finally:
+        llm.OLLAMA_MODEL_ENV = preferred_model
+
     print("[4/5] 数据质量独立复核 ...")
     audit = (b.get("quality") or {}).get("source_quality_audit") or {}
     if len(audit.get("checks") or []) != 8:
@@ -133,6 +141,27 @@ def main() -> int:
     if n_students:
         v = A.student_view(b, A.list_students(b)[0])
         _ = llm.offline_answer("测试", llm.build_facts(v, {}, cv["class_theme"]))
+    old_http_json, old_pick_model = llm._http_json, llm.pick_model
+    captured = {}
+    try:
+        def fake_pick_model(models=None):
+            del models
+            return "qwen3.5:4b"
+
+        llm.pick_model = fake_pick_model
+
+        def fake_http_json(_url, payload=None, timeout=5.0):
+            del _url, timeout
+            captured["payload"] = payload
+            return {"message": {"content": "ok"}}
+
+        llm._http_json = fake_http_json
+        if llm._chat_ollama("prompt", 0.1, 120) != "ok":
+            fails.append("本地模型文本调用没有返回内容")
+        if captured.get("payload", {}).get("options", {}).get("num_predict") != 120:
+            fails.append("本地模型生成长度没有遵守调用方上限")
+    finally:
+        llm._http_json, llm.pick_model = old_http_json, old_pick_model
     print("      校验 / 离线回答 正常")
 
     print("")

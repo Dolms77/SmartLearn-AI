@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""LLM 接入层：默认走本地 Ollama（deepseek-r1），可切回 DeepSeek API。
+"""LLM 接入层：默认走本地 Ollama（优先 qwen3.5:4b），可切回 DeepSeek API。
 
 设计要点
 --------
@@ -26,7 +26,10 @@ import urllib.request
 PROVIDER = os.environ.get("SA_LLM_PROVIDER", "ollama").strip().lower()
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
 OLLAMA_MODEL_ENV = os.environ.get("SA_OLLAMA_MODEL", "").strip()
-PREFERRED_MODELS = ["deepseek-r1:8b", "deepseek-r1:7b", "deepseek-r1", "qwen2.5:7b"]
+PREFERRED_MODELS = [
+    "qwen3.5:4b", "deepseek-r1:8b", "deepseek-r1:7b",
+    "deepseek-r1", "qwen2.5:7b",
+]
 OLLAMA_THINK = os.environ.get("SA_OLLAMA_THINK", "0") == "1"
 OLLAMA_NUM_PREDICT = int(os.environ.get("SA_OLLAMA_NUM_PREDICT", "700"))
 OLLAMA_NUM_CTX = int(os.environ.get("SA_OLLAMA_NUM_CTX", "4096"))
@@ -71,7 +74,7 @@ def list_local_models(force: bool = False) -> list[str]:
 
 
 def pick_model(models: list[str] | None = None) -> str | None:
-    """优先用环境变量指定；否则按 PREFERRED_MODELS 顺序找；再否则取任意 deepseek-r1。"""
+    """优先用环境变量指定；否则按 PREFERRED_MODELS 顺序，再选本机首个模型。"""
     models = models if models is not None else list_local_models()
     if OLLAMA_MODEL_ENV:
         return OLLAMA_MODEL_ENV
@@ -267,7 +270,7 @@ def _chat_api(key: str, prompt: str, temperature: float, max_tokens: int) -> str
 def _chat_ollama(prompt: str, temperature: float, max_tokens: int) -> str:
     model = pick_model()
     if not model:
-        raise RuntimeError("本地没有可用模型（先运行 ollama pull deepseek-r1:8b）")
+        raise RuntimeError(f"本地没有可用模型（可运行 ollama pull {PREFERRED_MODELS[0]}）")
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
@@ -275,7 +278,7 @@ def _chat_ollama(prompt: str, temperature: float, max_tokens: int) -> str:
         "think": OLLAMA_THINK,          # 关闭思考：1.5s vs 9.5s，结构化任务无需长推理
         "options": {
             "temperature": temperature,
-            "num_predict": max(max_tokens, OLLAMA_NUM_PREDICT),
+            "num_predict": max(1, min(max_tokens, OLLAMA_NUM_PREDICT)),
             "num_ctx": OLLAMA_NUM_CTX,
         },
     }
@@ -304,6 +307,15 @@ def _chat(key: str | None, prompt: str, temperature: float = 0.3, max_tokens: in
                 break
             time.sleep(1.5 * (attempt + 1))
     raise last if last else RuntimeError("unknown error")
+
+
+def generate_local_text(prompt: str, temperature: float = 0.3,
+                        max_tokens: int = 700) -> str:
+    """通过本机 Ollama 生成文本，不经过云端 API。"""
+    model = pick_model()
+    if not model:
+        raise RuntimeError(f"本地没有可用模型（可运行 ollama pull {PREFERRED_MODELS[0]}）")
+    return _chat_ollama(prompt, temperature, max_tokens)
 
 
 def _strip_fences(text: str) -> str:
