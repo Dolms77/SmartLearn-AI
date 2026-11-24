@@ -24,7 +24,7 @@
 
 | 模块 | 目录 | 产出 |
 |---|---|---|
-| 数据治理与统计 | `已完成脚本/01_data_loader.py` | 清洗后数据、质量报告、五维统计 |
+| 数据治理与统计 | `已完成脚本/01_data_loader.py` | 清洗后数据、质量报告、多维统计（9 类：总/主题/指标/评分点/学生/班级×主题/班级×题目/班级×评分点/跨节点） |
 | 知识追踪 | `已完成脚本/02_bkt_model.py` | 40×9 掌握概率、学生画像 |
 | 错因诊断 | `已完成脚本/03_error_diagnosis.py` | 385 条结构化错因（C1–C6） |
 | 知识库（可选） | `已完成脚本/04_rag_knowledge.py` | 课标/教材/题目向量索引 |
@@ -33,7 +33,7 @@
 | 多智能体演示 | `已完成脚本/07_multi_agent.py` | 可解释的智能体路由与建议 |
 | 任务3建议生成 | `已完成脚本/08_task3_generator.py` | 3 个典型案例 + 全班建议，需人工审校标记项 |
 | 任务1知识结构 | `已完成脚本/09_task1_knowledge_structure.py` | 可追溯的课标、教材、题目及作答证据映射 |
-| 交互界面 | `ui/` | Streamlit 四页 + DeepSeek 诊断 |
+| 交互界面 | `ui/` | Streamlit 12 页（学生 6 + 教师 6）+ 本地 Ollama / 云端 DeepSeek 双通道 |
 
 ## 三条口径（代码里写死，答辩可直接讲）
 
@@ -43,4 +43,4 @@
 
 ## 环境
 
-Python ≥ 3.10；运行时依赖（界面 + 脚本）见 `requirements.txt`，RAG 可选依赖见 `requirements-rag.txt`。
+Python ≥ 3.10；运行时依赖（界面 + 脚本）见 `requirements.txt`，RAG 可选依赖见 `requirements-rag.txt`，打包 exe 见 `requirements-build.txt`。界面默认用本机 Ollama（`ollama pull deepseek-r1:8b`），不装也能跑，只是问答退回离线模板。
