@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧学伴 - 学情诊断仪表盘</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Microsoft YaHei','PingFang SC','Helvetica Neue',sans-serif;
+       background:#F5F5F5; color:#333; line-height:1.6; }
+.header {
+    background:linear-gradient(135deg,#4ECDC4 0%,#45B7D1 100%);
+    color:white; padding:25px 30px; text-align:center;
+}
+.header h1 { font-size:24px; margin-bottom:5px; }
+.header p { font-size:13px; opacity:0.9; }
+.kpi-row {
+    display:flex; justify-content:center; gap:15px;
+    padding:20px; flex-wrap:wrap;
+}
+.kpi-card {
+    text-align:center; padding:15px 25px; border-radius:8px; min-width:130px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.1);
+}
+.kpi-card .value { font-size:26px; font-weight:bold; }
+.kpi-card .label { font-size:12px; color:#666; margin-top:3px; }
+.section {
+    background:white; margin:10px; padding:20px; border-radius:8px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.1);
+}
+.section h2 {
+    font-size:16px; color:#45B7D1;
+    border-bottom:2px solid #E0E0E0; padding-bottom:8px; margin-bottom:15px;
+}
+.chart-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:15px;
+}
+@media(max-width:768px) {
+    .chart-grid { grid-template-columns:1fr; }
+}
+.chart-box {
+    padding:10px; border:1px solid #EEE; border-radius:6px;
+}
+.chart-box h3 {
+    font-size:14px; color:#555; margin-bottom:10px; text-align:center;
+}
+.bar-chart {
+    display:flex; align-items:flex-end; justify-content:center;
+    gap:8px; height:240px; padding-bottom:30px; overflow-x:auto;
+}
+.bar-item {
+    display:flex; flex-direction:column; align-items:center;
+    min-width:40px; height:100%; justify-content:flex-end; position:relative;
+}
+.bar-group {
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+    height:100%; margin:0 2px;
+}
+.bar-fill {
+    width:24px; border-radius:3px 3px 0 0; transition:height 0.3s;
+    min-height:3px;
+}
+.bar-value {
+    font-size:9px; color:#666; margin-bottom:2px; white-space:nowrap;
+}
+.bar-label {
+    font-size:8px; color:#888; margin-top:4px; text-align:center;
+    white-space:nowrap; writing-mode:horizontal-tb;
+    position:absolute; bottom:-20px; transform:rotate(-30deg); transform-origin:left top;
+}
+.legend {
+    text-align:center; font-size:11px; color:#888; margin-bottom:10px;
+}
+.heatmap-table {
+    border-collapse:collapse; font-size:10px; margin:auto;
+}
+.heatmap-table th {
+    padding:8px 4px; color:#666; font-weight:normal;
+}
+.heatmap-table th.rotate {
+    writing-mode:vertical-rl; text-orientation:upright; height:60px;
+}
+.heatmap-table td {
+    padding:3px; text-align:center; border:1px solid #EEE;
+}
+.heatmap-table td.sid {
+    font-weight:bold; background:#F8F8F8; text-align:right; padding-right:8px;
+}
+.heat-cell {
+    width:40px; height:24px; font-size:9px;
+}
+.finding-card {
+    background:#FAFAFA; padding:10px 12px; margin:5px 0;
+    border-radius:3px; font-size:13px;
+}
+.pie-legend-item {
+    font-size:11px; margin:3px 0;
+}
+.footer {
+    text-align:center; padding:20px; color:#999; font-size:12px;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>智慧学伴 · 学情诊断仪表盘</h1>
+    <p>七年级数学 | 3主题 9指标 54题 40学生 790条记录 | 得分率57.94%</p>
+</div>
+
+<div class="kpi-row">
+    <div class="kpi-card" style="background:#E8F5E9;">
+        <div class="value" style="color:#2E7D32;">57.94%</div>
+        <div class="label">总体得分率</div>
+    </div>
+    <div class="kpi-card" style="background:#E3F2FD;">
+        <div class="value" style="color:#1565C0;">790</div>
+        <div class="label">已评分记录</div>
+    </div>
+    <div class="kpi-card" style="background:#FFF3E0;">
+        <div class="value" style="color:#E65100;">40</div>
+        <div class="label">学生人数</div>
+    </div>
+    <div class="kpi-card" style="background:#FCE4EC;">
+        <div class="value" style="color:#C62828;">6</div>
+        <div class="label">错误类型</div>
+    </div>
+</div>
+
+<div class="chart-box"><h3>关键发现（自动识别）</h3><div class="finding-card" style="border-left:4px solid #E74C3C;"><span style="color:#E74C3C;font-weight:bold;">[严重]</span> Q043P2 得分率为0%（9人全错），属于全班共性难点</div><div class="finding-card" style="border-left:4px solid #E74C3C;"><span style="color:#E74C3C;font-weight:bold;">[严重]</span> Q043P3 得分率为0%（9人全错），属于全班共性难点</div><div class="finding-card" style="border-left:4px solid #E67E22;"><span style="color:#E67E22;font-weight:bold;">[高]</span> D02在Q011上两次答题答案相同且都错（顽固性错误）</div><div class="finding-card" style="border-left:4px solid #E67E22;"><span style="color:#E67E22;font-weight:bold;">[高]</span> D03在Q018上两次答题答案相同且都错（顽固性错误）</div><div class="finding-card" style="border-left:4px solid #E67E22;"><span style="color:#E67E22;font-weight:bold;">[高]</span> D05在Q002上两次答题答案相同且都错（顽固性错误）</div><div class="finding-card" style="border-left:4px solid #E67E22;"><span style="color:#E67E22;font-weight:bold;">[高]</span> D06在Q012上两次答题答案相同且都错（顽固性错误）</div><div class="finding-card" style="border-left:4px solid #E67E22;"><span style="color:#E67E22;font-weight:bold;">[高]</span> D12在Q006上两次答题答案相同且都错（顽固性错误）</div><div class="finding-card" style="border-left:4px solid #E67E22;"><span style="color:#E67E22;font-weight:bold;">[高]</span> D21在Q018上两次答题答案相同且都错（顽固性错误）</div><div class="finding-card" style="border-left:4px solid #E67E22;"><span style="color:#E67E22;font-weight:bold;">[高]</span> D37在Q004上两次答题答案相同且都错（顽固性错误）</div><div class="finding-card" style="border-left:4px solid #F39C12;"><span style="color:#F39C12;font-weight:bold;">[中]</span> 发现49条级联错误：前一步出错导致后续步骤全部不得分</div></div>
+
+<div class="section">
+    <h2>九指标得分率 & 班级×主题对比</h2>
+    <div class="chart-grid">
+        
+    <div class="chart-box">
+        <h3>九指标得分率雷达图</h3>
+        <svg width="320" height="340" style="display:block;margin:auto;">
+            <polygon points="150.0,138.0 164.1,143.1 171.7,156.2 169.1,171.0 157.5,180.7 142.5,180.7 130.9,171.0 128.3,156.2 135.9,143.1" fill="none" stroke="#E0E0E0" stroke-width="1"/><polygon points="150.0,116.0 178.3,126.3 193.3,152.4 188.1,182.0 165.0,201.3 135.0,201.3 111.9,182.0 106.7,152.4 121.7,126.3" fill="none" stroke="#E0E0E0" stroke-width="1"/><polygon points="150.0,94.0 192.4,109.4 215.0,148.5 207.2,193.0 172.6,222.0 127.4,222.0 92.8,193.0 85.0,148.5 107.6,109.4" fill="none" stroke="#E0E0E0" stroke-width="1"/><polygon points="150.0,72.0 206.6,92.6 236.7,144.7 226.2,204.0 180.1,242.7 119.9,242.7 73.8,204.0 63.3,144.7 93.4,92.6" fill="none" stroke="#E0E0E0" stroke-width="1"/><polygon points="150.0,50.0 220.7,75.7 258.3,140.9 245.3,215.0 187.6,263.4 112.4,263.4 54.7,215.0 41.7,140.9 79.3,75.7" fill="none" stroke="#E0E0E0" stroke-width="1"/>
+            <line x1="150" y1="160" x2="150.0" y2="50.0" stroke="#D0D0D0" stroke-width="1"/><line x1="150" y1="160" x2="220.7" y2="75.7" stroke="#D0D0D0" stroke-width="1"/><line x1="150" y1="160" x2="258.3" y2="140.9" stroke="#D0D0D0" stroke-width="1"/><line x1="150" y1="160" x2="245.3" y2="215.0" stroke="#D0D0D0" stroke-width="1"/><line x1="150" y1="160" x2="187.6" y2="263.4" stroke="#D0D0D0" stroke-width="1"/><line x1="150" y1="160" x2="112.4" y2="263.4" stroke="#D0D0D0" stroke-width="1"/><line x1="150" y1="160" x2="54.7" y2="215.0" stroke="#D0D0D0" stroke-width="1"/><line x1="150" y1="160" x2="41.7" y2="140.9" stroke="#D0D0D0" stroke-width="1"/><line x1="150" y1="160" x2="79.3" y2="75.7" stroke="#D0D0D0" stroke-width="1"/>
+            <polygon points="150.0,106.3 197.4,103.5 207.8,149.8 202.5,190.3 171.2,218.4 129.4,216.7 96.5,190.9 66.3,145.2 118.6,122.6" fill="rgba(78,205,196,0.3)" stroke="#4ECDC4" stroke-width="2"/>
+            <circle cx="150.0" cy="106.3" r="3" fill="#4ECDC4"/><circle cx="197.4" cy="103.5" r="3" fill="#4ECDC4"/><circle cx="207.8" cy="149.8" r="3" fill="#4ECDC4"/><circle cx="202.5" cy="190.3" r="3" fill="#4ECDC4"/><circle cx="171.2" cy="218.4" r="3" fill="#4ECDC4"/><circle cx="129.4" cy="216.7" r="3" fill="#4ECDC4"/><circle cx="96.5" cy="190.9" r="3" fill="#4ECDC4"/><circle cx="66.3" cy="145.2" r="3" fill="#4ECDC4"/><circle cx="118.6" cy="122.6" r="3" fill="#4ECDC4"/>
+            <text x="150.0" y="25.0" text-anchor="middle" font-size="8" fill="#666">表示数量关系</text><text x="150.0" y="35.0" text-anchor="middle" font-size="8" fill="#4ECDC4">49%</text><text x="236.8" y="56.6" text-anchor="middle" font-size="8" fill="#666">识别同类项去</text><text x="236.8" y="66.6" text-anchor="middle" font-size="8" fill="#4ECDC4">67%</text><text x="282.9" y="136.6" text-anchor="middle" font-size="8" fill="#666">用整式解释具</text><text x="282.9" y="146.6" text-anchor="middle" font-size="8" fill="#4ECDC4">53%</text><text x="266.9" y="227.5" text-anchor="middle" font-size="8" fill="#666">运用等式性质</text><text x="266.9" y="237.5" text-anchor="middle" font-size="8" fill="#4ECDC4">55%</text><text x="196.2" y="286.9" text-anchor="middle" font-size="8" fill="#666">用消元法解二</text><text x="196.2" y="296.9" text-anchor="middle" font-size="8" fill="#4ECDC4">56%</text><text x="103.8" y="286.9" text-anchor="middle" font-size="8" fill="#666">列方程方程组</text><text x="103.8" y="296.9" text-anchor="middle" font-size="8" fill="#4ECDC4">55%</text><text x="33.1" y="227.5" text-anchor="middle" font-size="8" fill="#666">运用不等式性</text><text x="33.1" y="237.5" text-anchor="middle" font-size="8" fill="#4ECDC4">56%</text><text x="17.1" y="136.6" text-anchor="middle" font-size="8" fill="#666">求两个不等式</text><text x="17.1" y="146.6" text-anchor="middle" font-size="8" fill="#4ECDC4">77%</text><text x="63.2" y="56.6" text-anchor="middle" font-size="8" fill="#666">根据实际限制</text><text x="63.2" y="66.6" text-anchor="middle" font-size="8" fill="#4ECDC4">44%</text>
+        </svg>
+    </div>
+        
+    <div class="chart-box">
+        <h3>班级×主题对比</h3>
+        <div class="legend"><span style="color:#4ECDC4;">■</span> DC01 &nbsp; <span style="color:#FF6B6B;">■</span> DC02</div>
+        <div class="bar-chart">
+        <div class="bar-item">
+            <div class="bar-group">
+                <div class="bar-value">56.5%</div>
+                <div class="bar-fill" style="height:113.06px;background:#4ECDC4;"></div>
+            </div>
+            <div class="bar-group">
+                <div class="bar-value">59.3%</div>
+                <div class="bar-fill" style="height:118.68px;background:#FF6B6B;"></div>
+            </div>
+            <div class="bar-label">代数式</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-group">
+                <div class="bar-value">61.1%</div>
+                <div class="bar-fill" style="height:122.12px;background:#4ECDC4;"></div>
+            </div>
+            <div class="bar-group">
+                <div class="bar-value">49.3%</div>
+                <div class="bar-fill" style="height:98.6px;background:#FF6B6B;"></div>
+            </div>
+            <div class="bar-label">方程</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-group">
+                <div class="bar-value">65.8%</div>
+                <div class="bar-fill" style="height:131.64000000000001px;background:#4ECDC4;"></div>
+            </div>
+            <div class="bar-group">
+                <div class="bar-value">57.7%</div>
+                <div class="bar-fill" style="height:115.32px;background:#FF6B6B;"></div>
+            </div>
+            <div class="bar-label">不等式</div>
+        </div></div>
+    </div>
+    </div>
+</div>
+
+<div class="section">
+    <h2>评分点得分率 & 错误类型分布</h2>
+    <div class="chart-grid">
+        
+    <div class="chart-box">
+        <h3>评分点得分率（红色=重点关注）</h3>
+        <div class="bar-chart">
+        <div class="bar-item">
+            <div class="bar-value">0.0%</div>
+            <div class="bar-fill" style="height:2px;background:#E74C3C;"></div>
+            <div class="bar-label">Q043P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">0.0%</div>
+            <div class="bar-fill" style="height:2px;background:#E74C3C;"></div>
+            <div class="bar-label">Q043P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">14.3%</div>
+            <div class="bar-fill" style="height:28.58px;background:#E74C3C;"></div>
+            <div class="bar-label">Q018P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">16.7%</div>
+            <div class="bar-fill" style="height:33.339999999999996px;background:#E74C3C;"></div>
+            <div class="bar-label">Q054P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">18.2%</div>
+            <div class="bar-fill" style="height:36.36px;background:#E74C3C;"></div>
+            <div class="bar-label">Q014P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">25.0%</div>
+            <div class="bar-fill" style="height:50.0px;background:#E74C3C;"></div>
+            <div class="bar-label">Q028P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">26.3%</div>
+            <div class="bar-fill" style="height:52.64px;background:#E74C3C;"></div>
+            <div class="bar-label">Q011P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">26.7%</div>
+            <div class="bar-fill" style="height:53.339999999999996px;background:#E74C3C;"></div>
+            <div class="bar-label">Q022P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">27.3%</div>
+            <div class="bar-fill" style="height:54.54px;background:#E74C3C;"></div>
+            <div class="bar-label">Q014P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">29.4%</div>
+            <div class="bar-fill" style="height:58.81999999999999px;background:#E74C3C;"></div>
+            <div class="bar-label">Q034P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">31.2%</div>
+            <div class="bar-fill" style="height:62.5px;background:#F39C12;"></div>
+            <div class="bar-label">Q025P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">32.0%</div>
+            <div class="bar-fill" style="height:64.0px;background:#F39C12;"></div>
+            <div class="bar-label">Q006P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">33.3%</div>
+            <div class="bar-fill" style="height:66.66px;background:#F39C12;"></div>
+            <div class="bar-label">Q046P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">33.3%</div>
+            <div class="bar-fill" style="height:66.66px;background:#F39C12;"></div>
+            <div class="bar-label">Q046P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">36.4%</div>
+            <div class="bar-fill" style="height:72.72px;background:#F39C12;"></div>
+            <div class="bar-label">Q036P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">36.4%</div>
+            <div class="bar-fill" style="height:72.72px;background:#F39C12;"></div>
+            <div class="bar-label">Q036P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">36.4%</div>
+            <div class="bar-fill" style="height:72.72px;background:#F39C12;"></div>
+            <div class="bar-label">Q037P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">37.5%</div>
+            <div class="bar-fill" style="height:75.0px;background:#F39C12;"></div>
+            <div class="bar-label">Q007P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">37.5%</div>
+            <div class="bar-fill" style="height:75.0px;background:#F39C12;"></div>
+            <div class="bar-label">Q010P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">38.5%</div>
+            <div class="bar-fill" style="height:76.92px;background:#F39C12;"></div>
+            <div class="bar-label">Q031P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">38.9%</div>
+            <div class="bar-fill" style="height:77.78px;background:#F39C12;"></div>
+            <div class="bar-label">Q032P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">41.7%</div>
+            <div class="bar-fill" style="height:83.34px;background:#F39C12;"></div>
+            <div class="bar-label">Q028P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">42.9%</div>
+            <div class="bar-fill" style="height:85.72px;background:#F39C12;"></div>
+            <div class="bar-label">Q012P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">42.9%</div>
+            <div class="bar-fill" style="height:85.72px;background:#F39C12;"></div>
+            <div class="bar-label">Q049P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">42.9%</div>
+            <div class="bar-fill" style="height:85.72px;background:#F39C12;"></div>
+            <div class="bar-label">Q051P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">42.9%</div>
+            <div class="bar-fill" style="height:85.72px;background:#F39C12;"></div>
+            <div class="bar-label">Q052P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">42.9%</div>
+            <div class="bar-fill" style="height:85.72px;background:#F39C12;"></div>
+            <div class="bar-label">Q052P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">42.9%</div>
+            <div class="bar-fill" style="height:85.72px;background:#F39C12;"></div>
+            <div class="bar-label">Q052P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">45.5%</div>
+            <div class="bar-fill" style="height:90.9px;background:#F39C12;"></div>
+            <div class="bar-label">Q014P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">47.8%</div>
+            <div class="bar-fill" style="height:95.66px;background:#F39C12;"></div>
+            <div class="bar-label">Q002P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">50.0%</div>
+            <div class="bar-fill" style="height:100.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q004P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">50.0%</div>
+            <div class="bar-fill" style="height:100.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q015P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">50.0%</div>
+            <div class="bar-fill" style="height:100.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q023P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">50.0%</div>
+            <div class="bar-fill" style="height:100.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q024P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">50.0%</div>
+            <div class="bar-fill" style="height:100.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q050P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">50.0%</div>
+            <div class="bar-fill" style="height:100.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q054P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">52.9%</div>
+            <div class="bar-fill" style="height:105.88px;background:#2ECC71;"></div>
+            <div class="bar-label">Q027P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">53.3%</div>
+            <div class="bar-fill" style="height:106.66px;background:#2ECC71;"></div>
+            <div class="bar-label">Q022P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">55.6%</div>
+            <div class="bar-fill" style="height:111.11999999999999px;background:#2ECC71;"></div>
+            <div class="bar-label">Q016P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">55.6%</div>
+            <div class="bar-fill" style="height:111.11999999999999px;background:#2ECC71;"></div>
+            <div class="bar-label">Q040P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">56.2%</div>
+            <div class="bar-fill" style="height:112.5px;background:#2ECC71;"></div>
+            <div class="bar-label">Q025P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">56.2%</div>
+            <div class="bar-fill" style="height:112.5px;background:#2ECC71;"></div>
+            <div class="bar-label">Q026P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">57.7%</div>
+            <div class="bar-fill" style="height:115.38px;background:#2ECC71;"></div>
+            <div class="bar-label">Q017P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">58.3%</div>
+            <div class="bar-fill" style="height:116.66000000000001px;background:#2ECC71;"></div>
+            <div class="bar-label">Q021P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">58.3%</div>
+            <div class="bar-fill" style="height:116.66000000000001px;background:#2ECC71;"></div>
+            <div class="bar-label">Q033P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">58.3%</div>
+            <div class="bar-fill" style="height:116.66000000000001px;background:#2ECC71;"></div>
+            <div class="bar-label">Q042P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">58.8%</div>
+            <div class="bar-fill" style="height:117.63999999999999px;background:#2ECC71;"></div>
+            <div class="bar-label">Q034P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">60.0%</div>
+            <div class="bar-fill" style="height:120.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q019P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">60.0%</div>
+            <div class="bar-fill" style="height:120.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q029P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">61.5%</div>
+            <div class="bar-fill" style="height:123.07999999999998px;background:#2ECC71;"></div>
+            <div class="bar-label">Q020P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">63.2%</div>
+            <div class="bar-fill" style="height:126.32000000000001px;background:#2ECC71;"></div>
+            <div class="bar-label">Q011P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">66.7%</div>
+            <div class="bar-fill" style="height:133.34px;background:#2ECC71;"></div>
+            <div class="bar-label">Q018P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">66.7%</div>
+            <div class="bar-fill" style="height:133.34px;background:#2ECC71;"></div>
+            <div class="bar-label">Q035P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">66.7%</div>
+            <div class="bar-fill" style="height:133.34px;background:#2ECC71;"></div>
+            <div class="bar-label">Q040P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">66.7%</div>
+            <div class="bar-fill" style="height:133.34px;background:#2ECC71;"></div>
+            <div class="bar-label">Q046P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">66.7%</div>
+            <div class="bar-fill" style="height:133.34px;background:#2ECC71;"></div>
+            <div class="bar-label">Q047P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">66.7%</div>
+            <div class="bar-fill" style="height:133.34px;background:#2ECC71;"></div>
+            <div class="bar-label">Q048P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">66.7%</div>
+            <div class="bar-fill" style="height:133.34px;background:#2ECC71;"></div>
+            <div class="bar-label">Q054P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">68.0%</div>
+            <div class="bar-fill" style="height:136.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q006P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">68.0%</div>
+            <div class="bar-fill" style="height:136.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q006P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">68.2%</div>
+            <div class="bar-fill" style="height:136.35999999999999px;background:#2ECC71;"></div>
+            <div class="bar-label">Q009P3</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">68.8%</div>
+            <div class="bar-fill" style="height:137.5px;background:#2ECC71;"></div>
+            <div class="bar-label">Q030P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">69.2%</div>
+            <div class="bar-fill" style="height:138.46px;background:#2ECC71;"></div>
+            <div class="bar-label">Q031P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">69.2%</div>
+            <div class="bar-fill" style="height:138.46px;background:#2ECC71;"></div>
+            <div class="bar-label">Q031P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">71.4%</div>
+            <div class="bar-fill" style="height:142.86px;background:#2ECC71;"></div>
+            <div class="bar-label">Q001P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">72.2%</div>
+            <div class="bar-fill" style="height:144.44px;background:#2ECC71;"></div>
+            <div class="bar-label">Q008P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">72.2%</div>
+            <div class="bar-fill" style="height:144.44px;background:#2ECC71;"></div>
+            <div class="bar-label">Q013P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">72.7%</div>
+            <div class="bar-fill" style="height:145.45999999999998px;background:#2ECC71;"></div>
+            <div class="bar-label">Q036P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">72.7%</div>
+            <div class="bar-fill" style="height:145.45999999999998px;background:#2ECC71;"></div>
+            <div class="bar-label">Q041P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">72.7%</div>
+            <div class="bar-fill" style="height:145.45999999999998px;background:#2ECC71;"></div>
+            <div class="bar-label">Q053P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">73.7%</div>
+            <div class="bar-fill" style="height:147.36px;background:#2ECC71;"></div>
+            <div class="bar-label">Q011P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">75.0%</div>
+            <div class="bar-fill" style="height:150.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q015P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">75.0%</div>
+            <div class="bar-fill" style="height:150.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q025P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">76.2%</div>
+            <div class="bar-fill" style="height:152.38px;background:#2ECC71;"></div>
+            <div class="bar-label">Q018P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">76.9%</div>
+            <div class="bar-fill" style="height:153.84px;background:#2ECC71;"></div>
+            <div class="bar-label">Q044P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">77.3%</div>
+            <div class="bar-fill" style="height:154.54000000000002px;background:#2ECC71;"></div>
+            <div class="bar-label">Q009P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">77.8%</div>
+            <div class="bar-fill" style="height:155.56px;background:#2ECC71;"></div>
+            <div class="bar-label">Q040P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">80.0%</div>
+            <div class="bar-fill" style="height:160.0px;background:#2ECC71;"></div>
+            <div class="bar-label">Q039P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">81.8%</div>
+            <div class="bar-fill" style="height:163.64000000000001px;background:#2ECC71;"></div>
+            <div class="bar-label">Q009P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">81.8%</div>
+            <div class="bar-fill" style="height:163.64000000000001px;background:#2ECC71;"></div>
+            <div class="bar-label">Q045P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">82.3%</div>
+            <div class="bar-fill" style="height:164.7px;background:#2ECC71;"></div>
+            <div class="bar-label">Q034P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">83.3%</div>
+            <div class="bar-fill" style="height:166.66px;background:#2ECC71;"></div>
+            <div class="bar-label">Q003P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">83.3%</div>
+            <div class="bar-fill" style="height:166.66px;background:#2ECC71;"></div>
+            <div class="bar-label">Q028P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">84.2%</div>
+            <div class="bar-fill" style="height:168.42px;background:#2ECC71;"></div>
+            <div class="bar-label">Q005P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">85.7%</div>
+            <div class="bar-fill" style="height:171.42px;background:#2ECC71;"></div>
+            <div class="bar-label">Q038P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">85.7%</div>
+            <div class="bar-fill" style="height:171.42px;background:#2ECC71;"></div>
+            <div class="bar-label">Q049P2</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">86.7%</div>
+            <div class="bar-fill" style="height:173.34px;background:#2ECC71;"></div>
+            <div class="bar-label">Q022P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">88.9%</div>
+            <div class="bar-fill" style="height:177.78px;background:#2ECC71;"></div>
+            <div class="bar-label">Q043P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">92.9%</div>
+            <div class="bar-fill" style="height:185.72px;background:#2ECC71;"></div>
+            <div class="bar-label">Q049P1</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">93.8%</div>
+            <div class="bar-fill" style="height:187.5px;background:#2ECC71;"></div>
+            <div class="bar-label">Q015P1</div>
+        </div></div>
+    </div>
+        
+    <div class="chart-box">
+        <h3>错误类型分布</h3>
+        <div style="display:flex;align-items:center;justify-content:center;gap:20px;">
+            <svg width="200" height="200"><path d="M100,100 L100.0,20.0 A80,80 0 0 1 123.8,176.4 Z" fill="#FF6B6B" stroke="white" stroke-width="2"/><path d="M100,100 L123.8,176.4 A80,80 0 0 1 24.5,126.6 Z" fill="#FF9F43" stroke="white" stroke-width="2"/><path d="M100,100 L24.5,126.6 A80,80 0 0 1 28.4,64.4 Z" fill="#FECA57" stroke="white" stroke-width="2"/><path d="M100,100 L28.4,64.4 A80,80 0 0 1 55.7,33.4 Z" fill="#48DBFB" stroke="white" stroke-width="2"/><path d="M100,100 L55.7,33.4 A80,80 0 0 1 88.3,20.9 Z" fill="#A29BFE" stroke="white" stroke-width="2"/><path d="M100,100 L88.3,20.9 A80,80 0 0 1 100.0,20.0 Z" fill="#54A0FF" stroke="white" stroke-width="2"/><circle cx="100" cy="100" r="35" fill="white"/><text x="100" y="105" text-anchor="middle" font-size="14" fill="#666">共385条</text></svg>
+            <div><div class="pie-legend-item"><span style="color:#FF6B6B;">■</span> C1(概念误解): 174条 (45.2%)</div><div class="pie-legend-item"><span style="color:#FF9F43;">■</span> C3(计算失误): 94条 (24.4%)</div><div class="pie-legend-item"><span style="color:#FECA57;">■</span> C6(级联错误): 49条 (12.7%)</div><div class="pie-legend-item"><span style="color:#48DBFB;">■</span> C4(步骤遗漏): 32条 (8.3%)</div><div class="pie-legend-item"><span style="color:#A29BFE;">■</span> C5(表达不规范): 27条 (7.0%)</div><div class="pie-legend-item"><span style="color:#54A0FF;">■</span> C2(符号错误): 9条 (2.3%)</div></div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<div class="section">
+    <h2>学生得分率分布 & 跨节点变化</h2>
+    <div class="chart-grid">
+        
+    <div class="chart-box">
+        <h3>学生得分率分布（青=DC01 红=DC02）</h3>
+        <div class="bar-chart">
+        <div class="bar-item">
+            <div class="bar-value">17.1%</div>
+            <div class="bar-fill" style="height:34.28px;background:#4ECDC4;"></div>
+            <div class="bar-label">D03</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">25.0%</div>
+            <div class="bar-fill" style="height:50.0px;background:#4ECDC4;"></div>
+            <div class="bar-label">D05</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">26.7%</div>
+            <div class="bar-fill" style="height:53.339999999999996px;background:#4ECDC4;"></div>
+            <div class="bar-label">D09</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">28.6%</div>
+            <div class="bar-fill" style="height:57.14px;background:#FF6B6B;"></div>
+            <div class="bar-label">D37</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">29.3%</div>
+            <div class="bar-fill" style="height:58.540000000000006px;background:#FF6B6B;"></div>
+            <div class="bar-label">D34</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">33.3%</div>
+            <div class="bar-fill" style="height:66.66px;background:#4ECDC4;"></div>
+            <div class="bar-label">D20</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">34.2%</div>
+            <div class="bar-fill" style="height:68.42px;background:#4ECDC4;"></div>
+            <div class="bar-label">D06</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">34.4%</div>
+            <div class="bar-fill" style="height:68.76px;background:#FF6B6B;"></div>
+            <div class="bar-label">D40</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">35.5%</div>
+            <div class="bar-fill" style="height:70.96000000000001px;background:#FF6B6B;"></div>
+            <div class="bar-label">D39</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">36.4%</div>
+            <div class="bar-fill" style="height:72.72px;background:#4ECDC4;"></div>
+            <div class="bar-label">D02</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">36.7%</div>
+            <div class="bar-fill" style="height:73.34px;background:#FF6B6B;"></div>
+            <div class="bar-label">D24</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">37.5%</div>
+            <div class="bar-fill" style="height:75.0px;background:#FF6B6B;"></div>
+            <div class="bar-label">D23</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">38.1%</div>
+            <div class="bar-fill" style="height:76.2px;background:#FF6B6B;"></div>
+            <div class="bar-label">D30</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">40.9%</div>
+            <div class="bar-fill" style="height:81.82000000000001px;background:#FF6B6B;"></div>
+            <div class="bar-label">D31</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">44.8%</div>
+            <div class="bar-fill" style="height:89.66px;background:#4ECDC4;"></div>
+            <div class="bar-label">D13</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">45.7%</div>
+            <div class="bar-fill" style="height:91.42px;background:#FF6B6B;"></div>
+            <div class="bar-label">D22</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">46.7%</div>
+            <div class="bar-fill" style="height:93.34px;background:#4ECDC4;"></div>
+            <div class="bar-label">D21</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">48.6%</div>
+            <div class="bar-fill" style="height:97.3px;background:#4ECDC4;"></div>
+            <div class="bar-label">D01</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">54.2%</div>
+            <div class="bar-fill" style="height:108.33999999999999px;background:#FF6B6B;"></div>
+            <div class="bar-label">D28</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">55.9%</div>
+            <div class="bar-fill" style="height:111.75999999999999px;background:#FF6B6B;"></div>
+            <div class="bar-label">D25</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">59.1%</div>
+            <div class="bar-fill" style="height:118.17999999999999px;background:#4ECDC4;"></div>
+            <div class="bar-label">D04</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">59.4%</div>
+            <div class="bar-fill" style="height:118.76px;background:#4ECDC4;"></div>
+            <div class="bar-label">D19</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">64.0%</div>
+            <div class="bar-fill" style="height:128.0px;background:#FF6B6B;"></div>
+            <div class="bar-label">D27</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">65.0%</div>
+            <div class="bar-fill" style="height:130.0px;background:#4ECDC4;"></div>
+            <div class="bar-label">D07</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">66.7%</div>
+            <div class="bar-fill" style="height:133.34px;background:#FF6B6B;"></div>
+            <div class="bar-label">D32</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">66.7%</div>
+            <div class="bar-fill" style="height:133.34px;background:#FF6B6B;"></div>
+            <div class="bar-label">D35</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">70.0%</div>
+            <div class="bar-fill" style="height:140.0px;background:#4ECDC4;"></div>
+            <div class="bar-label">D08</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">70.6%</div>
+            <div class="bar-fill" style="height:141.18px;background:#FF6B6B;"></div>
+            <div class="bar-label">D38</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">71.4%</div>
+            <div class="bar-fill" style="height:142.86px;background:#4ECDC4;"></div>
+            <div class="bar-label">D11</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">72.7%</div>
+            <div class="bar-fill" style="height:145.45999999999998px;background:#4ECDC4;"></div>
+            <div class="bar-label">D12</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">77.4%</div>
+            <div class="bar-fill" style="height:154.84px;background:#4ECDC4;"></div>
+            <div class="bar-label">D18</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">79.0%</div>
+            <div class="bar-fill" style="height:157.9px;background:#FF6B6B;"></div>
+            <div class="bar-label">D33</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">79.4%</div>
+            <div class="bar-fill" style="height:158.82px;background:#FF6B6B;"></div>
+            <div class="bar-label">D26</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">80.5%</div>
+            <div class="bar-fill" style="height:160.98px;background:#4ECDC4;"></div>
+            <div class="bar-label">D10</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">81.4%</div>
+            <div class="bar-fill" style="height:162.79999999999998px;background:#4ECDC4;"></div>
+            <div class="bar-label">D15</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">85.7%</div>
+            <div class="bar-fill" style="height:171.42px;background:#FF6B6B;"></div>
+            <div class="bar-label">D29</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">86.8%</div>
+            <div class="bar-fill" style="height:173.67999999999998px;background:#FF6B6B;"></div>
+            <div class="bar-label">D36</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">87.2%</div>
+            <div class="bar-fill" style="height:174.36px;background:#4ECDC4;"></div>
+            <div class="bar-label">D16</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">97.8%</div>
+            <div class="bar-fill" style="height:195.66px;background:#4ECDC4;"></div>
+            <div class="bar-label">D14</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">100.0%</div>
+            <div class="bar-fill" style="height:200.0px;background:#4ECDC4;"></div>
+            <div class="bar-label">D17</div>
+        </div></div>
+    </div>
+        
+    <div class="chart-box">
+        <h3>跨节点(N01→N02)学习变化</h3>
+        <div class="bar-chart">
+        <div class="bar-item">
+            <div class="bar-value">5.0条</div>
+            <div class="bar-fill" style="height:111.11111111111111px;background:#2ECC71;"></div>
+            <div class="bar-label">进步</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">8.0条</div>
+            <div class="bar-fill" style="height:177.77777777777777px;background:#E74C3C;"></div>
+            <div class="bar-label">仍错(答案变)</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">7.0条</div>
+            <div class="bar-fill" style="height:155.55555555555557px;background:#E67E22;"></div>
+            <div class="bar-label">顽固错误</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">8.0条</div>
+            <div class="bar-fill" style="height:177.77777777777777px;background:#F39C12;"></div>
+            <div class="bar-label">退步</div>
+        </div>
+        <div class="bar-item">
+            <div class="bar-value">9.0条</div>
+            <div class="bar-fill" style="height:200.0px;background:#3498DB;"></div>
+            <div class="bar-label">都对</div>
+        </div></div>
+    </div>
+    </div>
+</div>
+
+<div class="section">
+    <h2>BKT知识追踪 - 掌握概率热力图</h2>
+    
+    <div class="chart-box" style="overflow-x:auto;">
+        <h3>BKT掌握概率热力图</h3>
+        <table class="heatmap-table">
+            <thead><tr><th style="width:50px;">学生</th><th class="rotate">T01I1</th><th class="rotate">T01I2</th><th class="rotate">T01I3</th><th class="rotate">T02I1</th><th class="rotate">T02I2</th><th class="rotate">T02I3</th><th class="rotate">T03I1</th><th class="rotate">T03I2</th><th class="rotate">T03I3</th></tr></thead>
+            <tbody><tr><td class="sid">D37</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#E74C3C;color:white;">33</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D03</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#E74C3C;color:white;">34</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#F39C12;color:white;">55</td><td class="heat-cell" style="background:#2ECC71;color:#333;">74</td><td class="heat-cell" style="background:#E74C3C;color:white;">33</td><td class="heat-cell" style="background:#E74C3C;color:white;">32</td></tr><tr><td class="sid">D06</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#2ECC71;color:#333;">84</td><td class="heat-cell" style="background:#E74C3C;color:white;">34</td><td class="heat-cell" style="background:#F39C12;color:white;">45</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#F39C12;color:white;">47</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td></tr><tr><td class="sid">D40</td><td class="heat-cell" style="background:#2ECC71;color:#333;">86</td><td class="heat-cell" style="background:#F39C12;color:white;">59</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#F39C12;color:white;">45</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#2ECC71;color:#333;">79</td><td class="heat-cell" style="background:#E74C3C;color:white;">32</td></tr><tr><td class="sid">D39</td><td class="heat-cell" style="background:#E74C3C;color:white;">32</td><td class="heat-cell" style="background:#2ECC71;color:#333;">93</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#E74C3C;color:white;">38</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#2ECC71;color:#333;">77</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D20</td><td class="heat-cell" style="background:#F39C12;color:white;">47</td><td class="heat-cell" style="background:#E74C3C;color:white;">31</td><td class="heat-cell" style="background:#E74C3C;color:white;">34</td><td class="heat-cell" style="background:#2ECC71;color:#333;">73</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#F39C12;color:white;">55</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#2ECC71;color:#333;">77</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D05</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#2ECC71;color:#333;">74</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#F39C12;color:white;">55</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#F39C12;color:white;">55</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#2ECC71;color:#333;">95</td><td class="heat-cell" style="background:#E74C3C;color:white;">32</td></tr><tr><td class="sid">D09</td><td class="heat-cell" style="background:#F39C12;color:white;">49</td><td class="heat-cell" style="background:#2ECC71;color:#333;">85</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#F39C12;color:white;">63</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#2ECC71;color:#333;">95</td><td class="heat-cell" style="background:#E74C3C;color:white;">32</td></tr><tr><td class="sid">D30</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#2ECC71;color:#333;">84</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#2ECC71;color:#333;">89</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D31</td><td class="heat-cell" style="background:#F39C12;color:white;">57</td><td class="heat-cell" style="background:#2ECC71;color:#333;">94</td><td class="heat-cell" style="background:#E74C3C;color:white;">34</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#E74C3C;color:white;">33</td><td class="heat-cell" style="background:#2ECC71;color:#333;">84</td></tr><tr><td class="sid">D34</td><td class="heat-cell" style="background:#E74C3C;color:white;">32</td><td class="heat-cell" style="background:#2ECC71;color:#333;">71</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#F39C12;color:white;">62</td><td class="heat-cell" style="background:#2ECC71;color:#333;">73</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#F39C12;color:white;">63</td><td class="heat-cell" style="background:#2ECC71;color:#333;">79</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D02</td><td class="heat-cell" style="background:#2ECC71;color:#333;">73</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#2ECC71;color:#333;">75</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#2ECC71;color:#333;">89</td><td class="heat-cell" style="background:#E74C3C;color:white;">33</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D24</td><td class="heat-cell" style="background:#E74C3C;color:white;">36</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#2ECC71;color:#333;">73</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#2ECC71;color:#333;">77</td><td class="heat-cell" style="background:#2ECC71;color:#333;">84</td></tr><tr><td class="sid">D01</td><td class="heat-cell" style="background:#2ECC71;color:#333;">95</td><td class="heat-cell" style="background:#F39C12;color:white;">40</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#F39C12;color:white;">50</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#2ECC71;color:#333;">88</td><td class="heat-cell" style="background:#F39C12;color:white;">45</td><td class="heat-cell" style="background:#2ECC71;color:#333;">85</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D23</td><td class="heat-cell" style="background:#2ECC71;color:#333;">73</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#E74C3C;color:white;">34</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#2ECC71;color:#333;">78</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#2ECC71;color:#333;">85</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td></tr><tr><td class="sid">D28</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#2ECC71;color:#333;">96</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#2ECC71;color:#333;">77</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D04</td><td class="heat-cell" style="background:#E74C3C;color:white;">36</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#E74C3C;color:white;">34</td><td class="heat-cell" style="background:#2ECC71;color:#333;">91</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">95</td><td class="heat-cell" style="background:#F39C12;color:white;">54</td></tr><tr><td class="sid">D25</td><td class="heat-cell" style="background:#2ECC71;color:#333;">89</td><td class="heat-cell" style="background:#E74C3C;color:white;">32</td><td class="heat-cell" style="background:#E74C3C;color:white;">34</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#F39C12;color:white;">63</td><td class="heat-cell" style="background:#2ECC71;color:#333;">96</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">49</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D16</td><td class="heat-cell" style="background:#E74C3C;color:white;">36</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#2ECC71;color:#333;">85</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#F39C12;color:white;">55</td><td class="heat-cell" style="background:#2ECC71;color:#333;">89</td><td class="heat-cell" style="background:#F39C12;color:white;">47</td><td class="heat-cell" style="background:#2ECC71;color:#333;">76</td></tr><tr><td class="sid">D21</td><td class="heat-cell" style="background:#E74C3C;color:white;">33</td><td class="heat-cell" style="background:#2ECC71;color:#333;">93</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#2ECC71;color:#333;">85</td><td class="heat-cell" style="background:#2ECC71;color:#333;">84</td></tr><tr><td class="sid">D22</td><td class="heat-cell" style="background:#E74C3C;color:white;">36</td><td class="heat-cell" style="background:#F39C12;color:white;">47</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#F39C12;color:white;">67</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">84</td></tr><tr><td class="sid">D19</td><td class="heat-cell" style="background:#F39C12;color:white;">46</td><td class="heat-cell" style="background:#2ECC71;color:#333;">96</td><td class="heat-cell" style="background:#2ECC71;color:#333;">88</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td><td class="heat-cell" style="background:#2ECC71;color:#333;">96</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#2ECC71;color:#333;">77</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D13</td><td class="heat-cell" style="background:#2ECC71;color:#333;">77</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#2ECC71;color:#333;">96</td><td class="heat-cell" style="background:#2ECC71;color:#333;">88</td><td class="heat-cell" style="background:#F39C12;color:white;">63</td><td class="heat-cell" style="background:#E74C3C;color:white;">33</td><td class="heat-cell" style="background:#E74C3C;color:white;">29</td></tr><tr><td class="sid">D35</td><td class="heat-cell" style="background:#F39C12;color:white;">49</td><td class="heat-cell" style="background:#2ECC71;color:#333;">94</td><td class="heat-cell" style="background:#E74C3C;color:white;">34</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#F39C12;color:white;">55</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#2ECC71;color:#333;">77</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D17</td><td class="heat-cell" style="background:#2ECC71;color:#333;">97</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#F39C12;color:white;">55</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#F39C12;color:white;">55</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#2ECC71;color:#333;">77</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D26</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">88</td><td class="heat-cell" style="background:#2ECC71;color:#333;">88</td><td class="heat-cell" style="background:#E74C3C;color:white;">38</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#E74C3C;color:white;">38</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D27</td><td class="heat-cell" style="background:#2ECC71;color:#333;">97</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#E74C3C;color:white;">34</td><td class="heat-cell" style="background:#2ECC71;color:#333;">74</td><td class="heat-cell" style="background:#2ECC71;color:#333;">89</td><td class="heat-cell" style="background:#F39C12;color:white;">55</td><td class="heat-cell" style="background:#2ECC71;color:#333;">78</td><td class="heat-cell" style="background:#2ECC71;color:#333;">76</td><td class="heat-cell" style="background:#E74C3C;color:white;">32</td></tr><tr><td class="sid">D08</td><td class="heat-cell" style="background:#E74C3C;color:white;">32</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#E74C3C;color:white;">34</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">48</td><td class="heat-cell" style="background:#F39C12;color:white;">62</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">76</td></tr><tr><td class="sid">D07</td><td class="heat-cell" style="background:#2ECC71;color:#333;">90</td><td class="heat-cell" style="background:#2ECC71;color:#333;">94</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#F39C12;color:white;">67</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#E74C3C;color:white;">33</td><td class="heat-cell" style="background:#2ECC71;color:#333;">84</td></tr><tr><td class="sid">D29</td><td class="heat-cell" style="background:#F39C12;color:white;">58</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#2ECC71;color:#333;">91</td><td class="heat-cell" style="background:#2ECC71;color:#333;">94</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D38</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#2ECC71;color:#333;">95</td><td class="heat-cell" style="background:#2ECC71;color:#333;">78</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#E74C3C;color:white;">30</td><td class="heat-cell" style="background:#2ECC71;color:#333;">79</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D18</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#F39C12;color:white;">63</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#F39C12;color:white;">63</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#E74C3C;color:white;">32</td></tr><tr><td class="sid">D32</td><td class="heat-cell" style="background:#2ECC71;color:#333;">95</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#2ECC71;color:#333;">91</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">91</td><td class="heat-cell" style="background:#F39C12;color:white;">56</td><td class="heat-cell" style="background:#2ECC71;color:#333;">77</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D12</td><td class="heat-cell" style="background:#2ECC71;color:#333;">84</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">88</td><td class="heat-cell" style="background:#2ECC71;color:#333;">88</td><td class="heat-cell" style="background:#2ECC71;color:#333;">89</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#2ECC71;color:#333;">96</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#E74C3C;color:white;">32</td></tr><tr><td class="sid">D33</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">88</td><td class="heat-cell" style="background:#2ECC71;color:#333;">74</td><td class="heat-cell" style="background:#2ECC71;color:#333;">78</td><td class="heat-cell" style="background:#E74C3C;color:white;">35</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#2ECC71;color:#333;">95</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D11</td><td class="heat-cell" style="background:#2ECC71;color:#333;">73</td><td class="heat-cell" style="background:#2ECC71;color:#333;">76</td><td class="heat-cell" style="background:#F39C12;color:white;">53</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">88</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D36</td><td class="heat-cell" style="background:#2ECC71;color:#333;">97</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#E74C3C;color:white;">34</td><td class="heat-cell" style="background:#2ECC71;color:#333;">89</td><td class="heat-cell" style="background:#2ECC71;color:#333;">96</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#2ECC71;color:#333;">91</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D10</td><td class="heat-cell" style="background:#2ECC71;color:#333;">86</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">95</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">91</td><td class="heat-cell" style="background:#2ECC71;color:#333;">89</td><td class="heat-cell" style="background:#2ECC71;color:#333;">96</td><td class="heat-cell" style="background:#F39C12;color:white;">44</td></tr><tr><td class="sid">D14</td><td class="heat-cell" style="background:#2ECC71;color:#333;">86</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">88</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">89</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">84</td></tr><tr><td class="sid">D15</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">96</td><td class="heat-cell" style="background:#2ECC71;color:#333;">78</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#2ECC71;color:#333;">88</td><td class="heat-cell" style="background:#2ECC71;color:#333;">98</td><td class="heat-cell" style="background:#2ECC71;color:#333;">99</td><td class="heat-cell" style="background:#2ECC71;color:#333;">97</td></tr></tbody>
+        </table>
+        <div class="legend">
+            <span style="color:#E74C3C;">■</span> &lt;40%薄弱 &nbsp;
+            <span style="color:#F39C12;">■</span> 40-70%发展中 &nbsp;
+            <span style="color:#2ECC71;">■</span> &ge;70%已掌握
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    智慧学伴智能体系统 | 数据驱动学情诊断 | 生成时间: 2026-11
+</div>
+
+</body>
+</html>
