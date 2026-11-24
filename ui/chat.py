@@ -13,18 +13,9 @@ import labels
 import llm
 import theme
 
-STUDENT_GREET = (
-    "你好，我是你的学伴。我已经读完你**全部 {n} 条**作答记录，"
-    "能定位到具体题号和评分点。\n\n"
-    "我只在证据足够时下结论——所以你可能会听到我说「这个还看不出」，"
-    "那不是敷衍，是数据真的不够。"
-)
+STUDENT_GREET = "已汇总 **{n} 条**有效作答。可以按题目、错因或学习主题查询。"
+TEACHER_GREET = "**{cls} 班**共有 **{n} 名学生、{m} 条作答记录**。可以查询班级表现和讲评建议。"
 
-TEACHER_GREET = (
-    "你好，我是 {cls} 的班级助手。我已汇总 **{n} 名学生 / {m} 条**作答记录，"
-    "可以按主题、指标、评分点三个粒度给你讲评建议。\n\n"
-    "未达到 3 条证据的「学生×指标」格子不判定薄弱；缺证据与学不会不是一回事。"
-)
 
 STUDENT_CHIPS = ["我哪一块最薄弱？", "哪些结论其实证据不足？", "我错得最多的是什么类型？",
                  "给我一个这周能做完的计划"]
@@ -209,15 +200,15 @@ def _render_meta(meta: dict, role: str = "student") -> None:
 def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str) -> None:
     hist = history(role, ident)
     n = sum(1 for r in bundle['records'] if r.get('class_id') == ident)
-    st.info('能力边界：作答证据 → 学情诊断 → 练习/讲评建议 → 追问解释。模型负责表达改写；不支持任意新答案自动判分。')
+    st.info('可以查询已评分的作答记录、练习建议和讲评建议。')
 
     if not hist:
         if role == "student":
             v = A.student_view(bundle, ident)
             hist.append({"role": "assistant", "content": STUDENT_GREET.format(n=v["evidence_total"])})
             hist.append({"role": "assistant", "content":
-                         f"先说结论：你 9 个指标里 **{v['coverage']['decided']} 个**有足够证据，"
-                         f"{len(v['insufficient'])} 个还不够。想知道哪一个最拖后腿，点下面的问题就行。"})
+                         f"9 个指标中，**{v['coverage']['decided']} 个**已有足够作答记录，"
+                         f"{len(v['insufficient'])} 个暂无法判定。"})
         else:
             row = A.class_view(bundle, ident)["class_theme"].get(ident, {})
             hist.append({"role": "assistant",
@@ -231,7 +222,7 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
                 _render_meta(m['meta'], role)
 
     chips = STUDENT_CHIPS if role == "student" else TEACHER_CHIPS
-    st.caption("试试这样问：")
+    st.caption("常用问题")
     picked = None
     for i, txt in enumerate(chips):
         if i % 2 == 0:
@@ -240,7 +231,7 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
         if c.button(txt, key=f"chip_{role}_{ident}_{i}", width="stretch"):
             picked = txt
 
-    typed = st.chat_input("问我任何关于" + ("你" if role == "student" else "这个班") + "学习情况的问题…")
+    typed = st.chat_input("输入个人学情问题" if role == "student" else "输入班级学情问题")
     question = picked or typed
     if not question:
         return
@@ -251,7 +242,7 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
 
     # 用 st.spinner 代替 st.empty()+st.chat_message 的“打字动画”：
     # 后者会触发 Streamlit 前端的 removeChild 报错（占位符里嵌 chat_message + 自定义 HTML）。
-    with st.spinner("正在组织回答…"):
+    with st.spinner("正在生成回答…"):
         answer = labels.humanize(
             _answer(question, role, ident, bundle, key, cache_dir, history=hist[:-1][-4:]),
             bundle.get("output_dir"))

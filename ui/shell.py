@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""智能体外壳：唤醒 → 选身份 → 选对象 → 按角色给导航与页面。"""
+"""首页、身份选择和按角色显示的导航。"""
 from __future__ import annotations
 
 import pandas as pd
@@ -8,7 +8,6 @@ from urllib.parse import quote
 
 import adapter as A
 import chat
-import design
 import home
 import insights as I
 import theme
@@ -45,7 +44,7 @@ def _ss(key, default=None):
 
 
 def reset() -> None:
-    for k in ("stage", "role", "ident", "page", "nav_page", "_shown_page"):
+    for k in ("stage", "role", "ident", "page", "nav_page"):
         st.session_state.pop(k, None)
     st.session_state["stage"] = "role"
 
@@ -59,40 +58,35 @@ def current() -> tuple[str, str] | None:
 
 
 # --------------------------------------------------------------------------
-# 唤醒 / 选身份 / 选对象
+# 首页与身份选择
 # --------------------------------------------------------------------------
 def landing() -> None:
     theme.hero()
-    theme.bubble(
-        "我是这个系统的智能体，不是一页报表。<br>"
-        "点下面的按钮唤醒我，我们开始：<b>你会以什么身份进来？</b>")
     st.write("")
     c1, c2, c3 = st.columns([0.9, 1.1, 1])
     with c2:
-        if st.button("👋 唤醒智慧学伴", type="primary", width="stretch", key="wake"):
+        if st.button("选择身份", type="primary", width="stretch", key="wake"):
             st.session_state["stage"] = "role"
             st.rerun()
     with c3:
-        if st.button("📤 提交学情数据", width="stretch", key="open_upload"):
+        if st.button("上传学情数据", width="stretch", key="open_upload"):
             st.session_state["show_upload"] = True
             st.rerun()
-    st.caption("提示：唤醒后可以选择「学生」看个人学情，或「教师」看班级讲评；"
-               "也可以先提交自己的学情数据，分析完再进入。")
 
 
 def pick_role() -> None:
-    theme.hero(sub="先告诉我，你这次想以哪种身份使用我")
+    theme.hero(sub="请选择身份")
     st.write("")
     c1, c2 = st.columns(2)
     with c1:
         theme.role_card("🧑‍🎓", "我是学生",
-                        "看自己的掌握情况、薄弱点、下一步练什么。<br>只会看到你自己的数据。")
+                        "查看个人学情、错因和练习建议。")
         if st.button("以学生身份进入", type="primary", width="stretch", key="as_student"):
             st.session_state.update({"role": "student", "stage": "identity"})
             st.rerun()
     with c2:
         theme.role_card("🧑‍🏫", "我是教师",
-                        "看班级整体、共性薄弱点、讲评顺序。<br>可以下钻到任意学生。")
+                        "查看班级得分、共性难点和学生作答。")
         if st.button("以教师身份进入", type="primary", width="stretch", key="as_teacher"):
             st.session_state.update({"role": "teacher", "stage": "identity"})
             st.rerun()
@@ -107,23 +101,23 @@ def pick_identity(bundle: dict) -> None:
     role = st.session_state.get("role")
     students = A.list_students(bundle)
     if role == "student":
-        theme.hero(sub="选一个账号，我把它当成你")
+        theme.hero(sub="选择学生")
         st.write("")
         sid = st.selectbox(
-            "选择你的账号", students, index=students.index("D01") if "D01" in students else 0,
+            "学生编号", students, index=students.index("D01") if "D01" in students else 0,
             format_func=lambda s: f"{s} · {A.student_class(bundle, s)} · "
                                   f"{len(bundle['records_by_student'].get(s, []))} 条记录")
         v = A.student_view(bundle, sid)
         c1, c2, c3 = st.columns(3)
-        c1.metric("你的有效记录", v["evidence_total"])
+        c1.metric("有效作答", v["evidence_total"])
         c2.metric("可判定指标", f"{v['coverage']['decided']}/9")
         c3.metric("整体掌握度", f"{v['overall']:.0%}" if v["overall"] is not None else "—")
-        st.caption("这组数字就是你登录后会看到的起点；证据不足的部分我会明确说明。")
+        st.caption("每项指标至少有 3 条有效作答才计算掌握度。")
         if st.button(f"进入 {sid} 的学情", type="primary", width="stretch", key="enter_student"):
             st.session_state.update({"role": "student", "ident": sid, "stage": "app", "page": "对话"})
             st.rerun()
     else:
-        theme.hero(sub="选一个班级，我把它当成你的班")
+        theme.hero(sub="选择班级")
         st.write("")
         classes = A.class_view(bundle)["classes"] or ["DC01"]
         cls = st.selectbox("选择班级", classes)
@@ -132,13 +126,13 @@ def pick_identity(bundle: dict) -> None:
         c1.metric("学生数", row.get("students", 0))
         c2.metric("班级得分率", f"{(row.get('overall') or 0):.0%}")
         c3.metric("可判定覆盖", f"{I.class_mastery_summary(bundle).get(cls, {}).get('decided_rate', 0):.0%}")
-        st.caption("覆盖 = 达到 3 条证据门槛的「学生×指标」占比；不到 3 条的格子我不会下结论。")
+        st.caption("覆盖率是已有至少 3 条有效作答的学生与指标组合所占比例。")
         if st.button(f"进入 {cls} 的班级视图", type="primary", width="stretch", key="enter_teacher"):
             st.session_state.update({"role": "teacher", "ident": cls, "stage": "app", "page": "对话"})
             st.rerun()
 
     st.write("")
-    if st.button("← 换个身份", key="back_identity"):
+    if st.button("← 返回身份选择", key="back_identity"):
         st.session_state["stage"] = "role"
         st.rerun()
 
@@ -161,8 +155,8 @@ def render_students_list(bundle: dict) -> None:
         })
     df = pd.DataFrame(rows)
     st.dataframe(df, width="stretch", hide_index=True)
-    st.caption("点击下方可下钻到某个学生；证据不足的学生不会被排名成「最差」。")
-    sid = st.selectbox("下钻查看", [r["学生"] for r in rows], key="teacher_drill")
+    st.caption("选择学生可查看作答记录和学情。")
+    sid = st.selectbox("查看学生学情", [r["学生"] for r in rows], key="teacher_drill")
     with st.expander(f"打开 {sid} 的完整学情", expanded=False):
         views.render_diagnosis(bundle, sid, st.session_state.get("_key"), st.session_state.get("_cache"))
 
@@ -216,28 +210,28 @@ def _nav(pages: list[str]) -> str:
         st.session_state["nav_page"] = pages[0]
 
     icon_rules = "".join(
-        f'div[role="radiogroup"] > label:nth-of-type({i + 1})::before'
+        f'[data-testid="stSidebar"] div[role="radiogroup"] > label:nth-of-type({i + 1})::before'
         f'{{content:"{NAV_LABELS.get(p, ("", p))[0]}";}}'
         for i, p in enumerate(pages))
     st.markdown(
         "<style>"
         # 隐藏原生圆点
-        'div[role="radiogroup"] > label > div:first-child{display:none!important;}'
-        'div[role="radiogroup"]{gap:2px!important;}'
-        'div[role="radiogroup"] > label{'
+        '[data-testid="stSidebar"] div[role="radiogroup"] > label > div:first-child{display:none!important;}'
+        '[data-testid="stSidebar"] div[role="radiogroup"]{gap:2px!important;}'
+        '[data-testid="stSidebar"] div[role="radiogroup"] > label{'
         'display:flex!important;align-items:center;gap:10px;'
         'padding:9px 10px!important;border-radius:10px!important;'
         'transition:background .15s ease;}'
-        'div[role="radiogroup"] > label:hover{background:rgba(47,111,237,.07)!important;}'
-        'div[role="radiogroup"] > label > div:last-child{font-size:14px;color:#31415c;}'
+        '[data-testid="stSidebar"] div[role="radiogroup"] > label:hover{background:rgba(47,111,237,.07)!important;}'
+        '[data-testid="stSidebar"] div[role="radiogroup"] > label > div:last-child{font-size:14px;color:#31415c;}'
         # 图标：固定 22px 宽，文字因此严格左对齐
-        'div[role="radiogroup"] > label::before{'
+        '[data-testid="stSidebar"] div[role="radiogroup"] > label::before{'
         'flex:0 0 22px;width:22px;text-align:center;font-size:15px;line-height:1;}'
         f"{icon_rules}"
         # 选中行
-        'div[role="radiogroup"] > label:has(input:checked){'
+        '[data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked){'
         'background:linear-gradient(135deg,#eaf1ff,#f4f0ff)!important;}'
-        'div[role="radiogroup"] > label:has(input:checked) > div:last-child{'
+        '[data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked) > div:last-child{'
         'color:#2F6FED!important;font-weight:600;}'
         "</style>", unsafe_allow_html=True)
 
@@ -256,27 +250,11 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
         page = _nav(pages)
         st.session_state["page"] = page
         st.divider()
-        st.caption("智能体状态")
+        st.caption("学情数据")
         st.success(f"已加载 {len(bundle['records'])} 条记录", icon="✅")
         if st.button("🔄 切换身份", width="stretch", key="switch_role"):
             reset()
             st.rerun()
-
-    # 切页时的“AI 思考”过渡：只在页面真的变化时插入一次（常开，不提供开关）
-    if st.session_state.get("_shown_page") != page:
-        st.session_state["_shown_page"] = page
-        try:
-            design.thinking_overlay(
-                {"我的学情": "正在核对证据链…",
-                 "学习建议": "正在按优先级排学习路径…",
-                 "知识与成果": "正在梳理知识谱系…",
-                 "班级概览": "正在汇总班级数据…",
-                 "学生名单": "正在读取学生档案…",
-                 "数据质量": "正在复核 8 条清洗规则…",
-                 "智能体": "正在唤醒多智能体…",
-                 "对话": "正在准备对话…"}.get(page, f"正在打开「{page}」…"))
-        except Exception as exc:  # noqa: BLE001 - 动画失败不能影响页面
-            st.session_state["_think_error"] = type(exc).__name__
 
     # 顶部状态条
     if page not in {"我的学情", "班级概览"}:
@@ -285,7 +263,7 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
             f"""<div class="sa-brand" style="border-bottom:1px solid #eaeff7;padding-bottom:10px;margin-bottom:14px">
                   {theme.avatar_svg(38)}
                   <div><div class="sa-brand-t">{page}</div>
-                       <div class="sa-brand-s">{sub} · 证据门槛 3 条 · 结论可下钻到记录编号</div></div>
+                       <div class="sa-brand-s">{sub}</div></div>
                 </div>""",
             unsafe_allow_html=True)
     

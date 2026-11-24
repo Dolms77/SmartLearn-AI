@@ -72,8 +72,6 @@ button[data-baseweb="tab"]{font-size:var(--f-s);}
 def inject_tokens() -> None:
     st.markdown(TOKENS_CSS, unsafe_allow_html=True)
     st.markdown(PAGE_CSS, unsafe_allow_html=True)
-    # 思考过渡层的样式也在这里一次性注入，避免 thinking_overlay 每次切页重复塞 <style>
-    st.markdown(THINK_CSS, unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------------
@@ -249,54 +247,3 @@ def identity_bar(avatar_html: str, name: str, sub: str) -> None:
         f'<div class="sa-idbar">{avatar_html}'
         f'<div><div class="who">{name}</div><div class="sub">{sub}</div></div>'
         f'</div>', unsafe_allow_html=True)
-
-
-# ---------------------------------------------------------------------------
-# "AI 思考中" 过渡层：只在切换页面时注入，1 秒后自动淡出
-THINK_CSS = """
-<style>
-/* 默认隐藏（display:none）：只有在"允许动效"的浏览器里才淡入淡出，
-   万一动效被禁用或浏览器不执行动画，这一层永远不可见，绝不会挡住点击。 */
-.sa-think{display:none;}
-.sa-think *{pointer-events:none!important;}
-@media (prefers-reduced-motion: no-preference){
-  .sa-think{position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-start;
-    justify-content:center;padding-top:22vh;pointer-events:none;
-    background:rgba(248,250,254,.42);backdrop-filter:blur(1.5px);
-    animation:sa-think-out .38s ease .78s forwards;}
-  .sa-think-card{animation:sa-think-in .22s ease;}
-  .sa-think-bar{position:fixed;display:block;animation:sa-bar .9s cubic-bezier(.4,0,.2,1) forwards;}
-}
-.sa-think-card{display:flex;align-items:center;gap:12px;
-  background:rgba(255,255,255,.95);border:1px solid #e6ebf3;border-radius:16px;
-  padding:14px 20px;box-shadow:0 18px 44px rgba(23,43,77,.14);}
-.sa-think-card .txt{font-size:14px;color:#31415c;}
-.sa-think-card .txt b{color:#2F6FED;font-weight:600;}
-/* 顶部进度条：从左扫到右 */
-.sa-think-bar{display:none;position:fixed;top:0;left:0;height:3px;z-index:10000;width:100%;
-  transform-origin:left center;pointer-events:none;
-  background:linear-gradient(90deg,#2F6FED,#7A56FF 50%,#00A3A3);}
-@keyframes sa-bar{0%{transform:scaleX(0);opacity:1;}70%{transform:scaleX(.86);opacity:1;}
-  100%{transform:scaleX(1);opacity:0;}}
-@keyframes sa-think-in{from{opacity:0;transform:translateY(-8px) scale(.98);}
-  to{opacity:1;transform:none;}}
-@keyframes sa-think-out{to{opacity:0;visibility:hidden;}}
-</style>
-"""
-
-
-def thinking_overlay(text: str = "正在组织答案…", hold: float = 1.05) -> None:
-    """切页时的一次性"思考"过渡：纯 CSS 自动淡出，不阻塞点击。
-
-    样式（THINK_CSS）已在 inject_tokens() 一次性注入，这里只渲染过渡层本体。
-    """
-    st.markdown(
-        f'<div class="sa-think-bar"></div>'
-        f'<div class="sa-think"><div class="sa-think-card">'
-        f'{typing_html()}'
-        f'<div class="txt"><b>智慧学伴</b> · {text}</div></div></div>',
-        unsafe_allow_html=True)
-
-
-def typing_html() -> str:
-    return '<span class="sa-dots"><span></span><span></span><span></span></span>'

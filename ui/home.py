@@ -14,6 +14,7 @@ import design
 import insights as I
 import labels
 import llm
+from scoring_review import review_html, valid_rate
 import theme
 import views
 
@@ -98,7 +99,7 @@ def _evidence_dialog(bundle: dict, sid: str, code: str) -> None:
                             f"{d.get('error_type_code')} {d.get('error_type')} — {d.get('error_description', '')}")
     else:
         design.empty_state("🗂", "这个指标还没有作答记录", "做完同指标 3 道题，就能给出结论。")
-    st.caption("依据来自 cleaned_data.json 的已评分记录；待评分/未作答不计入。")
+    st.caption("仅统计已评分的作答记录。")
 
 
 # ---------------------------------------------------------------------------
@@ -198,10 +199,10 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
         st.divider()
         st.markdown("**问学伴一句**")
         q = st.text_input("例如：我哪一块最薄弱？", key=f"home_q_{sid}",
-                          label_visibility="collapsed", placeholder="问我任何关于你学情的问题…")
+                          label_visibility="collapsed", placeholder="输入你的学情问题")
         if st.button("提问", key=f"home_ask_{sid}") and q:
             facts = llm.build_facts(v, stt, A.class_view(bundle)["class_theme"])
-            with st.spinner("正在组织语言…"):
+            with st.spinner("正在生成回答…"):
                 ans = llm.answer_question(q, facts, key, cache_dir)
             st.success(ans)
 
@@ -218,9 +219,9 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
     q_rates = I.class_question_rates(bundle, cls)
 
     design.identity_bar(
-        theme.avatar_img(40), f"{cls} · 教师视角",
-        f"{row.get('students', 0)} 名学生 · 可判定覆盖 {cms.get('decided_rate', 0):.0%} · "
-        f"本班有效记录 {sum(1 for r in bundle['records'] if r.get('class_id') == cls)} 条")
+        theme.avatar_img(40), "班级概览",
+        f"{cls} 班 · {row.get('students', 0)} 名学生 · "
+        f"{sum(1 for r in bundle['records'] if r.get('class_id') == cls)} 条有效作答")
 
     design.kpi_row([
         ("班级得分率", f"{(row.get('overall') or 0):.0%}", "Σ得分/Σ满分"),
@@ -244,14 +245,16 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
         with c2:
             C.show(C.question_rate_chart(q_rates, names=A.INDICATOR_NAMES))
     with t2:
-        sp = sp_all[:12]
-        if sp:
-            st.markdown("**本班优先复盘的评分步骤**")
-            st.caption("浅色区标出得分率低于 30% 的步骤。悬停可查看完整评分要求与作答条数。")
-            C.show(C.scoring_point_chart(
-                sp, names=A.INDICATOR_NAMES,
-                definitions={r["评分点"]: I.scoring_point_name(bundle, r["评分点"]) for r in sp},
-            ))
+        st.markdown("**本班优先复盘的评分步骤**")
+        st.caption("按得分率从低到高展示最多 12 项。低于 30% 的步骤优先复盘。")
+        measured, missing = _scoring_review_rows(bundle, cls)
+        if measured:
+            st.markdown(review_html(measured[:12]), unsafe_allow_html=True)
+        else:
+            st.info("本班暂无有效的评分步骤得分记录。")
+        if missing:
+            with st.expander(f"暂无数据的评分步骤（{len(missing)} 项）"):
+                st.markdown(review_html(missing), unsafe_allow_html=True)
         class_students = {r['student_id'] for r in bundle['records'] if r.get('class_id') == cls}
         counts = {}
         for d in bundle.get('diagnoses', []):
@@ -293,3 +296,29 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
                          "状态": "证据不足" if sv["coverage"]["decided"] == 0 else
                                  ('需关注' if sv['overall'] is not None and sv['overall'] < 0.4 else '正常')})
         st.dataframe(rows, width="stretch", hide_index=True)
+
+
+def _scoring_review_rows(bundle: dict, cls: str) -> tuple[list[dict], list[dict]]:
+    """旧数据可能以零分填补空记录，只有有效满分与作答数才采用得分率。"""
+    stats = bundle.get("statistics") or {}
+    points = (stats.get("by_class_scoring_point") or {}).get(cls) or {}
+    ids = set(points) | set(stats.get("by_scoring_point") or {})
+    for question in bundle["question_map"].values():
+        ids.update(question.get("scoring_point_definitions") or {})
+
+    measured, missing = [], []
+    for pid in sorted(ids):
+        record = points.get(pid) or {}
+        rate = record.get("score_rate")
+        if not ((record.get("count") or 0) > 0 and (record.get("full") or 0) > 0 and valid_rate(rate)):
+            rate = None
+        definition = (bundle["question_map"].get(pid.split("P")[0], {})
+                      .get("scoring_point_definitions") or {}).get(pid) or {}
+        item = {
+            "id": pid,
+            "description": definition.get("description") or I.scoring_point_name(bundle, pid),
+            "rate": rate,
+        }
+        (missing if rate is None else measured).append(item)
+    measured.sort(key=lambda item: (item["rate"], -points[item["id"]]["count"]))
+    return measured, missing

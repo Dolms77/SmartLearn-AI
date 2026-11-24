@@ -56,7 +56,7 @@ CLASS_HINTS = ("班", "全班", "对比", "DC01", "DC02")
 # ---------------------------------------------------------------------------
 # 加载
 # ---------------------------------------------------------------------------
-@st.cache_resource(show_spinner="正在唤醒多智能体系统…")
+@st.cache_resource(show_spinner="正在加载问答模块…")
 def _load_module(script_path: str = AGENT_SCRIPT):
     if not os.path.exists(script_path):
         raise FileNotFoundError(f"未找到多智能体脚本：{script_path}")
@@ -67,7 +67,7 @@ def _load_module(script_path: str = AGENT_SCRIPT):
     return mod
 
 
-@st.cache_resource(show_spinner="正在装载学情数据…")
+@st.cache_resource(show_spinner="正在读取学情数据…")
 def load_coordinator(output_dir: str = DEFAULT_OUTPUT):
     """缓存 Coordinator：同一会话内复用，多轮指代（"他呢？"）才能生效。
 
@@ -196,12 +196,12 @@ def render_trace_cards(steps: list[dict], *, evidence: list[str] | None = None,
             detail = _humanize(str(s.get('detail') or s.get('output') or ''))[:44]
             cards.append(f'<div class="sa-flow-card"><div class="sa-flow-icon" style="background:{color}18;color:{color}">{icon}</div><div class="sa-flow-name">{cn}</div><div class="sa-flow-action">{s.get("action", "处理")}</div><div class="sa-flow-detail">{detail or "结构化事实"}</div></div>')
         st.markdown(css + '<div class="sa-flow">' + ''.join(cards) + '</div>', unsafe_allow_html=True)
-        st.caption('按从左到右的真实执行顺序展示；任务模块使用结构化数据，不把它包装成多个大模型。')
+        st.caption('以下是本次问题的处理步骤，按执行顺序排列。')
         if evidence:
             more = '…' if len(evidence) > 6 else ''
             st.caption(f'本轮读取的作答记录（该生证据池，共 {len(evidence)} 条）：'
                        + '、'.join(evidence[:6]) + more)
-            st.caption('结论只引用其中与问题相关的记录；逐条对应关系在「我的学情」里按指标下钻查看。')
+            st.caption('在「我的学情」中选择指标，可查看相关作答记录。')
 
 
 def render_trace(result: dict, expanded: bool = True, compact: bool = True) -> None:
@@ -321,9 +321,9 @@ SID_KEY = "agent_bridge_student"
 
 def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
                       quick_questions: list[str] | None = None) -> None:
-    st.subheader("🤖 多智能体协同 · 对话")
-    st.caption("协调器识别意图后调度诊断 / 建议 / 讲评 / 班级 Agent，可复合级联；"
-               "每一步都记进执行轨迹，并由校验 Agent 过一遍。")
+    st.subheader("学情分析与讲评")
+    st.caption("可查询学生错因、练习建议和班级讲评。"
+               "展开回答详情可查看使用的记录和校验结果。")
 
     students = list_students(output_dir)
     c1, c2 = st.columns([1, 3])
@@ -332,14 +332,14 @@ def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
                               if students and st.session_state.get(SID_KEY, "D01") in students else 0),
                        key="ab_sid")
     st.session_state[SID_KEY] = sid
-    c2.caption("问句里带 Dxx 会自动切换学生；只说「他呢？」沿用上一位（多轮记忆）。")
+    c2.caption("可以在问题中写学生编号。未指定编号时沿用当前学生。")
 
     hist = st.session_state.setdefault(CHAT_KEY, [])
     if not hist:
         hist.append({"role": "assistant", "content":
-                     "你好，我是智慧学伴的多智能体系统。可以直接问我：\n\n"
+                     "可以从这些问题开始：\n\n"
                      f"- **{sid} 哪里最薄弱？**（诊断）\n"
-                     f"- **{sid} 哪里薄弱，顺便说说该练什么**（诊断→建议 级联）\n"
+                     f"- **{sid} 哪些知识点需要复习？可以练哪些题？**\n"
                      "- **下周这个班该怎么讲？**（讲评稿）\n"
                      "- **两个班差在哪？**（班级对比）\n"
                      "- **他呢？**（沿用上一位学生）"})

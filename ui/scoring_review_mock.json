@@ -1,0 +1,8 @@
+[
+  {"id": "Q028P2", "description": "求出一个未知数并回代，将所得结果代入原方程检验", "rate": 0},
+  {"id": "Q043P2", "description": "两边同除以负数，并把不等号方向反过来", "rate": 0.12},
+  {"id": "Q034P3", "description": "根据题意确定未知数的取值范围，并检查解是否满足题设条件", "rate": 0.28},
+  {"id": "Q021P1", "description": "根据已知条件列出方程", "rate": 0.3},
+  {"id": "Q017P2", "description": "合并同类项并写出化简后的结果", "rate": 0.36},
+  {"id": "Q052P3", "description": "结合图示说明所得结论", "rate": null}
+]

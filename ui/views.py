@@ -203,7 +203,7 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
             else:
                 st.caption("尚未生成。点击下方按钮调用；模型不可用时会提示。")
         if st.button("🤖 让本地模型复核这条诊断", disabled=not key, key=f"ai_{rid}"):
-            with st.spinner("本地模型思考中…"):
+            with st.spinner("正在生成分析…"):
                 got = llm.diagnose_record(
                     detail, key, cache_dir,
                     rule_hint=(f"{rule.get('error_type_code')} {rule.get('error_type')}"
@@ -252,7 +252,7 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
     question = (custom or "").strip() or q
     if col2.button("提问", width="stretch", key=f"qa_btn_{sid}"):
         if key:
-            with st.spinner("本地模型思考中…"):
+            with st.spinner("正在生成分析…"):
                 try:
                     st.session_state[f"qa_{sid}"] = llm.answer_question(question, facts, key, cache_dir)
                 except Exception as e:  # noqa: BLE001

@@ -52,7 +52,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-@st.cache_resource(show_spinner="智能体正在读取学情数据…")
+@st.cache_resource(show_spinner="正在读取学情数据…")
 def cached_bundle(output_dir: str, file_signature: tuple) -> dict:
     del file_signature
     return A.load_bundle(output_dir)

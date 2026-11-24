@@ -149,7 +149,7 @@ def avatar_svg(size: int = 132, cls: str = "sa-avatar") -> str:
 </svg>"""
 
 
-def hero(name: str = "智慧学伴", sub: str = "学情诊断智能体 · 会看证据，也会说“不知道”") -> None:
+def hero(name: str = "智慧学伴", sub: str = "个人学情与班级讲评") -> None:
     st.markdown(
         f"""<div class="sa-hero">
               <div class="sa-avatar-wrap">
