@@ -135,11 +135,11 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
     with t1:
         c1, c2 = st.columns([1, 1])
         with c1:
-            st.plotly_chart(C.student_radar(v), width="stretch")
+            C.show(C.student_radar(v))
         with c2:
-            st.plotly_chart(C.indicator_bars(v), width="stretch")
+            C.show(C.indicator_bars(v))
         with st.expander("证据量分布（为什么有的指标不下结论）", expanded=False):
-            st.plotly_chart(C.evidence_bars(v), width="stretch")
+            C.show(C.evidence_bars(v))
             st.caption("灰线为门槛 3 条；低于门槛一律「证据不足」，不参与薄弱排序。")
         st.dataframe([{"知识点": i["name"], "编号": i["code"],
                        "掌握度": None if i["mastery"] is None else round(i["mastery"], 3),
@@ -233,19 +233,20 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
     with t1:
         c1, c2 = st.columns([1, 1])
         with c1:
-            st.plotly_chart(C.class_theme_chart(cv["class_theme"]), width="stretch")
+            C.show(C.class_theme_chart(cv["class_theme"]))
         with c2:
-            st.plotly_chart(C.indicator_rank_chart(
+            C.show(C.indicator_rank_chart(
                 {c: {"score_rate": v["rate"], "count": v["n"]}
-                 for c, v in ind_rates.items() if v.get("rate") is not None}), width="stretch")
-        st.plotly_chart(C.question_rate_chart(q_rates), width="stretch")
+                 for c, v in ind_rates.items() if v.get("rate") is not None},
+                names=A.INDICATOR_NAMES))
+        C.show(C.question_rate_chart(q_rates, names=A.INDICATOR_NAMES))
     with t2:
         sp = sp_all[:12]
         if sp:
-            st.plotly_chart(C.scoring_point_chart(sp), width="stretch")
+            C.show(C.scoring_point_chart(sp, names=A.INDICATOR_NAMES))
         et = I.error_types(bundle)
         if et:
-            st.plotly_chart(C.error_type_chart(et), width="stretch")
+            C.show(C.error_type_chart(et))
         st.markdown(f"**{cls} 班全员掌握度矩阵**")
         sort_mode = st.radio(
             "矩阵排序",
@@ -260,7 +261,7 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
             "气泡大小与颜色表示掌握度（红 <40% · 燕麦色 40–80% · 绿 ≥80%）；"
             "灰色空心点表示证据不足。悬停查看掌握度、正确记录数和证据数。"
         )
-        st.plotly_chart(C.mastery_bubble_matrix_chart(matrix), width="stretch")
+        C.show(C.mastery_bubble_matrix_chart(matrix))
     with t3:
         rows = []
         for sid in A.list_students(bundle):

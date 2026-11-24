@@ -97,12 +97,12 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
 
     left, right = st.columns([1, 1])
     with left:
-        st.plotly_chart(C.student_radar(v), width="stretch")
+        C.show(C.student_radar(v))
     with right:
-        st.plotly_chart(C.indicator_bars(v), width="stretch")
+        C.show(C.indicator_bars(v))
 
     with st.expander("证据量分布（为什么有的指标不下结论）", expanded=False):
-        st.plotly_chart(C.evidence_bars(v), width="stretch")
+        C.show(C.evidence_bars(v))
         st.caption("灰线为证据门槛 3 条；低于门槛的指标一律输出「证据不足」，避免把缺记录当作未掌握。")
 
     # ---- 三主题得分率（来自 statistics.by_student.theme_rates）----
@@ -112,7 +112,7 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
     with c1:
         if rates:
             st.markdown("##### 三主题得分率（按题目原始计分，不含证据门槛）")
-            st.plotly_chart(C.theme_rates_chart(rates), width="stretch")
+            C.show(C.theme_rates_chart(rates))
         else:
             st.info("statistics.json 中没有该生的 theme_rates。")
     with c2:
@@ -152,7 +152,8 @@ def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) ->
             hist = (v.get("bkt_history") or {}).get(code) or []
             if len(hist) > 1:
                 st.markdown("**知识追踪轨迹（BKT 掌握概率随作答次序变化）**")
-                st.plotly_chart(C.timeline_chart(hist, code), width="stretch")
+                corrects = [bool(r.get("is_correct")) for r in recs]
+                C.show(C.timeline_chart(hist, code, corrects))
             for e in errs[:5]:
                 st.markdown(
                     f"- `{e.get('record_id')}` **{e.get('question_id')}** "
@@ -389,12 +390,12 @@ def render_class(bundle: dict, cls: str | None) -> None:
 
     left, right = st.columns(2)
     with left:
-        st.plotly_chart(C.class_theme_chart(cv["class_theme"]), width="stretch")
+        C.show(C.class_theme_chart(cv["class_theme"]))
     with right:
-        st.plotly_chart(C.indicator_rank_chart(cv["by_indicator"]), width="stretch")
+        C.show(C.indicator_rank_chart(cv["by_indicator"], names=A.INDICATOR_NAMES))
 
     st.markdown("##### 最薄弱的题目（至少 5 人作答）")
-    st.plotly_chart(C.question_rate_chart(cv["by_question"]), width="stretch")
+    C.show(C.question_rate_chart(cv["by_question"], names=A.INDICATOR_NAMES))
 
     class_questions = cv["by_class_question"].get(selected, {})
     if class_questions:
@@ -456,7 +457,7 @@ def render_class(bundle: dict, cls: str | None) -> None:
     if sp:
         left, right = st.columns([3, 2])
         with left:
-            st.plotly_chart(C.scoring_point_chart(sp), width="stretch")
+            C.show(C.scoring_point_chart(sp, names=A.INDICATOR_NAMES))
         with right:
             st.dataframe(pd.DataFrame([{
                 "评分点": r["评分点"], "指标": r["指标"], "得分率": f"{r['得分率']:.0%}",
@@ -477,7 +478,7 @@ def render_class(bundle: dict, cls: str | None) -> None:
         st.markdown("##### 六类错因分布（全部 385 条错误记录）")
         et = I.error_types(bundle)
         if et:
-            st.plotly_chart(C.error_type_chart(et), width="stretch")
+            C.show(C.error_type_chart(et))
     with right:
         st.markdown("##### 班级掌握度覆盖")
         cms = I.class_mastery_summary(bundle)
@@ -504,7 +505,7 @@ def render_class(bundle: dict, cls: str | None) -> None:
         "气泡大小与颜色表示掌握度（红 <40% · 燕麦色 40–80% · 绿 ≥80%）；"
         "灰色空心点表示证据不足。悬停查看掌握度、正确记录数和证据数。"
     )
-    st.plotly_chart(C.mastery_bubble_matrix_chart(matrix), width="stretch")
+    C.show(C.mastery_bubble_matrix_chart(matrix))
 
     # ---- 关键发现 ----
     findings = I.critical_findings(bundle)
