@@ -144,9 +144,17 @@ def build_knowledge_graph(data_model, stats):
     )
 
     # 物理布局设置
+    # 关键：minVelocity 太大时力导向永远收敛不了，表现为图谱一直在转；
+    # 这里显式设置 stabilization，并在页面里“稳定后立即冻结物理引擎”。
     net.set_options('''
     {
       "physics": {
+        "stabilization": {
+          "enabled": true,
+          "iterations": 400,
+          "updateInterval": 25,
+          "fit": true
+        },
         "forceAtlas2Based": {
           "gravitationalConstant": -50,
           "centralGravity": 0.01,
@@ -166,7 +174,7 @@ def build_knowledge_graph(data_model, stats):
       },
       "configure": {
         "enabled": true,
-        "filter": ["physics", "nodes", "edges"]
+        "filter": ["nodes", "edges"]
       }
     }
     ''')
@@ -192,9 +200,22 @@ def build_knowledge_graph(data_model, stats):
     </div>
     """
 
+    # 稳定后冻结物理引擎：否则 forceAtlas2Based 会一直微调，图谱看起来在“慢慢转动”
+    freeze_js = """
+<script type="text/javascript">
+  (function () {
+    function freeze() {
+      try { network.setOptions({ physics: { enabled: false } }); } catch (e) {}
+    }
+    try { network.once("stabilizationIterationsDone", freeze); } catch (e) {}
+    setTimeout(freeze, 2000);
+  })();
+</script>
+"""
+
     output_path = os.path.join(OUTPUT_DIR, 'knowledge_graph.html')
     html = net.generate_html(notebook=False)
-    html = html.replace('</body>', f'{legend_html}</body>')
+    html = html.replace('</body>', f'{legend_html}{freeze_js}</body>')
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html)
 

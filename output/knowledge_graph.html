@@ -314,7 +314,7 @@ function highlightFilter(filter) {
                   // adding nodes and edges to the graph
                   data = {nodes: nodes, edges: edges};
 
-                  var options = {"physics": {"forceAtlas2Based": {"gravitationalConstant": -50, "centralGravity": 0.01, "springLength": 100, "springConstant": 0.08, "damping": 0.4, "avoidOverlap": 0.5}, "minVelocity": 0.75, "solver": "forceAtlas2Based"}, "interaction": {"hover": true, "tooltipDelay": 100, "navigationButtons": true, "keyboard": true}, "configure": {"enabled": true, "filter": ["physics", "nodes", "edges"]}};
+                  var options = {"physics": {"forceAtlas2Based": {"gravitationalConstant": -50, "centralGravity": 0.01, "springLength": 100, "springConstant": 0.08, "damping": 0.4, "avoidOverlap": 0.5}, "minVelocity": 0.75, "solver": "forceAtlas2Based", "stabilization": {"enabled": true, "iterations": 400, "updateInterval": 25, "fit": true}}, "interaction": {"hover": true, "tooltipDelay": 100, "navigationButtons": true, "keyboard": true}, "configure": {"enabled": true, "filter": ["nodes", "edges"]}};
 
                   
 
@@ -353,5 +353,16 @@ function highlightFilter(filter) {
       拖拽节点调整位置<br>
       滚轮缩放
     </div>
-    </body>
+    
+<script type="text/javascript">
+  // 稳定后立即冻结物理引擎，避免图谱持续缓慢转动
+  (function () {
+    function freeze() {
+      try { network.setOptions({ physics: { enabled: false } }); } catch (e) {}
+    }
+    try { network.once("stabilizationIterationsDone", freeze); } catch (e) {}
+    setTimeout(freeze, 2000);
+  })();
+</script>
+</body>
 </html>
