@@ -138,7 +138,6 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
         c1, c2 = st.columns([1, 1])
         with c1:
             C.show(C.student_radar(v))
-            st.caption("灰空心点=证据不足（只标位置、不连折线）；折线只连有足够证据的指标。")
         with c2:
             C.show(C.indicator_bars(v))
         with st.expander("证据量分布（为什么有的指标不下结论）", expanded=False):

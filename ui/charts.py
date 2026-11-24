@@ -165,118 +165,42 @@ _HATCH = dict(shape="/", solidity=0.30, fillmode="overlay")
 # 学生个体视图
 # ============================================================
 
-def _radar_label(name: str, width: int = 7) -> str:
-    """雷达轴标签：中文长名按固定宽度折行，避免窄列里被裁掉。"""
-    text = str(name or "").strip()
-    if len(text) <= width:
-        return text
-    return "<br>".join(text[i:i + width] for i in range(0, len(text), width))
-
-
 def student_radar(student: dict) -> go.Figure:
-    """学生掌握度雷达图；证据不足的指标留空，不当作零掌握度。"""
-    by_code = {
-        x["code"]: x
-        for x in student.get("indicators", [])
-    }
-    ordered = [
-        by_code[code]
-        for code in INDICATORS
-        if code in by_code
-    ]
-
+    """9 指标雷达：点色=判定分级（灰空心=证据不足），中文短名。"""
+    inds = student["indicators"]
+    short = {x["code"]: (x["name"] or x["code"]) for x in inds}
+    ordered = [next(i for i in inds if i["code"] == c) for c in INDICATORS]
+    labels = [f"{(short.get(x['code'], x['code']) or x['code'])[:6]}<br>"
+              f"<span style='font-size:9px;color:{FAINT}'>{x['code']}</span>"
+              for x in ordered]
+    values = [(x["mastery"] or 0) for x in ordered]
+    colors = ["rgba(0,0,0,0)" if x["band"] == "insufficient"
+              else BAND_COLOR.get(x["band"], "#3E7CB1") for x in ordered]
+    symbols = ["circle-open" if x["band"] == "insufficient"
+               else "circle" for x in ordered]
+    custom = [[x["n"], BAND_TEXT[x["band"]]] for x in ordered] + [[ordered[0]["n"], BAND_TEXT[ordered[0]["band"]]]]
     fig = go.Figure()
-    if not ordered:
-        return _layout(fig, 380)
-
-    labels = [_radar_label(x.get("name") or x["code"]) for x in ordered]
-    full_names = [x.get("name") or x["code"] for x in ordered]
-    values = [
-        x.get("mastery")
-        if x.get("band") != "insufficient"
-        else None
-        for x in ordered
-    ]
-    colors = [
-        BAND_COLOR.get(x.get("band"), "#B7BFCA")
-        for x in ordered
-    ]
-    symbols = [
-        "circle-open"
-        if x.get("band") == "insufficient"
-        else "circle"
-        for x in ordered
-    ]
-    custom = [
-        [
-            x.get("n", 0),
-            x["code"],
-            BAND_TEXT.get(x.get("band"), "暂不判定"),
-            full_names[i],
-        ]
-        for i, x in enumerate(ordered)
-    ]
-
-    fig.add_trace(
-        go.Scatterpolar(
-            r=values + [values[0]],
-            theta=labels + [labels[0]],
-            mode="lines+markers",
-            fill="toself",
-            connectgaps=False,
-            name=student.get("sid", "学生"),
-            line=dict(
-                color="#3E7CB1",
-                width=2.2,
-                shape="linear",
-            ),
-            fillcolor="rgba(62,124,177,0.14)",
-            marker=dict(
-                size=6,
-                color=colors + [colors[0]],
-                symbol=symbols + [symbols[0]],
-                line=dict(width=1.6, color="#3E7CB1"),
-            ),
-            customdata=custom + [custom[0]],
-            hovertemplate=(
-                "%{customdata[3]}（%{customdata[1]}）"
-                "<br>%{customdata[2]}"
-                " · 掌握度 %{r:.0%}"
-                " · 证据 %{customdata[0]} 条"
-                "<extra></extra>"
-            ),
-        )
-    )
-
+    fig.add_trace(go.Scatterpolar(
+        r=values + [values[0]], theta=labels + [labels[0]], fill="toself",
+        name=student["sid"],
+        line=dict(color="#3E7CB1", width=2.2, shape="linear"),
+        fillcolor="rgba(62,124,177,0.14)",
+        marker=dict(size=6, color=colors, symbol=symbols,
+                    line=dict(width=1.6, color="#3E7CB1")),
+        customdata=custom,
+        hovertemplate="%{customdata[1]} · 掌握度 %{r:.0%}"
+                      " · 证据 %{customdata[0]} 条<extra></extra>",
+    ))
     fig.update_layout(
-        polar=dict(
-            # 留出四周刻度文字的空间：窄列（两栏布局）里长指标名最容易贴边被裁
-            domain=dict(x=[0.10, 0.90], y=[0.06, 0.94]),
-            radialaxis=dict(
-                range=[0, 1],
-                tickvals=[0.2, 0.4, 0.6, 0.8, 1.0],
-                ticktext=["20%", "40%", "60%", "80%", "100%"],
-                tickfont=dict(size=9, color=FAINT),
-                gridcolor=GRID,
-                linecolor=AXIS,
-            ),
-            angularaxis=dict(
-                # 旋转半步，避开 0° 轴上的 20%–100% 径向刻度文字
-                rotation=20,
-                gridcolor=GRID,
-                linecolor=AXIS,
-                tickfont=dict(size=9.5, color=SUB),
-            ),
-            bgcolor="rgba(0,0,0,0)",
-        ),
-        showlegend=False,
-    )
-
-    fig = _layout(fig, 400)
-    # 四边留白给刻度文字：默认 8px 会把 9 个长指标名裁掉
-    fig.update_layout(margin=dict(l=64, r=64, t=32, b=32))
-    return fig
-
+        polar=dict(radialaxis=dict(range=[0, 1], tickvals=[0.2, 0.4, 0.6, 0.8, 1.0],
+                                   ticktext=["20%", "40%", "60%", "80%", "100%"],
+                                   tickfont=dict(size=9, color=FAINT),
+                                   gridcolor=GRID, linecolor=AXIS),
+                   angularaxis=dict(gridcolor=GRID, linecolor=AXIS,
+                                    tickfont=dict(size=10, color=SUB)),
+                   bgcolor="rgba(0,0,0,0)"),
+        showlegend=False)
+    return _layout(fig, 380)
 
 
 def indicator_bars(student: dict) -> go.Figure:
