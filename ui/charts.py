@@ -165,6 +165,14 @@ _HATCH = dict(shape="/", solidity=0.30, fillmode="overlay")
 # 学生个体视图
 # ============================================================
 
+def _radar_label(name: str, width: int = 7) -> str:
+    """雷达轴标签：中文长名按固定宽度折行，避免窄列里被裁掉。"""
+    text = str(name or "").strip()
+    if len(text) <= width:
+        return text
+    return "<br>".join(text[i:i + width] for i in range(0, len(text), width))
+
+
 def student_radar(student: dict) -> go.Figure:
     """学生掌握度雷达图；证据不足的指标留空，不当作零掌握度。"""
     by_code = {
@@ -181,7 +189,8 @@ def student_radar(student: dict) -> go.Figure:
     if not ordered:
         return _layout(fig, 380)
 
-    labels = [x.get("name") or x["code"] for x in ordered]
+    labels = [_radar_label(x.get("name") or x["code"]) for x in ordered]
+    full_names = [x.get("name") or x["code"] for x in ordered]
     values = [
         x.get("mastery")
         if x.get("band") != "insufficient"
@@ -203,8 +212,9 @@ def student_radar(student: dict) -> go.Figure:
             x.get("n", 0),
             x["code"],
             BAND_TEXT.get(x.get("band"), "暂不判定"),
+            full_names[i],
         ]
-        for x in ordered
+        for i, x in enumerate(ordered)
     ]
 
     fig.add_trace(
@@ -229,8 +239,9 @@ def student_radar(student: dict) -> go.Figure:
             ),
             customdata=custom + [custom[0]],
             hovertemplate=(
-                "%{customdata[1]} · %{customdata[2]}"
-                "<br>掌握度 %{r:.0%}"
+                "%{customdata[3]}（%{customdata[1]}）"
+                "<br>%{customdata[2]}"
+                " · 掌握度 %{r:.0%}"
                 " · 证据 %{customdata[0]} 条"
                 "<extra></extra>"
             ),
@@ -239,6 +250,8 @@ def student_radar(student: dict) -> go.Figure:
 
     fig.update_layout(
         polar=dict(
+            # 留出四周刻度文字的空间：窄列（两栏布局）里长指标名最容易贴边被裁
+            domain=dict(x=[0.10, 0.90], y=[0.06, 0.94]),
             radialaxis=dict(
                 range=[0, 1],
                 tickvals=[0.2, 0.4, 0.6, 0.8, 1.0],
@@ -248,16 +261,21 @@ def student_radar(student: dict) -> go.Figure:
                 linecolor=AXIS,
             ),
             angularaxis=dict(
+                # 旋转半步，避开 0° 轴上的 20%–100% 径向刻度文字
+                rotation=20,
                 gridcolor=GRID,
                 linecolor=AXIS,
-                tickfont=dict(size=10, color=SUB),
+                tickfont=dict(size=9.5, color=SUB),
             ),
             bgcolor="rgba(0,0,0,0)",
         ),
         showlegend=False,
     )
 
-    return _layout(fig, 380)
+    fig = _layout(fig, 400)
+    # 四边留白给刻度文字：默认 8px 会把 9 个长指标名裁掉
+    fig.update_layout(margin=dict(l=64, r=64, t=32, b=32))
+    return fig
 
 
 
