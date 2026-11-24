@@ -663,6 +663,13 @@ def _last_topic(history: list[dict] | None, facts: dict) -> dict | None:
     return None
 
 
+def _last_assistant(history: list[dict] | None) -> str:
+    for msg in reversed(history or []):
+        if msg.get("role") == "assistant":
+            return re.sub(r"\s+", " ", str(msg.get("content") or "")).strip()
+    return ""
+
+
 def _answer_from_facts(question: str, facts: dict,
                        history: list[dict] | None = None) -> str:
     """确定性兜底回答：模型输出不可用时，用事实拼一段人话。
@@ -703,6 +710,11 @@ def _answer_from_facts(question: str, facts: dict,
                     f"掌握度 {topic.get('mastery', 0):.0%}，有 {topic.get('n', 0)} 条作答证据，"
                     f"{_band_clause(topic)}"
                     f"想深入的话，打开「我的学情」看这个指标的题目明细，能看到每题丢在哪个评分点。")
+        last = _last_assistant(history)
+        if last:
+            return (f"上一条讲的是：{last[:60]}…\n"
+                    f"想继续展开可以说「按指标看错因」「看具体题目」或「那第二薄弱呢」，"
+                    f"我按证据接着往下拆。")
 
     if any(k in q for k in ("证据不足", "不足", "看不出", "哪些结论", "不确定")):
         if not ins:
@@ -767,7 +779,7 @@ REWRITE_PROMPT_STUDENT = """你是"智慧学伴"，正在跟一位七年级学�
 不要输出思考过程，不要解释你在做什么，不要复述问题；也不要用「根据已核实」「根据分析」这类空话开头，直接说结论（不超过 3 句）；
 不要推测原因，只陈述事实与建议；不要把「证据条数」说成「错题数」或「做题数」；
 不要编造【事实结论】里没有的细分信息（例如每条证据分别对应哪个评分点、错误的具体环节）。
-如果【上文】里已经讲过某个指标，直接用"刚才提到的…"衔接，不要重复寒暄。
+【上文】只用来理解指代（“它”“那个指标”“第二薄弱”“再详细点”）；如果本轮问题本身没有指代，**不要**说“刚才提到的”，直接从结论说起。
 
 【上文】{context}
 
@@ -786,7 +798,7 @@ REWRITE_PROMPT_TEACHER = """你是"智慧学伴"的教师端助手，正在向�
 不要编造学生姓名或班级里不存在的信息，只能用【事实结论】里的数字；
 涉及两个班对比时，必须保留班级编号（如 DC01、DC02），不要用「这个班」「您班上」代指，避免指代混乱；
 不要推测原因（如「因为学生粗心」「思路错误」），只陈述事实与建议。
-如果【上文】里已经点名某个指标或评分点，用"刚才提到的…"衔接，不要重复开场。
+【上文】只用来理解指代（“它”“那个指标”“第二薄弱”“再详细点”）；本轮问题没有指代时，**不要**用“刚才提到的”开场，直接讲结论。
 
 【上文】{context}
 
@@ -862,6 +874,9 @@ def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "stude
         return ""                                    # 两班对比丢了班级编号 → 指代会混乱，拒
     if "评分点" in text and "评分点" not in draft:
         return ""                                    # 草稿没有评分点明细，模型编不出来 → 拒
+    for phrase in ("刚才提到", "刚才说到", "上面提到"):
+        if phrase in text and phrase not in draft:
+            return ""                                # 非追问轮却硬套“刚才提到的…” → 拒
     return text
 
 

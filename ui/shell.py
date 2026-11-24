@@ -257,8 +257,25 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
             reset()
             st.rerun()
 
-    # 不在每次切页动态插入固定定位 HTML 覆盖层：部分 Streamlit 前端版本会因此触发
-    # NotFoundError: removeChild。页面切换改为原生、稳定的即时渲染。
+    # 切页时的“AI 思考”过渡：只在页面真的变化时插入一次。
+    # 注意：固定定位覆盖层在部分 Streamlit 前端版本里会触发 removeChild，因此提供开关，
+    # 默认开启；若浏览器控制台报 removeChild，可在侧栏「⚙ 模型与数据」里关掉。
+    if (st.session_state.get("thinking_enabled", True)
+            and st.session_state.get("_shown_page") != page):
+        st.session_state["_shown_page"] = page
+        try:
+            design.thinking_overlay(
+                {"我的学情": "正在核对证据链…",
+                 "学习建议": "正在按优先级排学习路径…",
+                 "知识地图": "正在梳理知识谱系…",
+                 "班级概览": "正在汇总班级数据…",
+                 "学生名单": "正在读取学生档案…",
+                 "数据质量": "正在复核 8 条清洗规则…",
+                 "成果文件": "正在整理产物清单…",
+                 "智能体": "正在唤醒多智能体…",
+                 "对话": "正在准备对话…"}.get(page, f"正在打开「{page}」…"))
+        except Exception as exc:  # noqa: BLE001 - 动画失败不能影响页面
+            st.session_state["_think_error"] = type(exc).__name__
 
     # 顶部状态条
     if page not in {"我的学情", "班级概览"}:

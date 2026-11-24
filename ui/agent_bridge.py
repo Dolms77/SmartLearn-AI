@@ -184,7 +184,10 @@ def render_trace_cards(steps: list[dict], *, evidence: list[str] | None = None,
         st.markdown(css + '<div class="sa-flow">' + ''.join(cards) + '</div>', unsafe_allow_html=True)
         st.caption('按从左到右的真实执行顺序展示；任务模块使用结构化数据，不把它包装成多个大模型。')
         if evidence:
-            st.caption('本轮读取的作答记录：' + '、'.join(evidence[:6]))
+            more = '…' if len(evidence) > 6 else ''
+            st.caption(f'本轮读取的作答记录（该生证据池，共 {len(evidence)} 条）：'
+                       + '、'.join(evidence[:6]) + more)
+            st.caption('结论只引用其中与问题相关的记录；逐条对应关系在「我的学情」里按指标下钻查看。')
 
 
 def render_trace(result: dict, expanded: bool = True, compact: bool = True) -> None:

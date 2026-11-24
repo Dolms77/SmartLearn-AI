@@ -658,7 +658,7 @@ def render_quality(bundle: dict) -> None:
 # --------------------------------------------------------------------------
 def render_artifacts(bundle: dict) -> None:
     st.subheader("成果文件与外部产物")
-    st.caption("日常流程保留 05 知识图谱；06 仪表盘不再由一键流程生成，图表字段说明见前端数据契约。")
+    st.caption("05 知识图谱与 06 学情仪表盘都由一键流程生成；图表字段说明见前端数据契约。")
 
     rows = I.artifact_files(bundle)
     df = pd.DataFrame([{

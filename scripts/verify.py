@@ -30,11 +30,11 @@ REQUIRED = {
     "error_pattern_summary.json": "错因汇总（03）",
     "task3_recommendations.json": "任务3建议（08）",
     "task1_knowledge_structure.json": "任务1知识结构（09）",
+    "dashboard.html": "学情仪表盘（06）",
 }
 OPTIONAL = {
     "knowledge_base.json": "RAG 知识库（04，可选）",
     "knowledge_graph.html": "知识图谱（05）",
-    "dashboard.html": "学情仪表盘（06）",
     "error_diagnosis_llm.json": "LLM 诊断（llm_upgrade.py，可选）",
 }
 
