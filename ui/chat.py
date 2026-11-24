@@ -194,18 +194,14 @@ def _practice_answer(question: str, ident: str, bundle: dict) -> str | None:
     return f"{r['question_id']} · 当前任务：{point}。\n先写出这一步的表达式或推理依据，不必急着报最终答案。"
 
 
-def _render_meta(meta: dict, role: str = "teacher") -> None:
-    """只在教师端展示“本轮来源 / 协同路径 / 证据编号”这类内部信息。
-
-    学生端看到的是给自己的回答，不该出现协调器、诊断、校验、记录编号等工程细节；
-    学生要复核可以去「我的学情」按指标下钻。
-    """
-    if not meta or role != "teacher":
+def _render_meta(meta: dict, role: str = "student") -> None:
+    """展示本轮来源、协同路径与读取的作答记录（学生、教师都保留，便于复核）。"""
+    if not meta:
         return
     label = '模型改写（缓存）' if meta.get('source') == 'model' and meta.get('cached') else '模型改写' if meta.get('source') == 'model' else '规则回答（未使用模型改写）'
     st.caption('本轮来源：' + label)
     AB.render_trace_cards(meta.get('trace', []), evidence=meta.get('evidence'),
-                          title='本轮协同路径', expanded=False)
+                          title='本轮协同路径', expanded=True)
     if meta.get('fallback'):
         st.warning('表达层调用异常，已降级：' + meta['fallback'])
 

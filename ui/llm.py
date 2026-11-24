@@ -24,6 +24,8 @@ import urllib.request
 # 配置（全部可用环境变量覆盖）
 # --------------------------------------------------------------------------
 PROVIDER = os.environ.get("SA_LLM_PROVIDER", "ollama").strip().lower()
+# 提示词 / 守卫版本：进缓存键，改了口吻规则后旧答案自动失效（避免回放旧话术）
+_PROMPT_VER = "2026-11-24d"
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
 OLLAMA_MODEL_ENV = os.environ.get("SA_OLLAMA_MODEL", "").strip()
 PREFERRED_MODELS = ["deepseek-r1:8b", "deepseek-r1:7b", "deepseek-r1", "qwen2.5:7b"]
@@ -730,10 +732,10 @@ def _answer_from_facts(question: str, facts: dict,
         top = weak[0]
         more = "；".join(f"{w.get('name') or w['indicator']}（{w.get('mastery', 0):.0%}，证据 {w['n']} 条）"
                         for w in weak[1:3])
-        return (f"最该先补的是 {top.get('name') or top['indicator']}，"
-                f"掌握度 {top.get('mastery', 0):.0%}、证据 {top['n']} 条。"
+        return (f"最该先补的是「{top.get('name') or top['indicator']}」，"
+                f"掌握度只有 {top.get('mastery', 0):.0%}，证据 {top['n']} 条。"
                 + (f"其次是 {more}。" if more else "")
-                + "这些数字都来自你的实际作答，点开「我的学情」能看到具体是哪几道题。")
+                + "点开「我的学情」就能看到具体是哪几道题。")
 
     if any(k in q for k in ("错", "粗心", "错因", "类型")):
         summary = facts.get("error_summary") or {}
@@ -877,6 +879,12 @@ def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "stude
     for phrase in ("刚才提到", "刚才说到", "上面提到"):
         if phrase in text and phrase not in draft:
             return ""                                # 非追问轮却硬套“刚才提到的…” → 拒
+    # 以短问句开头 = 复述用户问题（如“你哪一块最薄弱？用整式解释…”），草稿从不用问句开头
+    if re.match(r"^[^。！？\n]{1,28}[？?]", text.strip()):
+        return ""
+    # 草稿里的“点开『我的学情』…”是给学生看的下一步动作，改写不能丢
+    if "我的学情" in draft and "我的学情" not in text:
+        return ""
     return text
 
 
@@ -890,7 +898,8 @@ def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
     """
     context = _context_block(history)
     hist_key = hashlib.md5(context.encode("utf-8")).hexdigest()[:8] if history else "0"
-    ident = (f"{role}|{hist_key}|" + question
+    # 提示词/守卫版本进缓存键：改了 prompt 或守卫后，旧缓存自动失效，避免回放旧话术
+    ident = (f"{_PROMPT_VER}|{role}|{hist_key}|" + question
              + json.dumps(facts, ensure_ascii=False, sort_keys=True))
     cached = read_cache(cache_dir, "qa", ident)
     if cached:
@@ -900,7 +909,9 @@ def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
     # 指代类追问（“那第二薄弱呢”“再详细点”）草稿已经足够自然，且模型改写容易编细节 → 不交给模型
     is_followup = _ordinal_index(question) is not None or any(
         k in question for k in _FOLLOWUP_HINTS)
-    text = draft if is_followup else (
+    # “最薄弱”这类结论句带固定导航语（点开「我的学情」…），模型改写常把它丢掉 → 直接用草稿
+    is_weakest = any(k in question for k in ("薄弱", "最弱", "拖后腿", "哪里差", "短板"))
+    text = draft if (is_followup or is_weakest) else (
         _safe_rewrite(draft, question, key, role=role, context=context) or draft)
     source = "model" if text != draft else "template"
     write_cache(cache_dir, "qa", ident,
