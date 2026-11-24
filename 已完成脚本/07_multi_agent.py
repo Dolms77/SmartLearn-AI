@@ -136,6 +136,7 @@ class Coordinator:
             'recommend': RecommendationAgent(bundle),
             'lecture': LectureAgent(bundle),
             'class': ClassAgent(bundle),
+            'evidence': EvidenceAgent(bundle),
         }
         self.validator = ValidatorAgent(bundle)
         # 会话记忆
@@ -151,7 +152,7 @@ class Coordinator:
                 intents.append(name)
         # 复合意图：诊断+建议共存 → 级联
         if 'recommend' in intents and 'diagnosis' in intents:
-            intents = ['diagnosis', 'recommend']  # 按级联顺序
+            intents = ['diagnosis', 'recommend'] + [x for x in intents if x not in ('diagnosis', 'recommend')]  # 保留证据等复合意图
         # 学生识别（校验存在性）
         m = self.STUDENT_RE.search(question)
         sid = None
@@ -204,6 +205,20 @@ class Coordinator:
 # 专职 Agent（含协作链接口）
 # ============================================================
 
+class EvidenceAgent:
+    """只返回目标学生的真实作答编号，不把证据意图降级为诊断。"""
+    def __init__(self, bundle):
+        self.b = bundle
+
+    def run(self, intent, chain_ctx, trace):
+        sid = intent.get('student_id')
+        rows = self.b.records_by_student.get(sid, [])
+        trace.log('EvidenceAgent', '读取作答证据', str(sid), f'范围限定为目标学生，共{len(rows)}条')
+        return {'agent': 'EvidenceAgent', 'student_id': sid,
+                'evidence_ids': [r['record_id'] for r in rows if r.get('record_id')],
+                'count': len(rows), 'source': 'cleaned_data.json'}
+
+
 class DiagnosisAgent:
     """诊断Agent：掌握度+错因+跨节点，输出带证据链"""
 
@@ -239,8 +254,12 @@ class DiagnosisAgent:
         weak.sort(key=lambda x: x['mastery'])
         insuf = [i['indicator'] for i in indicators if i['band'] == 'insufficient']
         parts = []
-        if p.get('overall_mastery') is not None:
-            parts.append(f"整体掌握度 {p['overall_mastery']:.0%}（仅计证据充分指标）。")
+        decided_values = [i['mastery'] for i in indicators if i['n'] >= MIN_EVIDENCE and i['mastery'] is not None]
+        if decided_values:
+            decided_mean = sum(decided_values) / len(decided_values)
+            parts.append(f"整体掌握度 {decided_mean:.0%}（仅计证据充分指标）。")
+        else:
+            parts.append('整体掌握度 —（全部指标证据不足）。')
         if weak:
             parts.append(f"最需要关注的是 {weak[0]['indicator']}"
                          f"（{weak[0]['name']}），掌握度 {weak[0]['mastery']:.0%}，"
@@ -306,7 +325,8 @@ class RecommendationAgent:
                     'mastery': d.get('current_mastery'), 'n': d.get('answer_count', 0)}
                    for ind, d in details.items()
                    if d.get('status') in ('weak', 'developing')
-                   and d.get('answer_count', 0) >= MIN_EVIDENCE]
+                   and d.get('answer_count', 0) >= MIN_EVIDENCE
+                   and d.get('current_mastery') is not None]
         targets.sort(key=lambda x: x['mastery'])
         recs = []
         for i, t in enumerate(targets[:3], 1):
@@ -328,7 +348,7 @@ class RecommendationAgent:
             })
         return {'agent': 'RecommendationAgent', 'student_id': sid,
                 'source': '现场轻量生成（建议运行08V2生成正式话语版）',
-                'diagnosis_summary': f"整体掌握度 {p.get('overall_mastery', 0):.0%}",
+                'diagnosis_summary': prev.get('summary') or '尚未执行证据充分指标的整体诊断。',
                 'recommendations': recs}
 
 

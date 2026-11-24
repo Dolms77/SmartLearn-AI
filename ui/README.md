@@ -1,14 +1,14 @@
 # 智慧学伴 · 交互界面（C 角色）
 
-Streamlit 三页应用：**学生诊断 / 班级概览 / 任务1 知识结构 / 数据质量复核**，可接入 DeepSeek API。
+Streamlit 应用：**12 个页面**（学生端 6 / 教师端 6）+ 多智能体对话；入口为「唤醒 → 选身份 → 选账号」。默认本地 Ollama 推理，可切云端 DeepSeek。
 
 ```
 ui/
 ├─ app.py            # 入口（侧栏路由 + 全局状态）
 ├─ adapter.py        # 数据适配层：只读 output/*.json → 视图模型（证据门槛在此把关）
 ├─ charts.py         # Plotly 图表构件
-├─ views.py          # 四个页面
-├─ llm.py            # DeepSeek 接入（缓存 / 强校验 / 离线降级）
+├─ views.py          # 班级概览 / 任务1 / 数据质量 / 成果文件等页面组件
+├─ llm.py            # 本地 Ollama / 云端 DeepSeek 双通道（缓存 / 守卫 / 离线降级）
 ├─ llm_upgrade.py    # 批量生成 LLM 错因诊断（增量、断点续跑）
 ├─ selftest.py       # 不依赖 Streamlit 的自检脚本
 └─ README.md
@@ -57,9 +57,9 @@ cd ui
 手动等价命令：
 
 ```powershell
-$env:USERPROFILE="D:\学习资料\AI竞赛\工作区\.streamlit-home"
+$env:USERPROFILE="$PWD\.streamlit-home"      # 指到工程内任意可写目录
 $env:HOME=$env:USERPROFILE
-$env:TEMP="D:\学习资料\AI竞赛\工作区\.tmp"; $env:TMP=$env:TEMP
+$env:TEMP="$PWD\.tmp"; $env:TMP=$env:TEMP
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.streamlit" | Out-Null
 Set-Content "$env:USERPROFILE\.streamlit\credentials.toml" "[general]`nemail = `"`""
 ..\.venv-ui\Scripts\python.exe -m streamlit run app.py --server.headless=true

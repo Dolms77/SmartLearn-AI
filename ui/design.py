@@ -72,6 +72,8 @@ button[data-baseweb="tab"]{font-size:var(--f-s);}
 def inject_tokens() -> None:
     st.markdown(TOKENS_CSS, unsafe_allow_html=True)
     st.markdown(PAGE_CSS, unsafe_allow_html=True)
+    # 思考过渡层的样式也在这里一次性注入，避免 thinking_overlay 每次切页重复塞 <style>
+    st.markdown(THINK_CSS, unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------------
@@ -158,11 +160,13 @@ div[data-baseweb="tab-highlight"],div[data-baseweb="tab-border"]{display:none;}
 .stButton>button[kind="primary"]:hover{filter:brightness(1.05);transform:translateY(-1px);}
 .stButton>button{border-radius:10px;border-color:rgba(226,232,244,.95);}
 
-/* ---------- 表格/图表容器：轻微玻璃感 ---------- */
-div[data-testid="stDataFrame"],div[data-testid="stPlotlyChart"]{
-  background:rgba(255,255,255,.55);border-radius:14px;padding:6px;
-  border:1px solid rgba(255,255,255,.7);box-shadow:0 6px 18px rgba(23,43,77,.05);
-}
+/* ---------- 表格/图表容器：图表克制、表格有清晰分层 ---------- */
+div[data-testid="stPlotlyChart"]{background:rgba(255,255,255,.55);border-radius:14px;padding:6px;border:1px solid rgba(255,255,255,.7);box-shadow:0 6px 18px rgba(23,43,77,.05);}
+div[data-testid="stDataFrame"]{background:rgba(255,255,255,.78);border-radius:12px;overflow:hidden;border:1px solid #dbe5f0;box-shadow:0 6px 18px rgba(23,43,77,.05);}
+div[data-testid="stDataFrame"] [role="columnheader"]{background:#eaf1fb!important;color:#243858!important;font-weight:700!important;border-bottom:1px solid #cbd9ea!important;}
+div[data-testid="stDataFrame"] [role="gridcell"]{border-bottom:1px solid #edf1f6!important;}
+div[data-testid="stDataFrame"] [role="row"]:nth-child(even) [role="gridcell"]{background:rgba(234,241,251,.34)!important;}
+div[data-testid="stDataFrame"] [role="row"]:hover [role="gridcell"]{background:#e8f2ff!important;}
 
 /* ---------- 滚动条 ---------- */
 ::-webkit-scrollbar{width:10px;height:10px;}
@@ -282,8 +286,10 @@ THINK_CSS = """
 
 
 def thinking_overlay(text: str = "正在组织答案…", hold: float = 1.05) -> None:
-    """切页时的一次性"思考"过渡：纯 CSS 自动淡出，不阻塞点击。"""
-    st.markdown(THINK_CSS, unsafe_allow_html=True)
+    """切页时的一次性"思考"过渡：纯 CSS 自动淡出，不阻塞点击。
+
+    样式（THINK_CSS）已在 inject_tokens() 一次性注入，这里只渲染过渡层本体。
+    """
     st.markdown(
         f'<div class="sa-think-bar"></div>'
         f'<div class="sa-think"><div class="sa-think-card">'

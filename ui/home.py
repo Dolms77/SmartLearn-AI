@@ -12,6 +12,7 @@ import adapter as A
 import charts as C
 import design
 import insights as I
+import labels
 import llm
 import theme
 import views
@@ -48,9 +49,10 @@ def _student_headline(v: dict) -> tuple[str, list[tuple[str, str]], str | None]:
 
 
 def _teacher_headline(bundle: dict, cls: str) -> tuple[str, list[tuple[str, str]], str | None]:
+    """教师端结论卡：全部用本班口径，指标显示中文名称而不是代号。"""
     cv = A.class_view(bundle, cls)
     row = cv["class_theme"].get(cls, {})
-    sp = I.scoring_points(bundle, limit=3)
+    sp = I.class_scoring_points(bundle, cls, limit=3)
     others = [c for c in cv["classes"] if c != cls]
     gap = ""
     if others:
@@ -58,12 +60,13 @@ def _teacher_headline(bundle: dict, cls: str) -> tuple[str, list[tuple[str, str]
         gap = f"，比 {others[0]} 高 {d:+.1%}"
     if sp:
         top = sp[0]
-        point_name = I.scoring_point_name(bundle, top["评分点"])
-        ind_name = A.INDICATOR_NAMES.get(top["指标"], top["指标"])
+        # 评分点用中文定义（来自 fix 分支的改进），指标名走统一的名称映射
+        point_name = I.scoring_point_name(bundle, top["评分点"]) or top["评分点"]
+        ind_name = labels.ind_name(top.get("指标", ""), "", bundle.get("output_dir"))
         return (f"最该先讲 **{point_name}**（{ind_name}），全班得分率 {top['得分率']:.0%}"
                 f"（{top['正确/总数']}）。讲评按「评分点 → 题目 → 变式」推进。",
                 [("班级得分率", f"{(row.get('overall') or 0):.0%}"),
-                 ("薄弱评分点", f"{len(sp)} 个")],
+                 ("薄弱评分点", f"{sum(1 for x in I.class_scoring_points(bundle, cls) if x['得分率'] < 0.3)} 个")],
                 None)
     return (f"{cls}：{row.get('students', 0)} 名学生，班级得分率 {(row.get('overall') or 0):.0%}{gap}。",
             [("学生数", f"{row.get('students', 0)}"),
@@ -134,11 +137,11 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
     with t1:
         c1, c2 = st.columns([1, 1])
         with c1:
-            st.plotly_chart(C.student_radar(v), width="stretch")
+            C.show(C.student_radar(v))
         with c2:
-            st.plotly_chart(C.indicator_bars(v), width="stretch")
+            C.show(C.indicator_bars(v))
         with st.expander("证据量分布（为什么有的指标不下结论）", expanded=False):
-            st.plotly_chart(C.evidence_bars(v), width="stretch")
+            C.show(C.evidence_bars(v))
             st.caption("灰线为门槛 3 条；低于门槛一律「证据不足」，不参与薄弱排序。")
         st.dataframe([{"知识点": i["name"], "编号": i["code"],
                        "掌握度": None if i["mastery"] is None else round(i["mastery"], 3),
@@ -209,17 +212,20 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
     cv = A.class_view(bundle, cls)
     row = cv["class_theme"].get(cls, {})
     cms = I.class_mastery_summary(bundle).get(cls, {})
+    sp_all = I.class_scoring_points(bundle, cls)
+    ind_rates = I.class_indicator_rates(bundle, cls)
+    q_rates = I.class_question_rates(bundle, cls)
 
     design.identity_bar(
         theme.avatar_img(40), f"{cls} · 教师视角",
         f"{row.get('students', 0)} 名学生 · 可判定覆盖 {cms.get('decided_rate', 0):.0%} · "
-        f"全班有效记录 {(bundle.get('statistics') or {}).get('overall', {}).get('total_records', 0)} 条")
+        f"本班有效记录 {sum(1 for r in bundle['records'] if r.get('class_id') == cls)} 条")
 
     design.kpi_row([
         ("班级得分率", f"{(row.get('overall') or 0):.0%}", "Σ得分/Σ满分"),
         ("学生数", f"{row.get('students', 0)}", ""),
         ("可判定格子", f"{cms.get('decided', 0)}", f"共 {cms.get('students', 0) * 9} 个"),
-        ("薄弱评分点", f"{len(I.scoring_points(bundle, limit=None))}", "<30% 的评分点"),
+        ("薄弱评分点", f"{len([x for x in sp_all if x['得分率'] < 0.3])}", "得分率 <30% 的评分点"),
     ])
 
     headline, metrics, _ = _teacher_headline(bundle, cls)
@@ -229,17 +235,28 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
     with t1:
         c1, c2 = st.columns([1, 1])
         with c1:
-            st.plotly_chart(C.class_theme_chart(cv["class_theme"]), width="stretch")
+            C.show(C.class_theme_chart(cv["class_theme"]))
         with c2:
-            st.plotly_chart(C.indicator_rank_chart(cv["by_indicator"]), width="stretch")
-        st.plotly_chart(C.question_rate_chart(cv["by_question"]), width="stretch")
+            C.show(C.indicator_rank_chart(
+                {c: {"score_rate": v["rate"], "count": v["n"]}
+                 for c, v in ind_rates.items() if v.get("rate") is not None},
+                names=A.INDICATOR_NAMES))
+        C.show(C.question_rate_chart(q_rates, names=A.INDICATOR_NAMES))
     with t2:
-        sp = I.scoring_points(bundle, limit=12)
+        sp = sp_all[:12]
         if sp:
-            st.plotly_chart(C.scoring_point_chart(sp), width="stretch")
-        et = I.error_types(bundle)
+            C.show(C.scoring_point_chart(sp, names=A.INDICATOR_NAMES))
+        class_students = {r['student_id'] for r in bundle['records'] if r.get('class_id') == cls}
+        counts = {}
+        for d in bundle.get('diagnoses', []):
+            if d.get('student_id') in class_students:
+                code = d.get('error_type_code') or d.get('error_type', '未分类')
+                counts.setdefault(code, {'代码': code, '类型': d.get('error_type', code), '条数': 0})['条数'] += 1
+        total_errors = sum(r['条数'] for r in counts.values())
+        et = [{**r, '占比': 100 * r['条数'] / total_errors} for r in counts.values()] if total_errors else []
         if et:
-            st.plotly_chart(C.error_type_chart(et), width="stretch")
+            st.caption(f'{cls} 本班错因构成；每条诊断计一次，不代表错误因果比例。')
+            C.show(C.error_type_chart(et))
         st.markdown(f"**{cls} 班全员掌握度矩阵**")
         sort_mode = st.radio(
             "矩阵排序",
@@ -251,17 +268,19 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
         matrix = I.mastery_heatmap(
             bundle, class_id=cls, clustered=sort_mode == "平均掌握度")
         st.caption(
-            "气泡大小与颜色表示掌握度（红 <40% · 燕麦色 40–80% · 绿 ≥80%）；"
+            "气泡大小与颜色表示掌握度（红 <40% · 燕麦色 40–70% · 绿 ≥70%）；"
             "灰色空心点表示证据不足。悬停查看掌握度、正确记录数和证据数。"
         )
-        st.plotly_chart(C.mastery_bubble_matrix_chart(matrix), width="stretch")
+        C.show(C.mastery_bubble_matrix_chart(matrix))
     with t3:
         rows = []
         for sid in A.list_students(bundle):
             sv = A.student_view(bundle, sid)
+            if sv["cls"] != cls:
+                continue
             rows.append({"学生": sid, "班级": sv["cls"], "有效记录": sv["evidence_total"],
                          "可判定": f"{sv['coverage']['decided']}/9",
-                         "可判定掌握度": None if sv["overall"] is None else f"{sv['overall']:.0%}",
+                         "可判定掌握度": "—" if sv["overall"] is None else f"{sv['overall']:.0%}",
                          "状态": "证据不足" if sv["coverage"]["decided"] == 0 else
-                                 ("需关注" if (sv["overall"] or 1) < 0.4 else "正常")})
+                                 ('需关注' if sv['overall'] is not None and sv['overall'] < 0.4 else '正常')})
         st.dataframe(rows, width="stretch", hide_index=True)

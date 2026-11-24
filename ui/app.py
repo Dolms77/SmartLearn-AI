@@ -79,16 +79,41 @@ if not bundle.get("records"):
     st.error("cleaned_data.json 缺失或为空，请先运行 01_data_loader.py。")
     st.stop()
 
+# --------------------------------------------------------------------------
+# 模型后端：由侧栏底部的 radio 写入 session_state，这里提前读取，本 run 立即生效
+# （不在顶部渲染任何侧栏控件，避免条件控件移位触发前端 removeChild 报错）
+# --------------------------------------------------------------------------
+_default_api = llm.PROVIDER == "api"
+# 首屏默认索引（环境决定），之后由 session_state 接管，避免动态 index 造成控件状态混乱
+_default_idx = 1 if _default_api else 0
+provider_choice = st.session_state.get(
+    "provider_choice", "云端 API" if _default_api else "本地模型")
+use_api = provider_choice == "云端 API"
+
+# 让底层通道与用户选择一致（覆盖模块级 PROVIDER，影响 llm.status() / llm._chat() 的分流）
+llm.PROVIDER = "api" if use_api else "ollama"
+
+
 @st.cache_data(ttl=20, show_spinner=False)
-def _llm_status_cached():
+def _llm_status_cached(provider: str):
+    del provider  # 仅作缓存键：切换后端时立即失效重查
     return llm.status()
 
 
-stt = _llm_status_cached()
-online = bool(stt["online"])
-key = llm.resolve_key(st.session_state.get("api_key_input") or None) if stt["provider"] == "api" else None
-# views/chat 只判断"模型是否可用"，因此本地模式传一个真值哨兵
-llm_flag = ("api" if key else None) if stt["provider"] == "api" else ("local" if online else None)
+stt = _llm_status_cached(llm.PROVIDER)
+
+if use_api:
+    api_key_val = str(st.session_state.get("api_key_input", "") or "")
+    key = llm.resolve_key(api_key_val or None)
+    # 只做格式校验（sk- 前缀 + 长度），杜绝“随便输数字也算成功”；真实校验走侧栏「验证 Key」按钮
+    online = llm.key_format_ok(key)
+    llm_flag = key if online else None
+else:
+    key = None
+    online = bool(stt["online"])
+    # 本地模式传真值哨兵即可（_chat 在 PROVIDER=="ollama" 时忽略 key）
+    llm_flag = "local" if online else None
+
 st.session_state["_key"] = llm_flag
 st.session_state["_cache"] = os.path.join(DEFAULT_OUTPUT, "llm_cache")
 
@@ -113,23 +138,48 @@ else:
 # --------------------------------------------------------------------------
 with st.sidebar:
     st.divider()
-    st.caption(("🟢 本地模型已就绪：" if online else "🟠 模型未就绪：") + stt["label"])
+    # 模型后端开关（写 session_state["provider_choice"]；顶部据此决定通道）
+    # 用 selectbox 而非 radio：避免生成第二个 radiogroup，与 _nav 的 div[role="radiogroup"] CSS 冲突
+    st.selectbox(
+        "模型后端", ["本地模型", "云端 API"],
+        index=_default_idx, key="provider_choice",
+        help="会话内即时切换；选「云端 API」后填入 Key")
+    if use_api:
+        st.text_input(
+            "DeepSeek API Key", type="password", key="api_key_input",
+            help="输入后即时生效（先做格式校验）；点「验证 Key」做真实校验")
+        if not online:
+            if key:
+                st.warning("Key 格式不正确（应以 sk- 开头），云端不可用。", icon="⚠️")
+            else:
+                st.warning("尚未配置 API Key，云端不可用，已回退离线回答。", icon="⚠️")
+        if st.button("🔑 验证 Key", width="stretch", key="verify_key_btn"):
+            with st.spinner("正在校验 DeepSeek Key…"):
+                ok, msg = llm.verify_key(key or "")
+            if ok:
+                st.success(f"✅ {msg}")
+            else:
+                st.error(f"❌ {msg}")
+
+    # 状态显示
+    if use_api:
+        st.caption(("🟢 云端模型已就绪：" if online else "🟠 云端模型未就绪：") + stt["label"])
+    else:
+        st.caption(("🟢 本地模型已就绪：" if online else "🟠 模型未就绪：") + stt["label"])
     with st.expander("⚙ 模型与数据", expanded=False):
-        if online:
+        if use_api:
+            if online:
+                st.success(f"{stt['label']} 已就绪", icon="✅")
+            else:
+                st.warning("未配置有效 API Key，云端不可用", icon="⚠️")
+        elif online:
             st.success(f"{stt['label']} 已就绪", icon="✅")
-            if stt["provider"] == "ollama":
-                st.caption("推理全程在本机完成，不联网、不上传。")
-                if stt.get("models"):
-                    st.caption("本机模型：" + "、".join(stt["models"]))
+            st.caption("推理全程在本机完成，不联网、不上传。")
+            if stt.get("models"):
+                st.caption("本机模型：" + "、".join(stt["models"]))
         else:
             st.warning(stt["reason"] or "模型不可用", icon="⚠️")
-            if stt["provider"] == "ollama":
-                st.code("ollama pull deepseek-r1:8b", language="powershell")
-                st.caption("拉取后无需重启界面，点右上角 Rerun 即可。")
-
-        with st.expander("切回云端 API（可选）", expanded=False):
-            st.text_input("DeepSeek API Key", type="password", key="api_key_input",
-                          help="设置环境变量 SA_LLM_PROVIDER=api 后才会使用")
-            st.caption("当前后端：" + stt["provider"])
-        st.caption(f"产物目录：`{DEFAULT_OUTPUT}`")
-        st.caption("数据仅用于本赛题演示；不写入、不上传任何学生个人信息。")
+            st.code("ollama pull deepseek-r1:8b", language="powershell")
+            st.caption("拉取后无需重启界面，点右上角 Rerun 即可。")
+    st.caption(f"产物目录：`{DEFAULT_OUTPUT}`")
+    st.caption("数据仅用于本赛题演示；不写入、不上传任何学生个人信息。")
