@@ -183,7 +183,7 @@ def student_radar(student: dict) -> go.Figure:
     fig.add_trace(go.Scatterpolar(
         r=values + [values[0]], theta=labels + [labels[0]], fill="toself",
         name=student["sid"],
-        line=dict(color="#3E7CB1", width=2.2, shape="spline", smoothing=0.6),
+        line=dict(color="#3E7CB1", width=2.2, shape="linear"),
         fillcolor="rgba(62,124,177,0.14)",
         marker=dict(size=6, color=colors, symbol=symbols,
                     line=dict(width=1.6, color="#3E7CB1")),
