@@ -248,14 +248,12 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
     with st.chat_message("user", avatar="🧑‍🎓"):
         st.markdown(question)
 
-    placeholder = st.empty()
-    with placeholder.container():
-        with st.chat_message("assistant", avatar=theme.character_path()):
-            st.markdown(theme.typing(), unsafe_allow_html=True)
-    answer = labels.humanize(
-        _answer(question, role, ident, bundle, key, cache_dir, history=hist[:-1][-4:]),
-        bundle.get("output_dir"))
-    placeholder.empty()
+    # 用 st.spinner 代替 st.empty()+st.chat_message 的“打字动画”：
+    # 后者会触发 Streamlit 前端的 removeChild 报错（占位符里嵌 chat_message + 自定义 HTML）。
+    with st.spinner("正在组织回答…"):
+        answer = labels.humanize(
+            _answer(question, role, ident, bundle, key, cache_dir, history=hist[:-1][-4:]),
+            bundle.get("output_dir"))
     meta = st.session_state.get(f'meta_{role}_{ident}', {})
     hist.append({'role': 'assistant', 'content': answer, 'meta': meta})
     with st.chat_message('assistant', avatar=theme.character_path()):

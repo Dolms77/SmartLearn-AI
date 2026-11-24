@@ -69,6 +69,8 @@ button[data-baseweb="tab"]{font-size:var(--f-s);}
 def inject_tokens() -> None:
     st.markdown(TOKENS_CSS, unsafe_allow_html=True)
     st.markdown(PAGE_CSS, unsafe_allow_html=True)
+    # 思考过渡层的样式也在这里一次性注入，避免 thinking_overlay 每次切页重复塞 <style>
+    st.markdown(THINK_CSS, unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------------
@@ -279,8 +281,10 @@ THINK_CSS = """
 
 
 def thinking_overlay(text: str = "正在组织答案…", hold: float = 1.05) -> None:
-    """切页时的一次性"思考"过渡：纯 CSS 自动淡出，不阻塞点击。"""
-    st.markdown(THINK_CSS, unsafe_allow_html=True)
+    """切页时的一次性"思考"过渡：纯 CSS 自动淡出，不阻塞点击。
+
+    样式（THINK_CSS）已在 inject_tokens() 一次性注入，这里只渲染过渡层本体。
+    """
     st.markdown(
         f'<div class="sa-think-bar"></div>'
         f'<div class="sa-think"><div class="sa-think-card">'

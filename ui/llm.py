@@ -254,6 +254,30 @@ def _client(key: str):
     return OpenAI(api_key=key, base_url=API_BASE_URL, timeout=40.0, max_retries=1)
 
 
+def key_format_ok(key: str | None) -> bool:
+    """DeepSeek Key 的轻量格式校验：以 sk- 开头且长度足够（不联网，即时反馈）。"""
+    k = (key or "").strip()
+    return k.startswith("sk-") and len(k) >= 20
+
+
+def verify_key(key: str) -> tuple[bool, str]:
+    """真实校验 DeepSeek Key：拉一次 /models。返回 (是否有效, 说明)。
+
+    说明：这是联网的真实校验，只在用户点「验证 Key」时调用，避免每次重绘都打网络。
+    """
+    k = (key or "").strip()
+    if not key_format_ok(k):
+        return False, "格式不正确（应以 sk- 开头）"
+    try:
+        _client(k).models.list()
+        return True, "Key 有效"
+    except Exception as e:  # noqa: BLE001 - 网络/鉴权错误都归为无效
+        msg = str(e)
+        if "401" in msg or "auth" in msg.lower() or "invalid" in msg.lower() or "key" in msg.lower():
+            return False, "Key 无效（认证失败）"
+        return False, f"无法连接 DeepSeek：{type(e).__name__}"
+
+
 def _chat_api(key: str, prompt: str, temperature: float, max_tokens: int) -> str:
     resp = _client(key).chat.completions.create(
         model=API_MODEL,
