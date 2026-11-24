@@ -490,17 +490,19 @@ def _teacher_answer(question: str, facts: dict,
     cmp_ = facts.get("class_compare") or {}
     q = question or ""
 
-    # ⓪ 追问：第 N 弱的指标
+    # 按上一轮用户话题消解序数，不把题目追问误当指标。
     idx = _ordinal_index(q)
     if idx is not None:
-        if len(inds) > idx:
-            x = inds[idx]
-            return (f"排在第 {idx + 1} 位的是{x['indicator']}（{_pct(x['rate'])}）。"
-                    f"和第一位相比，差距主要在支撑它的题目上；建议按这个指标再准备一组变式题。")
-        if len(qs) > idx:
-            x = qs[idx]
-            return (f"排在第 {idx + 1} 位的题目是 {x['question']}（得分率 {_pct(x['rate'])}，"
-                    f"{x['n']} 人作答）。")
+        topic = _rank_topic(q, history)
+        pool = sps if topic == 'scoring' else qs if topic == 'question' else inds
+        if len(pool) <= idx:
+            return f"当前可用的{ {'scoring': '评分点', 'question': '题目'}.get(topic, '指标') }不足 {idx + 1} 项，不能补造排名。"
+        x = pool[idx]
+        if topic == 'scoring':
+            return f"第 {idx + 1} 个评分点是 {x['评分点']}（{x['正确/总数']} 做对），来自 {x['题号']}。"
+        if topic == 'question':
+            return f"第 {idx + 1} 道题是 {x['question']}（得分率 {_pct(x['rate'])}，样本 {x['n']} 条）；这不是指标排名。"
+        return f"第 {idx + 1} 个指标是 {x['indicator']}（得分率 {_pct(x['rate'])}，样本 {x['n']} 条），统计口径为 {cls}。"
 
     # ① 追问：把刚才提到的内容讲细
     if any(k in q for k in _FOLLOWUP_HINTS):
@@ -509,9 +511,13 @@ def _teacher_answer(question: str, facts: dict,
             if msg.get("role") == "assistant":
                 last = str(msg.get("content") or "")
                 break
+        if _rank_topic(q, history) == 'question':
+            for x in qs:
+                if x['question'] in last:
+                    return f"刚才提到的是 {x['question']}：{x.get('text', '')}。本班得分率 {_pct(x['rate'])}，样本 {x['n']} 条。请结合该题评分点安排讲评，不能仅凭得分率推测错因。"
         for x in inds:
-            if x["indicator"] in last:
-                return (f"刚才提到的 {x['indicator']} 是 {cls} 本周最弱的指标之一，"
+            if x['indicator'] in last or (x.get('name') and x['name'] in last):
+                return (f"刚才提到的 {x['indicator']} 是 {cls} 当前统计中最弱的指标之一，"
                         f"得分率 {_pct(x['rate'])}，样本 {x['n']} 条。"
                         f"建议先看它在评分点上的分布，再决定讲哪一步。")
         for s in sps:
@@ -569,7 +575,7 @@ def _teacher_answer(question: str, facts: dict,
         parts = []
         if qs:
             parts.append("先讲 " + "、".join(
-                f"{x['question']}（得分率 {_pct(x['rate'])}，{x['n']} 人作答）" for x in qs[:3]))
+                f"{x['question']}（得分率 {_pct(x['rate'])}，样本 {x['n']} 条）" for x in qs[:3]))
         if inds:
             parts.append("再补指标 " + "、".join(
                 f"{x['indicator']}（{_pct(x['rate'])}）" for x in inds[:2]))
@@ -593,6 +599,18 @@ def _teacher_answer(question: str, facts: dict,
 
 _ORDINALS = (("第二", 1), ("第三", 2), ("第四", 3), ("第2", 1), ("第3", 2), ("第4", 3))
 _FOLLOWUP_HINTS = ("再详细", "展开", "具体一点", "具体点", "多说", "刚才", "上面", "那个指标", "这一个")
+
+
+def _rank_topic(question: str, history: list[dict] | None = None) -> str:
+    candidates = [question] + [str(m.get('content', '')) for m in reversed(history or []) if m.get('role') == 'user']
+    for text in candidates:
+        if '评分点' in text or '哪一步' in text:
+            return 'scoring'
+        if any(k in text for k in ('题目', '哪几道题', '哪道题', '第二题', '第三题')):
+            return 'question'
+        if any(k in text for k in ('指标', '薄弱', '知识点')):
+            return 'indicator'
+    return 'indicator'
 
 
 def _ordinal_index(q: str) -> int | None:
@@ -636,16 +654,22 @@ def _answer_from_facts(question: str, facts: dict,
     errs = facts.get("error_types") or []
     q = question or ""
 
-    # ⓪ 追问：按序数取第 N 个薄弱/发展中指标
+    if any(k in q for k in ('全班', '这个班', '两个班', '同学名单')) or re.search(r'D\d{2}', q.replace(sid, '')):
+        return '学生入口只讨论你自己的学习记录，不提供其他同学的数据。班级讲评和学生名单请在教师入口查看。'
+    if any(k in q for k in ('你能做什么', 'AI能力', '什么能力', '多agent', '多智能体')):
+        return '我能读取你的作答证据、解释学情、给出分步练习建议并接续追问。统计和推荐由规则任务模块执行；模型在线时负责表达改写。不支持把任意新答案自动判分，也不能用模拟数据证明教学成效。'
+
+    # 只对证据充分的指标排序；缺证据不能排成“次薄弱”。
     idx = _ordinal_index(q)
     if idx is not None:
-        pool = weak + (facts.get("developing_indicators") or []) + ins
+        pool = sorted(weak + (facts.get("developing_indicators") or []), key=lambda x: x.get('mastery', 1))
         if len(pool) > idx:
             w = pool[idx]
             return (f"排在第 {idx + 1} 位的是{w.get('name') or w['indicator']}，"
                     f"掌握度 {w.get('mastery', 0):.0%}、证据 {w.get('n', 0)} 条。"
                     f"{_band_clause(w)}"
-                    f"要不要我把它前面的那道也一起排进这周的计划？")
+                    f"可以继续问这个指标的作答依据或练习步骤。")
+        return f"目前只有 {len(pool)} 个证据充分的待巩固指标，不足以给出第 {idx + 1} 位；证据不足的指标不参与排名。"
 
     # ① 追问：把刚才提到的那个指标讲细一点
     if any(k in q for k in _FOLLOWUP_HINTS):
@@ -686,6 +710,16 @@ def _answer_from_facts(question: str, facts: dict,
                 f"具体丢在哪个评分点上。")
 
     if any(k in q for k in ("计划", "建议", "下一步", "练什么", "怎么学", "安排")):
+        recs = facts.get('collaboration_recommendations') or []
+        if recs:
+            lines = ['先按你的作答诊断安排练习：']
+            for i, r in enumerate(recs[:3], 1):
+                lines.append(f"{i}. 巩固{r.get('indicator_name') or r.get('indicator')}：" + '、'.join(r.get('recommended_questions') or []))
+                hints = [h for h in r.get('step_hints', []) if '人工审校' not in h]
+                if hints:
+                    lines.append('提示：' + '；'.join(hints[:2]))
+            lines.append('这些题目来自项目题库；请写出解题过程，自查评分点。目前不自动判定你新输入答案的对错。')
+            return '\n'.join(lines)
         if not weak:
             return f"{sid} 目前没有证据充分的薄弱点，建议保持每周一次综合练习，重点练「不等式与不等式组」的应用题。"
         steps = "；".join(f"第{i}步补「{w.get('name') or w['indicator']}」"
@@ -748,7 +782,7 @@ def _rewrite_prompt(role: str) -> str:
 
 
 def _numbers(text: str) -> set[str]:
-    return set(re.findall(r"\d+", text or ""))
+    return set(re.findall(r"\d+(?:\.\d+)?%?", text or ""))
 
 
 _PLACEHOLDER_RE = re.compile(r"[\[\]【】]|占位|待补充|XX|具体丢分步骤")
@@ -785,8 +819,10 @@ def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "stude
     if not text:
         return ""
     allowed_nums = _numbers(draft) | {"3", "9"}      # 3=门槛、9=指标总数
-    if _numbers(text) - allowed_nums:
-        return ""                                    # 冒出 draft 里没有的数字 → 拒
+    if _numbers(text) - allowed_nums or _numbers(draft) - _numbers(text):
+        return ""  # 不能新增数字，也不能删掉草稿中的数字、百分比和样本量
+    if role == 'teacher' and re.search(r'你的|你最|你应该|你需要', text):
+        return ""  # 教师回答不能把班级统计说成老师个人的薄弱点
     codes = set(re.findall(r"T0[123]I[123]", text))
     if codes - set(re.findall(r"T0[123]I[123]", draft)):
         return ""                                    # 编造指标编号 → 拒
@@ -806,7 +842,8 @@ def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "stude
 
 
 def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
-                    role: str = "student", history: list[dict] | None = None) -> str:
+                    role: str = "student", history: list[dict] | None = None,
+                    return_meta: bool = False):
     """先由事实生成"不会错"的草稿，再让模型改写口吻；改写不达标就用草稿。
 
     role: student / teacher —— 决定改写提示词与缓存分桶（两种口吻互不串用）。
@@ -818,7 +855,7 @@ def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
              + json.dumps(facts, ensure_ascii=False, sort_keys=True))
     cached = read_cache(cache_dir, "qa", ident)
     if cached:
-        return cached.get("answer", "")
+        return (cached.get('answer', ''), {'source': cached.get('source', 'template'), 'cached': True}) if return_meta else cached.get('answer', '')
 
     draft = _answer_from_facts(question, facts, history)
     # 指代类追问（“那第二薄弱呢”“再详细点”）草稿已经足够自然，且模型改写容易编细节 → 不交给模型
@@ -830,7 +867,7 @@ def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
     write_cache(cache_dir, "qa", ident,
                 {"question": question, "role": role, "answer": text,
                  "source": source, "draft": draft})
-    return text
+    return (text, {'source': source, 'cached': False}) if return_meta else text
 
 
 # --------------------------------------------------------------------------
@@ -880,5 +917,6 @@ def build_facts(student: dict, stats_student: dict | None, class_rows: dict | No
              "question": d.get("question_id")}
             for d in errs[:8]
         ],
-        "class_theme_rates": class_rows or {},
+        # 学生问答不携带其他班级统计，不能只靠提示词限制数据边界。
+        "class_theme_rates": {},
     }

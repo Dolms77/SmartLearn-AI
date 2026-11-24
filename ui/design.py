@@ -155,11 +155,13 @@ div[data-baseweb="tab-highlight"],div[data-baseweb="tab-border"]{display:none;}
 .stButton>button[kind="primary"]:hover{filter:brightness(1.05);transform:translateY(-1px);}
 .stButton>button{border-radius:10px;border-color:rgba(226,232,244,.95);}
 
-/* ---------- 表格/图表容器：轻微玻璃感 ---------- */
-div[data-testid="stDataFrame"],div[data-testid="stPlotlyChart"]{
-  background:rgba(255,255,255,.55);border-radius:14px;padding:6px;
-  border:1px solid rgba(255,255,255,.7);box-shadow:0 6px 18px rgba(23,43,77,.05);
-}
+/* ---------- 表格/图表容器：图表克制、表格有清晰分层 ---------- */
+div[data-testid="stPlotlyChart"]{background:rgba(255,255,255,.55);border-radius:14px;padding:6px;border:1px solid rgba(255,255,255,.7);box-shadow:0 6px 18px rgba(23,43,77,.05);}
+div[data-testid="stDataFrame"]{background:rgba(255,255,255,.78);border-radius:12px;overflow:hidden;border:1px solid #dbe5f0;box-shadow:0 6px 18px rgba(23,43,77,.05);}
+div[data-testid="stDataFrame"] [role="columnheader"]{background:#eaf1fb!important;color:#243858!important;font-weight:700!important;border-bottom:1px solid #cbd9ea!important;}
+div[data-testid="stDataFrame"] [role="gridcell"]{border-bottom:1px solid #edf1f6!important;}
+div[data-testid="stDataFrame"] [role="row"]:nth-child(even) [role="gridcell"]{background:rgba(234,241,251,.34)!important;}
+div[data-testid="stDataFrame"] [role="row"]:hover [role="gridcell"]{background:#e8f2ff!important;}
 
 /* ---------- 滚动条 ---------- */
 ::-webkit-scrollbar{width:10px;height:10px;}

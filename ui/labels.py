@@ -47,7 +47,8 @@ def humanize(text: str, output_dir: str | None = None,
         return text
     ind, theme = maps if maps is not None else name_maps(output_dir or "")
     s = str(text)
-    s = _IND_PAREN_RE.sub(lambda m: m.group(2), s)
+    # 只有括号确实重复中文名称时才去掉编号；“T02I1（46%）”不能丢掉指标名。
+    s = _IND_PAREN_RE.sub(lambda m: m.group(2) if m.group(2) == ind.get(m.group(1)) else m.group(0), s)
     s = _IND_RE.sub(lambda m: ind.get(m.group(0), m.group(0)), s)
     s = _THEME_RE.sub(lambda m: theme.get(m.group(0), m.group(0)), s)
     s = re.sub(r"[ \t]{2,}", " ", s)

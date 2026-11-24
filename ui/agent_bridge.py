@@ -43,6 +43,12 @@ AGENT_META = {
     "LectureAgent": ("👩‍🏫", "讲评", "#E67E22"),
     "ClassAgent": ("🏫", "班级", "#3498DB"),
     "ValidatorAgent": ("🛡️", "校验", "#2ECC71"),
+    "EvidenceAgent": ("🧾", "证据", "#4E7B8F"),
+    "班级统计模块": ("📊", "班级统计", "#3E7CB1"),
+    "教师意图模块": ("🧠", "意图匹配", "#8E6BBE"),
+    "证据边界模块": ("🔒", "边界校验", "#2E9E5B"),
+    "分步练习模块": ("🪜", "分步练习", "#D08770"),
+    "角色边界": ("🔒", "角色边界", "#2E9E5B"),
 }
 CLASS_HINTS = ("班", "全班", "对比", "DC01", "DC02")
 
@@ -146,36 +152,46 @@ def _name_maps() -> tuple[dict, dict]:
     return labels.name_maps(DEFAULT_OUTPUT)
 
 
-def render_trace(result: dict, expanded: bool = True, compact: bool = True) -> None:
-    steps = (result.get("trace") or {}).get("steps") or []
-    if not steps:
+def render_trace_cards(steps: list[dict], *, evidence: list[str] | None = None,
+                       title: str = '本轮协同路径', expanded: bool = False) -> None:
+    """卡片化协同路径：仅合并连续、语义相同的校验步骤，保留真实执行顺序。"""
+    unique = []
+    seen = set()
+    for step in steps:
+        agent, action = str(step.get('agent', '')), str(step.get('action', ''))
+        key = (agent, action)
+        if key in seen and ('校验' in action or agent == 'ValidatorAgent'):
+            continue
+        seen.add(key)
+        unique.append(step)
+    if not unique:
         return
-    agents = [s.get("agent") for s in steps if s.get("agent") != "Coordinator"]
-    label = f"🤖 执行轨迹（{len(steps)} 步 · {len(agents)} 个专职 Agent）"
-    passed = all((r.get("validation") or {}).get("passed", True)
-                 for r in result.get("results", []) or [])
+    css = '''<style>
+    .sa-flow{display:flex;align-items:stretch;gap:6px;overflow-x:auto;padding:8px 2px 12px}
+    .sa-flow-card{min-width:132px;flex:1;padding:12px 10px;border-radius:12px;background:#fff;border:1px solid #e2eaf4;box-shadow:0 4px 12px rgba(22,35,58,.06);position:relative}
+    .sa-flow-card:not(:last-child):after{content:'→';position:absolute;right:-12px;top:40%;z-index:2;color:#95a8bd;font-size:18px;font-weight:700}
+    .sa-flow-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:15px;margin-bottom:7px}
+    .sa-flow-name{font-size:12px;font-weight:700;color:#22324a}.sa-flow-action{font-size:11px;color:#63748a;margin-top:3px;line-height:1.4}
+    .sa-flow-detail{font-size:10px;color:#8a99aa;margin-top:7px;line-height:1.35;border-top:1px solid #eef2f6;padding-top:6px}
+    @media(max-width:760px){.sa-flow-card{min-width:118px}.sa-flow{gap:12px}}
+    </style>'''
+    with st.expander(f'🧩 {title} · {len(unique)} 个步骤', expanded=expanded):
+        cards = []
+        for s in unique:
+            icon, cn, color = AGENT_META.get(s.get('agent', ''), ('⚙', str(s.get('agent') or '任务模块'), '#90A4AE'))
+            detail = _humanize(str(s.get('detail') or s.get('output') or ''))[:44]
+            cards.append(f'<div class="sa-flow-card"><div class="sa-flow-icon" style="background:{color}18;color:{color}">{icon}</div><div class="sa-flow-name">{cn}</div><div class="sa-flow-action">{s.get("action", "处理")}</div><div class="sa-flow-detail">{detail or "结构化事实"}</div></div>')
+        st.markdown(css + '<div class="sa-flow">' + ''.join(cards) + '</div>', unsafe_allow_html=True)
+        st.caption('按从左到右的真实执行顺序展示；任务模块使用结构化数据，不把它包装成多个大模型。')
+        if evidence:
+            st.caption('本轮读取的作答记录：' + '、'.join(evidence[:6]))
 
-    with st.expander(label, expanded=expanded):
-        st.markdown(_TRACE_CSS, unsafe_allow_html=True)
-        html = ['<div class="sa-trace">']
-        for s in steps:
-            icon, cn, color = AGENT_META.get(s.get("agent", ""), ("⚙️", s.get("agent", "?"), "#90A4AE"))
-            detail = ""
-            if not compact:
-                if s.get("detail"):
-                    detail += f'<div class="sa-d">输入：{_humanize(str(s["detail"])[:70])}</div>'
-                if s.get("output"):
-                    detail += f'<div class="sa-d">输出：{_humanize(str(s["output"])[:70])}</div>'
-            html.append(
-                f'<div class="sa-step"><div class="sa-ico" style="border-color:{color};'
-                f'color:{color};">{icon}</div><div class="sa-body">'
-                f'<div class="sa-t">{cn} · {s.get("action", "")}'
-                f'<small>{s.get("time", "")}</small></div>{detail}</div></div>')
-        html.append("</div>")
-        st.markdown("".join(html), unsafe_allow_html=True)
-        st.caption(("✅ 校验通过：结论均带证据、提示未泄露答案。" if passed
-                    else "⚠️ 校验拦截：存在需要人工复核的结论。") +
-                   " 轨迹由 Trace 逐步记录，可复核。")
+
+def render_trace(result: dict, expanded: bool = True, compact: bool = True) -> None:
+    steps = (result.get('trace') or {}).get('steps') or []
+    passed = all((r.get('validation') or {}).get('passed', True) for r in result.get('results', []) or [])
+    render_trace_cards(steps, title='多智能体协同路径', expanded=expanded)
+    st.caption('✅ 校验通过：结论均带证据。' if passed else '⚠️ 存在需要人工复核的结论。')
 
 
 # ---------------------------------------------------------------------------

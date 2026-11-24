@@ -64,7 +64,7 @@ def _teacher_headline(bundle: dict, cls: str) -> tuple[str, list[tuple[str, str]
         return (f"最该先讲 **{top['评分点']}**（{ind_name}），全班得分率 {top['得分率']:.0%}"
                 f"（{top['正确/总数']}）。讲评按「评分点 → 题目 → 变式」推进。",
                 [("班级得分率", f"{(row.get('overall') or 0):.0%}"),
-                 ("薄弱评分点", f"{len(I.class_scoring_points(bundle, cls))} 个")],
+                 ("薄弱评分点", f"{sum(1 for x in I.class_scoring_points(bundle, cls) if x['得分率'] < 0.3)} 个")],
                 None)
     return (f"{cls}：{row.get('students', 0)} 名学生，班级得分率 {(row.get('overall') or 0):.0%}{gap}。",
             [("学生数", f"{row.get('students', 0)}"),
@@ -217,7 +217,7 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
     design.identity_bar(
         theme.avatar_img(40), f"{cls} · 教师视角",
         f"{row.get('students', 0)} 名学生 · 可判定覆盖 {cms.get('decided_rate', 0):.0%} · "
-        f"全班有效记录 {(bundle.get('statistics') or {}).get('overall', {}).get('total_records', 0)} 条")
+        f"本班有效记录 {sum(1 for r in bundle['records'] if r.get('class_id') == cls)} 条")
 
     design.kpi_row([
         ("班级得分率", f"{(row.get('overall') or 0):.0%}", "Σ得分/Σ满分"),
@@ -244,8 +244,16 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
         sp = sp_all[:12]
         if sp:
             C.show(C.scoring_point_chart(sp, names=A.INDICATOR_NAMES))
-        et = I.error_types(bundle)
+        class_students = {r['student_id'] for r in bundle['records'] if r.get('class_id') == cls}
+        counts = {}
+        for d in bundle.get('diagnoses', []):
+            if d.get('student_id') in class_students:
+                code = d.get('error_type_code') or d.get('error_type', '未分类')
+                counts.setdefault(code, {'代码': code, '类型': d.get('error_type', code), '条数': 0})['条数'] += 1
+        total_errors = sum(r['条数'] for r in counts.values())
+        et = [{**r, '占比': 100 * r['条数'] / total_errors} for r in counts.values()] if total_errors else []
         if et:
+            st.caption(f'{cls} 本班错因构成；每条诊断计一次，不代表错误因果比例。')
             C.show(C.error_type_chart(et))
         st.markdown(f"**{cls} 班全员掌握度矩阵**")
         sort_mode = st.radio(
@@ -258,7 +266,7 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
         matrix = I.mastery_heatmap(
             bundle, class_id=cls, clustered=sort_mode == "平均掌握度")
         st.caption(
-            "气泡大小与颜色表示掌握度（红 <40% · 燕麦色 40–80% · 绿 ≥80%）；"
+            "气泡大小与颜色表示掌握度（红 <40% · 燕麦色 40–70% · 绿 ≥70%）；"
             "灰色空心点表示证据不足。悬停查看掌握度、正确记录数和证据数。"
         )
         C.show(C.mastery_bubble_matrix_chart(matrix))
@@ -272,5 +280,5 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
                          "可判定": f"{sv['coverage']['decided']}/9",
                          "可判定掌握度": "—" if sv["overall"] is None else f"{sv['overall']:.0%}",
                          "状态": "证据不足" if sv["coverage"]["decided"] == 0 else
-                                 ("需关注" if (sv["overall"] or 1) < 0.4 else "正常")})
+                                 ('需关注' if sv['overall'] is not None and sv['overall'] < 0.4 else '正常')})
         st.dataframe(rows, width="stretch", hide_index=True)
