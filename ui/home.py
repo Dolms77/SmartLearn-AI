@@ -15,7 +15,7 @@ import design
 import insights as I
 import labels
 import llm
-from scoring_review import review_html, valid_rate
+from scoring_review import render_scoring_review, valid_rate
 import theme
 import views
 
@@ -239,15 +239,15 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
         render_comparison(cls, cv["class_theme"], ind_rates, q_rates, A.INDICATOR_NAMES)
     with t2:
         st.markdown("**本班优先复盘的评分步骤**")
-        st.caption("按得分率从低到高展示最多 12 项。低于 30% 的步骤优先复盘。")
+        st.caption("按得分率从低到高展示最多 12 项。红色表示得分率为 30% 或以下。")
         measured, missing = _scoring_review_rows(bundle, cls)
         if measured:
-            st.markdown(review_html(measured[:12]), unsafe_allow_html=True)
+            render_scoring_review(measured[:12], key=f"scoring_review_{cls}")
         else:
             st.info("本班暂无有效的评分步骤得分记录。")
         if missing:
             with st.expander(f"暂无数据的评分步骤（{len(missing)} 项）"):
-                st.markdown(review_html(missing), unsafe_allow_html=True)
+                render_scoring_review(missing, key=f"scoring_review_missing_{cls}")
         class_students = {r['student_id'] for r in bundle['records'] if r.get('class_id') == cls}
         counts = {}
         for d in bundle.get('diagnoses', []):

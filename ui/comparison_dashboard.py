@@ -6,7 +6,7 @@ import streamlit.components.v1 as components
 
 
 TOPICS = {"T01": "代数式", "T02": "方程", "T03": "不等式"}
-_dashboard = components.declare_component(
+dashboard_component = components.declare_component(
     "class_comparison", path=str(Path(__file__).with_name("class_comparison") / "dist"),
 )
 
@@ -33,5 +33,5 @@ def comparison_data(class_rates: dict, indicators: dict, questions: dict, names:
 
 
 def render_comparison(cls: str, class_rates: dict, indicators: dict, questions: dict, names: dict) -> None:
-    _dashboard(dashboard=comparison_data(class_rates, indicators, questions, names),
-               key=f"class_comparison_{cls}")
+    dashboard_component(dashboard=comparison_data(class_rates, indicators, questions, names),
+                        key=f"class_comparison_{cls}")
