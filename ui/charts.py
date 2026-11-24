@@ -166,41 +166,99 @@ _HATCH = dict(shape="/", solidity=0.30, fillmode="overlay")
 # ============================================================
 
 def student_radar(student: dict) -> go.Figure:
-    """9 指标雷达：点色=判定分级（灰空心=证据不足），中文短名。"""
-    inds = student["indicators"]
-    short = {x["code"]: (x["name"] or x["code"]) for x in inds}
-    ordered = [next(i for i in inds if i["code"] == c) for c in INDICATORS]
-    labels = [f"{(short.get(x['code'], x['code']) or x['code'])[:6]}<br>"
-              f"<span style='font-size:9px;color:{FAINT}'>{x['code']}</span>"
-              for x in ordered]
-    values = [(x["mastery"] or 0) for x in ordered]
-    colors = ["rgba(0,0,0,0)" if x["band"] == "insufficient"
-              else BAND_COLOR.get(x["band"], "#3E7CB1") for x in ordered]
-    symbols = ["circle-open" if x["band"] == "insufficient"
-               else "circle" for x in ordered]
-    custom = [[x["n"], BAND_TEXT[x["band"]]] for x in ordered] + [[ordered[0]["n"], BAND_TEXT[ordered[0]["band"]]]]
+    """学生掌握度雷达图；证据不足的指标留空，不当作零掌握度。"""
+    by_code = {
+        x["code"]: x
+        for x in student.get("indicators", [])
+    }
+    ordered = [
+        by_code[code]
+        for code in INDICATORS
+        if code in by_code
+    ]
+
     fig = go.Figure()
-    fig.add_trace(go.Scatterpolar(
-        r=values + [values[0]], theta=labels + [labels[0]], fill="toself",
-        name=student["sid"],
-        line=dict(color="#3E7CB1", width=2.2, shape="linear"),
-        fillcolor="rgba(62,124,177,0.14)",
-        marker=dict(size=6, color=colors, symbol=symbols,
-                    line=dict(width=1.6, color="#3E7CB1")),
-        customdata=custom,
-        hovertemplate="%{customdata[1]} · 掌握度 %{r:.0%}"
-                      " · 证据 %{customdata[0]} 条<extra></extra>",
-    ))
+    if not ordered:
+        return _layout(fig, 380)
+
+    labels = [x.get("name") or x["code"] for x in ordered]
+    values = [
+        x.get("mastery")
+        if x.get("band") != "insufficient"
+        else None
+        for x in ordered
+    ]
+    colors = [
+        BAND_COLOR.get(x.get("band"), "#B7BFCA")
+        for x in ordered
+    ]
+    symbols = [
+        "circle-open"
+        if x.get("band") == "insufficient"
+        else "circle"
+        for x in ordered
+    ]
+    custom = [
+        [
+            x.get("n", 0),
+            x["code"],
+            BAND_TEXT.get(x.get("band"), "暂不判定"),
+        ]
+        for x in ordered
+    ]
+
+    fig.add_trace(
+        go.Scatterpolar(
+            r=values + [values[0]],
+            theta=labels + [labels[0]],
+            mode="lines+markers",
+            fill="toself",
+            connectgaps=False,
+            name=student.get("sid", "学生"),
+            line=dict(
+                color="#3E7CB1",
+                width=2.2,
+                shape="linear",
+            ),
+            fillcolor="rgba(62,124,177,0.14)",
+            marker=dict(
+                size=6,
+                color=colors + [colors[0]],
+                symbol=symbols + [symbols[0]],
+                line=dict(width=1.6, color="#3E7CB1"),
+            ),
+            customdata=custom + [custom[0]],
+            hovertemplate=(
+                "%{customdata[1]} · %{customdata[2]}"
+                "<br>掌握度 %{r:.0%}"
+                " · 证据 %{customdata[0]} 条"
+                "<extra></extra>"
+            ),
+        )
+    )
+
     fig.update_layout(
-        polar=dict(radialaxis=dict(range=[0, 1], tickvals=[0.2, 0.4, 0.6, 0.8, 1.0],
-                                   ticktext=["20%", "40%", "60%", "80%", "100%"],
-                                   tickfont=dict(size=9, color=FAINT),
-                                   gridcolor=GRID, linecolor=AXIS),
-                   angularaxis=dict(gridcolor=GRID, linecolor=AXIS,
-                                    tickfont=dict(size=10, color=SUB)),
-                   bgcolor="rgba(0,0,0,0)"),
-        showlegend=False)
+        polar=dict(
+            radialaxis=dict(
+                range=[0, 1],
+                tickvals=[0.2, 0.4, 0.6, 0.8, 1.0],
+                ticktext=["20%", "40%", "60%", "80%", "100%"],
+                tickfont=dict(size=9, color=FAINT),
+                gridcolor=GRID,
+                linecolor=AXIS,
+            ),
+            angularaxis=dict(
+                gridcolor=GRID,
+                linecolor=AXIS,
+                tickfont=dict(size=10, color=SUB),
+            ),
+            bgcolor="rgba(0,0,0,0)",
+        ),
+        showlegend=False,
+    )
+
     return _layout(fig, 380)
+
 
 
 def indicator_bars(student: dict) -> go.Figure:
@@ -333,31 +391,32 @@ def timeline_chart(history: list, name: str,
 # ============================================================
 
 def class_theme_chart(class_rows: dict) -> go.Figure:
-    """班级 × 主题分组柱：单色三阶 + 全体均值线。"""
-    classes = [c for c in class_rows]
+    """两班主题哑铃图：每一行只比较同一主题的两端，避免折线误导与标签遮挡。"""
+    classes = list(class_rows)[:2]
+    if len(classes) < 2:
+        return _layout(go.Figure(), 300)
+    left, right = classes
+    rows = [(THEME_NAMES[t], class_rows[left].get(t), class_rows[right].get(t), t) for t in THEMES]
     fig = go.Figure()
-    all_vals = []
-    for t in THEMES:
-        vals = [class_rows[c].get(t) or 0 for c in classes]
-        all_vals += [v for v in vals if v]
-        fig.add_trace(go.Bar(
-            name=THEME_NAMES[t], x=classes, y=vals,
-            marker=dict(color=THEME_SHADES[THEMES.index(t)], cornerradius=2,
-                        line_width=0),
-            text=[f"{v:.1%}" for v in vals], textposition="outside",
-            hovertemplate="%{x} · " + THEME_NAMES[t] +
-                         "：得分率 %{y:.1%}<extra></extra>"))
-    if all_vals:
-        _mean_line_h(fig, sum(all_vals) / len(all_vals), label="全体均值")
-    fig.update_yaxes(range=[0, 1.12], tickformat=".0%", title="得分率")
-    fig.update_layout(barmode="group")
-    return _layout(fig, 360)
+    for label, a, b, code in rows:
+        if a is None or b is None:
+            continue
+        fig.add_shape(type='line', x0=min(a, b), x1=max(a, b), y0=label, y1=label, line=dict(color='#C9D5E3', width=3))
+        fig.add_trace(go.Scatter(x=[a], y=[label], mode='markers+text', name=left, legendgroup=left, showlegend=(label == rows[0][0]),
+            marker=dict(size=13, color=CLASS_COLORS.get(left, '#3E7CB1'), line=dict(color='white', width=2)), text=[f'{a:.1%}'], textposition='middle left',
+            hovertemplate=f'{left} · {label}：%{{x:.1%}}<extra></extra>'))
+        fig.add_trace(go.Scatter(x=[b], y=[label], mode='markers+text', name=right, legendgroup=right, showlegend=(label == rows[0][0]),
+            marker=dict(size=13, color=CLASS_COLORS.get(right, '#D08770'), line=dict(color='white', width=2)), text=[f'{b:.1%}'], textposition='middle right',
+            hovertemplate=f'{right} · {label}：%{{x:.1%}}<extra></extra>'))
+    fig.update_xaxes(range=[0, 1.12], tickformat='.0%', title='主题得分率')
+    fig.update_yaxes(autorange='reversed')
+    return _layout(fig, 310)
 
 
 def indicator_rank_chart(by_indicator: dict, names: dict | None = None) -> go.Figure:
     """9 指标得分率排序（横条 + 中文短名 + 均值线）。names: 编号→中文名。"""
-    rows = sorted(((k, v.get("score_rate", 0), v.get("count", 0))
-                   for k, v in by_indicator.items()), key=lambda x: x[1])
+    rows = sorted(((k, v['score_rate'], v.get('count') or 0)
+                   for k, v in by_indicator.items() if v.get('score_rate') is not None), key=lambda x: x[1])
     if not rows:
         return _layout(go.Figure(), 300)
     codes = [r[0] for r in rows]
@@ -365,14 +424,13 @@ def indicator_rank_chart(by_indicator: dict, names: dict | None = None) -> go.Fi
     counts = [r[2] for r in rows]
     ylabels = [f"{(names or {}).get(c, c)}" for c in codes]
     mean = sum(rates) / len(rates) if rates else None
-    fig = go.Figure(go.Bar(
-        y=ylabels, x=rates, orientation="h",
-        marker=dict(color=[_ramp(r) for r in rates], cornerradius=2, line_width=0),
-        text=[f"{r:.0%}" for r in rates], textposition="outside",
+    fig = go.Figure(go.Scatter(
+        y=ylabels, x=rates, mode='markers+text',
+        marker=dict(color=[_ramp(r) for r in rates], size=[8 + min(n, 100) ** 0.5 for n in counts], line=dict(color='white', width=1.5)),
+        text=[f'{r:.0%}' for r in rates], textposition='middle right',
         customdata=list(zip(codes, counts)),
-        hovertemplate="%{customdata[0]} · 证据 %{customdata[1]} 条"
-                      " · 得分率 %{x:.1%}<extra></extra>"))
-    _mean_line_h(fig, mean, axis="x", label="全体均值")
+        hovertemplate='%{customdata[0]} · 证据 %{customdata[1]} 条 · 得分率 %{x:.1%}<extra></extra>'))
+    _mean_line_h(fig, mean, axis='x', label='指标率算术均值（非总体得分率）')
     fig.update_xaxes(range=[0, 1.1], tickformat=".0%")
     fig.update_yaxes(tickfont=dict(size=10.5, color=SUB))
     return _layout(fig, 340)
@@ -396,13 +454,16 @@ def question_rate_chart(by_question: dict, top: int = 10,
         alphas.append(0.45 if v["n"] < 10 else 1.0)
     texts = [f"{r:.0%}（n={n}）" if n >= 10 else f"{r:.0%}（n={n} 小样本※）"
              for r, n in zip(vals, nvals)]
-    fig = go.Figure(go.Bar(
-        y=labels, x=vals, orientation="h",
-        marker=dict(color=colors, opacity=alphas, cornerradius=2, line_width=0),
-        text=texts, textposition="outside",
-        customdata=[[v.get("text", "")[:40]] for _, v in rows],
-        hovertemplate="%{y}<br>%{customdata[0]}<br>得分率 %{x:.1%}<extra></extra>"))
-    _mean_line_h(fig, sum(vals) / len(vals), axis="x", label="均值")
+    fig = go.Figure()
+    for label, val in zip(labels, vals):
+        fig.add_shape(type='line', x0=0, x1=val, y0=label, y1=label, line=dict(color='#CCD8E4', width=2))
+    fig.add_trace(go.Scatter(
+        y=labels, x=vals, mode='markers+text',
+        marker=dict(color=colors, opacity=alphas, size=[10 + min(n, 40) ** 0.5 for n in nvals]),
+        text=texts, textposition='middle right',
+        customdata=[[v.get('text', '')[:40]] for _, v in rows],
+        hovertemplate='%{y}<br>%{customdata[0]}<br>得分率 %{x:.1%}<extra></extra>'))
+    _mean_line_h(fig, sum(vals) / len(vals), axis='x', label='展示题目率均值（非全班总体）')
     fig.update_xaxes(range=[0, 1.12], tickformat=".0%")
     fig.update_yaxes(tickfont=dict(size=10.5, color=SUB))
     return _layout(fig, 360)
@@ -417,17 +478,15 @@ def scoring_point_chart(rows: list, height: int = 420,
     vals = [r["得分率"] for r in rows]
     ns = [r["样本"] for r in rows]
     alphas = [0.45 if n < 10 else 1.0 for n in ns]
-    fig = go.Figure(go.Bar(
-        y=labels, x=vals, orientation="h",
+    fig = go.Figure(go.Scatter(
+        y=labels, x=vals, mode='markers+text',
         marker=dict(color=[_ramp(v) for v in vals], opacity=alphas,
-                    cornerradius=2, line_width=0),
-        text=[f"{v:.0%} (n={n})" for v, n in zip(vals, ns)],
-        textposition="outside",
-        customdata=[[(names or {}).get(r.get("指标", ""), r.get("指标", "")),
-                     r.get("题干", "")] for r in rows],
-        hovertemplate="%{y} · %{customdata[0]}<br>%{customdata[1]}"
-                      "<br>得分率 %{x:.1%}<extra></extra>"))
-    _mean_line_h(fig, sum(vals) / len(vals), axis="x", label="均值")
+                    size=[8 + min(n, 100) ** 0.5 for n in ns], symbol='diamond'),
+        text=[f'{v:.0%} (n={n})' for v, n in zip(vals, ns)],
+        textposition='middle right',
+        customdata=[[(names or {}).get(r.get('指标', ''), r.get('指标', '')), r.get('题干', '')] for r in rows],
+        hovertemplate='%{y} · %{customdata[0]}<br>%{customdata[1]}<br>得分率 %{x:.1%}<extra></extra>'))
+    _mean_line_h(fig, sum(vals) / len(vals), axis='x', label='评分点率算术均值')
     fig.update_xaxes(range=[0, 1.12], tickformat=".0%")
     fig.update_yaxes(autorange="reversed", tickfont=dict(size=10.5, color=SUB))
     return _layout(fig, height)
@@ -440,18 +499,16 @@ def error_type_chart(rows: list) -> go.Figure:
     mx = max(r["条数"] for r in rows)
     total = sum(r["条数"] for r in rows)
     colors = ["#2C5F8A" if r["条数"] == mx else "#8FA9C5" for r in rows]
-    fig = go.Figure(go.Bar(
-        x=[f"{r['代码']} {r['类型']}" for r in rows], y=[r["条数"] for r in rows],
-        marker=dict(color=colors, cornerradius=2, line_width=0),
-        text=[f"{r['条数']}（{r['占比']}%）" for r in rows],
-        textposition="outside",
-        hovertemplate="%{x}：%{y} 条<extra></extra>"))
-    fig.update_yaxes(title="错误记录数", rangemode="tozero")
-    fig.add_annotation(x=1, xref="paper", y=1.06, yref="paper",
-                       text=f"共 {total} 条错因诊断（深色 = 数量最多的一类）",
-                       showarrow=False, font=dict(size=9.5, color=FAINT),
-                       xanchor="right")
-    return _layout(fig, 330)
+    if not total:
+        return _layout(go.Figure(), 320)
+    fig = go.Figure(go.Pie(
+        labels=[r['类型'] for r in rows], values=[r['条数'] for r in rows],
+        hole=0.64, sort=False, marker=dict(colors=['#2C5F8A', '#467BA7', '#6997BB', '#91B2CD', '#B7CEDF', '#DDE7EF'][:len(rows)], line=dict(color='white', width=2)),
+        textinfo='label+percent', textposition='outside',
+        hovertemplate='%{label}：%{value} 条 · %{percent}<extra></extra>'))
+    fig.add_annotation(x=0.5, y=0.5, xref='paper', yref='paper', text=f'{total}<br>错因记录', showarrow=False, font=dict(size=18, color=SUB))
+    fig.update_layout(showlegend=False)
+    return _layout(fig, 380)
 
 
 def mastery_bubble_matrix_chart(data: dict, height: int | None = None) -> go.Figure:
@@ -474,8 +531,8 @@ def mastery_bubble_matrix_chart(data: dict, height: int | None = None) -> go.Fig
     # 分档与配色：科研语义色（红 <40% / 燕麦 40–80% / 绿 ≥80%）
     bands = [
         ("低于 40%", lambda value: value < 0.4, "#B4434D"),
-        ("40%–80%", lambda value: 0.4 <= value < 0.8, "#C9A24E"),
-        ("80% 及以上", lambda value: value >= 0.8, "#4C8A67"),
+        ('40%–70%', lambda value: 0.4 <= value < 0.7, '#C9A24E'),
+        ('70% 及以上', lambda value: value >= 0.7, '#4C8A67'),
     ]
     for label, belongs, color in bands:
         xs, ys, sizes, custom = [], [], [], []
