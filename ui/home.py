@@ -158,7 +158,8 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
             by_type: dict[str, int] = {}
             for e in errs:
                 by_type[e.get("error_type") or "未分类"] = by_type.get(e.get("error_type") or "未分类", 0) + 1
-            design.kpi_row([(k, f"{n} 处", f"{n / len(errs):.0%}") for k, n in
+            # 交换 label/value：错因类型用大字、数量用小字（kpi_row 的 value 是大字、label 是小字）
+            design.kpi_row([(f"{n} 处", k, f"{n / len(errs):.0%}") for k, n in
                             sorted(by_type.items(), key=lambda kv: -kv[1])[:4]])
             st.dataframe([{"记录": e.get("record_id"), "题号": e.get("question_id"),
                            "指标": e.get("indicator_id"), "类型": e.get("error_type"),

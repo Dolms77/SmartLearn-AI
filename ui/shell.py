@@ -48,6 +48,7 @@ def _ss(key, default=None):
 def reset() -> None:
     for k in ("stage", "role", "ident", "page", "nav_page", "_shown_page"):
         st.session_state.pop(k, None)
+    st.session_state["stage"] = "role"
 
 
 def current() -> tuple[str, str] | None:
