@@ -181,8 +181,5 @@ with st.sidebar:
             st.warning(stt["reason"] or "模型不可用", icon="⚠️")
             st.code("ollama pull deepseek-r1:8b", language="powershell")
             st.caption("拉取后无需重启界面，点右上角 Rerun 即可。")
-    # 切页“AI 思考”过渡开关：默认开启；若某种浏览器下报 removeChild，可在这里关掉
-    st.checkbox("切页时播放思考动画", value=True, key="thinking_enabled",
-                help="关闭后页面切换立即渲染，不出现过渡层")
     st.caption(f"产物目录：`{DEFAULT_OUTPUT}`")
     st.caption("数据仅用于本赛题演示；不写入、不上传任何学生个人信息。")

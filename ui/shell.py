@@ -257,11 +257,8 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
             reset()
             st.rerun()
 
-    # 切页时的“AI 思考”过渡：只在页面真的变化时插入一次。
-    # 注意：固定定位覆盖层在部分 Streamlit 前端版本里会触发 removeChild，因此提供开关，
-    # 默认开启；若浏览器控制台报 removeChild，可在侧栏「⚙ 模型与数据」里关掉。
-    if (st.session_state.get("thinking_enabled", True)
-            and st.session_state.get("_shown_page") != page):
+    # 切页时的“AI 思考”过渡：只在页面真的变化时插入一次（常开，不提供开关）
+    if st.session_state.get("_shown_page") != page:
         st.session_state["_shown_page"] = page
         try:
             design.thinking_overlay(
