@@ -2,6 +2,8 @@
 """首页、身份选择和按角色显示的导航。"""
 from __future__ import annotations
 
+from html import escape
+
 import pandas as pd
 import streamlit as st
 from urllib.parse import quote
@@ -44,7 +46,7 @@ def _ss(key, default=None):
 
 
 def reset() -> None:
-    for k in ("stage", "role", "ident", "page", "nav_page"):
+    for k in ("stage", "role", "ident", "page", "nav_page", "teacher_class"):
         st.session_state.pop(k, None)
     st.session_state["stage"] = "role"
 
@@ -119,17 +121,20 @@ def pick_identity(bundle: dict) -> None:
     else:
         theme.hero(sub="选择班级")
         st.write("")
-        classes = A.class_view(bundle)["classes"] or ["DC01"]
-        cls = st.selectbox("选择班级", classes)
-        row = A.class_view(bundle)["class_theme"].get(cls, {})
-        c1, c2, c3 = st.columns(3)
-        c1.metric("学生数", row.get("students", 0))
-        c2.metric("班级得分率", f"{(row.get('overall') or 0):.0%}")
-        c3.metric("可判定覆盖", f"{I.class_mastery_summary(bundle).get(cls, {}).get('decided_rate', 0):.0%}")
-        st.caption("覆盖率是已有至少 3 条有效作答的学生与指标组合所占比例。")
-        if st.button(f"进入 {cls} 的班级视图", type="primary", width="stretch", key="enter_teacher"):
-            st.session_state.update({"role": "teacher", "ident": cls, "stage": "app", "page": "对话"})
-            st.rerun()
+        class_view = A.class_view(bundle)
+        if class_view["classes"]:
+            cls = st.selectbox("选择班级", class_view["classes"])
+            row = class_view["class_theme"][cls]
+            c1, c2, c3 = st.columns(3)
+            c1.metric("学生数", row.get("students", 0))
+            c2.metric("班级得分率", f"{row['overall']:.0%}" if row["overall"] is not None else "—")
+            c3.metric("可判定覆盖", f"{I.class_mastery_summary(bundle).get(cls, {}).get('decided_rate', 0):.0%}")
+            st.caption("覆盖率是已有至少 3 条有效作答的学生与指标组合所占比例。")
+            if st.button(f"进入 {cls} 的班级视图", type="primary", width="stretch", key="enter_teacher"):
+                st.session_state.update({"role": "teacher", "ident": cls, "stage": "app", "page": "对话"})
+                st.rerun()
+        else:
+            st.info("当前数据中没有班级。")
 
     st.write("")
     if st.button("← 返回身份选择", key="back_identity"):
@@ -140,10 +145,12 @@ def pick_identity(bundle: dict) -> None:
 # --------------------------------------------------------------------------
 # 登录后的页面
 # --------------------------------------------------------------------------
-def render_students_list(bundle: dict) -> None:
+def render_students_list(bundle: dict, cls: str) -> None:
     st.subheader("学生名单与覆盖情况")
     rows = []
     for sid in A.list_students(bundle):
+        if A.student_class(bundle, sid) != cls:
+            continue
         v = A.student_view(bundle, sid)
         rows.append({
             "学生": sid, "班级": v["cls"], "有效记录": v["evidence_total"],
@@ -153,10 +160,13 @@ def render_students_list(bundle: dict) -> None:
             "状态": "证据不足" if v["coverage"]["decided"] == 0 else
                     ('需关注' if v['overall'] is not None and v['overall'] < 0.4 else '正常'),
         })
+    if not rows:
+        st.info("当前班级没有学生名单。")
+        return
     df = pd.DataFrame(rows)
     st.dataframe(df, width="stretch", hide_index=True)
     st.caption("选择学生可查看作答记录和学情。")
-    sid = st.selectbox("查看学生学情", [r["学生"] for r in rows], key="teacher_drill")
+    sid = st.selectbox("查看学生学情", [r["学生"] for r in rows], key=f"teacher_drill_{cls}")
     with st.expander(f"打开 {sid} 的完整学情", expanded=False):
         views.render_diagnosis(bundle, sid, st.session_state.get("_key"), st.session_state.get("_cache"))
 
@@ -212,13 +222,32 @@ def _nav(pages: list[str]) -> str:
     return active
 
 
+def _teacher_class_selector(bundle: dict, ident: str) -> str | None:
+    classes = A.list_classes(bundle)
+    if not classes:
+        theme.brand(sub="教师视角")
+        return None
+
+    if st.session_state.get("teacher_class") not in classes:
+        st.session_state["teacher_class"] = ident if ident in classes else classes[0]
+    brand, picker = st.columns([1.25, 1], gap=None, vertical_alignment="center")
+    with brand:
+        theme.brand(sub="教师视角", compact=True)
+    cls = picker.selectbox("选择班级", classes, key="teacher_class", label_visibility="collapsed")
+    st.session_state["ident"] = cls
+    return cls
+
+
 def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str) -> None:
     pages = STUDENT_PAGES if role == "student" else TEACHER_PAGES
     if st.session_state.get("nav_page") not in pages:
         st.session_state["nav_page"] = pages[0]
 
     with st.sidebar:
-        theme.brand(sub=f"{'学生视角' if role == 'student' else '教师视角'} · {ident}")
+        if role == "teacher":
+            ident = _teacher_class_selector(bundle, ident)
+        else:
+            theme.brand(sub=f"学生视角 · {ident}")
         page = _nav(pages)
         st.session_state["page"] = page
         st.divider()
@@ -228,6 +257,10 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
             reset()
             st.rerun()
 
+    if ident is None:
+        st.info("当前数据中没有班级。")
+        return
+
     # 顶部状态条
     if page not in {"我的学情", "班级概览"}:
         sub = (f"{ident} · {A.student_class(bundle, ident)}" if role == "student" else f"{ident} 班级视角")
@@ -235,7 +268,7 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
             f"""<div class="sa-brand" style="border-bottom:1px solid #eaeff7;padding-bottom:10px;margin-bottom:14px">
                   {theme.avatar_svg(38)}
                   <div><div class="sa-brand-t">{page}</div>
-                       <div class="sa-brand-s">{sub}</div></div>
+                       <div class="sa-brand-s">{escape(sub)}</div></div>
                 </div>""",
             unsafe_allow_html=True)
     
@@ -250,7 +283,7 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
     elif page == "班级概览":
         home.render_teacher_home(bundle, ident)
     elif page == "学生名单":
-        render_students_list(bundle)
+        render_students_list(bundle, ident)
     elif page == "数据质量":
         views.render_quality(bundle)
     elif page == "智能体":

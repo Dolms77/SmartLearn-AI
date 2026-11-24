@@ -47,6 +47,9 @@ img.sa-avatar { border-radius:26px; background:#fff; object-fit:cover;
 
 .sa-brand { display:flex; align-items:center; gap:10px; padding:2px 0 10px; }
 .sa-brand .sa-avatar { width:46px; height:46px; border-radius:12px; animation: sa-float 5s ease-in-out infinite; }
+.sa-brand-compact { gap:6px; padding-bottom:0; }
+.sa-brand-compact .sa-avatar { width:30px; height:30px; flex:none; border-radius:8px; }
+.sa-brand-compact .sa-brand-t { font-size:14px; white-space:nowrap; }
 .sa-brand-t { font-weight:700; font-size:16px; color:#16233a; line-height:1.2; }
 .sa-brand-s { font-size:11.5px; color:#7c8798; }
 
@@ -178,10 +181,11 @@ def role_card(icon: str, title: str, desc: str) -> None:
     )
 
 
-def brand(title: str = "智慧学伴", sub: str = "智能体已就绪") -> None:
+def brand(title: str = "智慧学伴", sub: str = "智能体已就绪", *, compact: bool = False) -> None:
+    style = "sa-brand sa-brand-compact" if compact else "sa-brand"
     st.markdown(
-        f"""<div class="sa-brand">
-              {avatar_img(46)}
+        f"""<div class="{style}">
+              {avatar_img(30 if compact else 46)}
               <div><div class="sa-brand-t">{title}</div><div class="sa-brand-s">{sub}</div></div>
             </div>""",
         unsafe_allow_html=True,

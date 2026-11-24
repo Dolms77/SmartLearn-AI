@@ -245,5 +245,5 @@ def empty_state(icon: str, title: str, desc: str = "") -> None:
 def identity_bar(avatar_html: str, name: str, sub: str) -> None:
     st.markdown(
         f'<div class="sa-idbar">{avatar_html}'
-        f'<div><div class="who">{name}</div><div class="sub">{sub}</div></div>'
+        f'<div><div class="who">{_html.escape(name)}</div><div class="sub">{_html.escape(sub)}</div></div>'
         f'</div>', unsafe_allow_html=True)

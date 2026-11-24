@@ -191,11 +191,20 @@ def record_detail(bundle: dict, record_id: str) -> dict | None:
 # --------------------------------------------------------------------------
 # 群体视图
 # --------------------------------------------------------------------------
+def list_classes(bundle: dict) -> list[str]:
+    """班级可出现在学生名册、作答记录或统计数据中。"""
+    by_student = (bundle.get("statistics") or {}).get("by_student") or {}
+    classes = {row.get("class") for row in by_student.values()}
+    classes.update(row.get("class_id") for row in bundle["records"])
+    classes.update(student_class(bundle, sid) for sid in list_students(bundle))
+    return sorted(cls for cls in classes if isinstance(cls, str) and cls.strip() and cls not in {"—", "?"})
+
+
 def class_view(bundle: dict, cls: str | None = None) -> dict:
     stats = bundle.get("statistics") or {}
     by_class_theme = stats.get("by_class_theme") or {}
     by_student = stats.get("by_student") or {}
-    classes = sorted({v.get("class") for v in by_student.values() if v.get("class")})
+    classes = list_classes(bundle)
 
     rows = {}
     for c in classes:
