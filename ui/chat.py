@@ -110,6 +110,12 @@ def _answer(question: str, role: str, ident: str, bundle: dict, key: str | None,
     if practice:
         meta['reason'] = 'practice'
         meta['trace'].append({'agent': '分步练习模块', 'action': '维护当前题目与步骤', 'detail': '只使用项目题干和评分点，不自动判分、不写回BKT'})
+        if provider == 'ollama':
+            if key or llm.pick_model():
+                practice, guidance_meta = llm.guide_local_practice(question, practice)
+                meta.update(guidance_meta)
+            else:
+                meta['reason'] = 'unavailable'
         st.session_state[f'meta_{role}_{ident}'] = meta
         return practice
     try:
@@ -200,7 +206,10 @@ def _render_meta(meta: dict, role: str = "student") -> None:
         return
     backend = {"api": "云端模型", "ollama": "本地模型"}.get(meta.get("provider"), "模型")
     if meta.get("source") == "model":
-        label = f"{backend}改写" + ("（缓存）" if meta.get("cached") else "")
+        if meta.get("mode") == "practice_guidance":
+            label = f"{backend}选择练习呈现方式 · 题库评分步骤"
+        else:
+            label = f"{backend}改写" + ("（缓存）" if meta.get("cached") else "")
     else:
         reason = {
             "structured_question": "此类问题直接按证据回答",

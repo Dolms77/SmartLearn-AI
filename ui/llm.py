@@ -923,14 +923,16 @@ def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
         k in question for k in _FOLLOWUP_HINTS)
     # “最薄弱”这类结论句带固定导航语（点开「我的学情」…），模型改写常把它丢掉 → 直接用草稿
     is_weakest = any(k in question for k in ("薄弱", "最弱", "拖后腿", "哪里差", "短板"))
-    if is_followup or is_weakest:
+    local_student = provider == "ollama" and role == "student"
+    if (is_followup or is_weakest) and not local_student:
         meta["reason"] = "structured_question"
         return (draft, meta) if return_meta else draft
 
     context = _context_block(history)
     backend = (API_BASE_URL, API_MODEL) if provider == "api" else (OLLAMA_HOST, pick_model())
+    version = f"{_PROMPT_VER}-local-student-v2" if local_student else _PROMPT_VER
     ident = json.dumps(
-        [_PROMPT_VER, provider, backend, role, context, question, facts], ensure_ascii=False, sort_keys=True,
+        [version, provider, backend, role, context, question, facts], ensure_ascii=False, sort_keys=True,
     )
     cached = read_cache(cache_dir, "qa", ident)
     if cached and cached.get("source") == "model" and cached.get("answer"):
@@ -944,6 +946,31 @@ def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
         meta["source"] = "model"
         write_cache(cache_dir, "qa", ident, {"role": role, "answer": text, "source": "model"})
     return (text, meta) if return_meta else text
+
+
+def guide_local_practice(question: str, draft: str) -> tuple[str, dict]:
+    """让本地模型选择本轮引导，逐字保留题干、评分点和练习操作。"""
+    guides = {
+        "A": "先看题目要求，再按下面的步骤作答。",
+        "B": "对照当前这一步，检查你的写法和理由。",
+        "C": "可以用下面的参考内容做一次自查。",
+        "D": "",
+    }
+    options = "\n".join(f"{code}：{text or '直接呈现练习内容'}" for code, text in guides.items())
+    prompt = (
+        "你是学生的数学练习助手。根据本轮问题和已确定的练习内容，选择最贴切的开场引导。"
+        "如果练习已结束、无法打开题目，或无需额外引导，选择 D。只输出一个选项字母。\n"
+        f"可选引导：\n{options}\n本轮问题：{question}\n练习内容：{draft}"
+    )
+    try:
+        choice = _chat(None, prompt, temperature=0, max_tokens=16, provider="ollama").strip().upper()
+    except Exception:
+        return draft, {"reason": "call_failed"}
+    if choice not in guides:
+        return draft, {"reason": "unusable_output"}
+    lead = guides[choice]
+    answer = f"{lead}\n\n{draft}" if lead else draft
+    return answer, {"source": "model", "mode": "practice_guidance"}
 
 
 # --------------------------------------------------------------------------
