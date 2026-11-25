@@ -67,15 +67,15 @@
 <pre>ollama pull deepseek-r1:8b      <span class="c"># 约 5.2 GB；也可用 deepseek-r1:7b</span>
 ollama list                     <span class="c"># 确认在列表里，回界面刷新即可</span></pre>
   <div class="ok">
-    界面共 <b>12 页</b>，入口是「<b>唤醒 → 选身份 → 选账号</b>」三步：<br>
-    学生端 6 页：<b>对话 · 智能体 · 我的学情 · 学习建议 · 知识地图 · 成果文件</b>；<br>
-    教师端 6 页：<b>对话 · 智能体 · 班级概览 · 学生名单 · 数据质量 · 成果文件</b>。
+    界面共 <b>11 页</b>，入口是「<b>选择身份 → 选身份 → 选账号</b>」三步：<br>
+    学生端 5 页：<b>对话 · 智能体 · 我的学情 · 学习建议 · 知识与成果</b>；<br>
+    教师端 6 页：<b>对话 · 智能体 · 班级概览 · 学生名单 · 数据质量 · 知识与成果</b>。
   </div>
 </div>
 
 <h2>一·5 上传自己的数据（可选）</h2>
 <div class="card">
-  <p>欢迎页右侧新增了「<b>提交学情数据</b>」按钮：想用自带结果就点左边的「唤醒智慧学伴」，想分析自己的数据就点右边展开上传面板。</p>
+  <p>欢迎页右侧新增了「<b>上传学情数据</b>」按钮：想用自带结果就点左边的「选择身份」，想分析自己的数据就点右边展开上传面板。</p>
   <ol>
     <li>点「下载 CSV 模板」，按表头填 5 个文件：<code>课程要求.csv</code>、<code>题目与材料.csv</code>、<code>模拟学生.csv</code>、<code>测验节点.csv</code>、<code>作答记录.csv</code>；</li>
     <li>打包成 zip（或逐个上传），系统会先校验文件与列名，不通过会明确提示；</li>
@@ -93,7 +93,7 @@ ollama list                     <span class="c"># 确认在列表里，回界面
   <tr><td><code>00_开始使用.html</code></td><td>本文件</td><td>—</td></tr>
   <tr><td><code>README.md</code></td><td>仓库首页说明</td><td>必读</td></tr>
   <tr><td><code>docs/复现手册.md</code></td><td>完整复现步骤、文件清单、报错对照</td><td>必读</td></tr>
-  <tr><td><code>docs/界面验证记录.md</code></td><td>12 个页面 / 14 项检查的验证结果（可作复核材料）</td><td>选读</td></tr>
+  <tr><td><code>docs/界面验证记录.md</code></td><td>11 个页面 / 14 项检查的验证结果（可作复核材料）</td><td>选读</td></tr>
   <tr><td><code>requirements.txt</code></td><td>运行时依赖（版本为下限，兼容 Python ≥3.10）</td><td>必需</td></tr>
   <tr><td><code>requirements-rag.txt</code></td><td>04 向量库依赖（约 2 GB）</td><td>可选</td></tr>
 <tr><td><code>requirements-build.txt</code></td><td>打包 exe 用（PyInstaller）</td><td>可选</td></tr>

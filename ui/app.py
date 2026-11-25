@@ -59,7 +59,7 @@ def cached_bundle(output_dir: str, file_signature: tuple) -> dict:
 
 
 # --------------------------------------------------------------------------
-# 第一步：选数据集（欢迎页右侧「提交学情数据」按钮展开），完成后写 session_state["output_dir"]
+# 第一步：选数据集（欢迎页右侧「上传学情数据」按钮展开），完成后写 session_state["output_dir"]
 # --------------------------------------------------------------------------
 OUTPUT_DIR = st.session_state.get("output_dir") or DEFAULT_OUTPUT
 
@@ -190,7 +190,7 @@ with st.sidebar:
             st.warning(stt["reason"] or "模型不可用", icon="⚠️")
             st.code("ollama pull deepseek-r1:8b", language="powershell")
             st.caption("拉取后无需重启界面，点右上角 Rerun 即可。")
-    if st.button("🔄 提交 / 切换学情数据", width="stretch", key="switch_dataset"):
+    if st.button("🔄 上传 / 切换学情数据", width="stretch", key="switch_dataset"):
         st.session_state.pop("ident", None)
         st.session_state["stage"] = "landing"
         st.session_state["show_upload"] = True
