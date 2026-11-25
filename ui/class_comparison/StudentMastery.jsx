@@ -6,7 +6,7 @@ export const mockMastery = [
   { code: "T01I1", name: "表示数量关系并代入求值", mastery: 0.46, n: 7 },
   { code: "T01I2", name: "合并同类项与整式化简", mastery: 0.5, n: 8 },
   { code: "T01I3", name: "用代数式解释实际问题", mastery: null, n: 1 },
-  { code: "T02I1", name: "根据题意建立方程", mastery: 0.79, n: 8 },
+  { code: "T02I1", name: "根据题意建立方程", mastery: 0.79, n: 2, band: "insufficient" },
   { code: "T02I2", name: "求解一元一次方程", mastery: 0.8, n: 10 },
   { code: "T02I3", name: "检验解的合理性", mastery: 0, n: 5 },
   { code: "T03I1", name: "运用不等式性质求解", mastery: 0.91, n: 10 },
@@ -23,7 +23,11 @@ const shortNames = {
 };
 const valid = (rate) => Number.isFinite(rate) && rate >= 0 && rate <= 1;
 const format = new Intl.NumberFormat("zh-CN", { style: "percent", maximumFractionDigits: 1 });
-const rateText = (row) => valid(row.mastery) ? format.format(row.mastery) : "证据不足";
+const rateText = (row) => {
+  if (!valid(row.mastery)) return "证据不足";
+  const value = format.format(row.mastery);
+  return row.band === "insufficient" ? `初步估计 ${value}（证据不足）` : value;
+};
 const bands = { mastered: "已掌握", developing: "发展中", weak: "薄弱" };
 const detail = (row) => [
   `${row.code} ${row.name}`, rateText(row), `作答 ${row.n} 条`, bands[row.band],
@@ -46,10 +50,14 @@ function RadarLabel({ x, y, textAnchor, payload, rows, setActive }) {
   if (!row) return null;
   const name = shortNames[row.code] ?? row.name;
   const above = textAnchor === "middle" && payload.coordinate === 90;
+  const angle = payload.coordinate * Math.PI / 180;
   return (
     <g tabIndex={0} aria-label={detail(row)}
       onMouseEnter={() => setActive(row)} onMouseLeave={() => setActive(null)}
       onFocus={() => setActive(row)} onBlur={() => setActive(null)}>
+      {!valid(row.mastery) &&
+        <circle cx={x - 6 * Math.cos(angle)} cy={y + 6 * Math.sin(angle)}
+          r={3.5} fill="none" stroke="#64748B" strokeWidth={1.5} data-unknown-vertex="" />}
       <text x={x} y={above ? y - 15 : y - 5}
         textAnchor={textAnchor} fill="#334155" fontSize={10.5}>
         <tspan>{name}</tspan>
@@ -60,21 +68,30 @@ function RadarLabel({ x, y, textAnchor, payload, rows, setActive }) {
 }
 
 function RadarProfile({ points = [], setActive }) {
+  const measured = points.map((point, index) => ({ ...point, index }))
+    .filter((point) => valid(point.value));
   return (
     <g>
-      {points.map((point, i) => {
-        const next = points[(i + 1) % points.length];
-        // Missing values break the profile. A valid zero remains at the center.
-        if (!valid(point.value) || !valid(next.value)) return null;
+      {measured.map((point, i) => {
+        if (measured.length < 2 || (measured.length === 2 && i === 1)) return null;
+        const next = measured[(i + 1) % measured.length];
+        const adjacent = (point.index + 1) % points.length === next.index
+          || (measured.length === 2 && (next.index + 1) % points.length === point.index);
+        const certain = adjacent && point.payload.band !== "insufficient" && next.payload.band !== "insufficient";
+        // No radius is assigned to a null value. Dashed links show uncertainty or a skipped axis.
         return <line key={point.payload.code} data-profile-line="" x1={point.x} y1={point.y}
-          x2={next.x} y2={next.y} stroke={navy} strokeWidth={2} strokeLinecap="round" />;
+          x2={next.x} y2={next.y} stroke={certain ? navy : "#8A9BB0"}
+          strokeWidth={2} strokeLinecap="round" strokeDasharray={certain ? undefined : "4 4"} />;
       })}
-      {points.filter((point) => valid(point.value)).map(({ x, y, payload }) => (
+      {measured.map(({ x, y, payload }) => (
         <g key={payload.code} tabIndex={0} aria-label={detail(payload)}
           onMouseEnter={() => setActive(payload)} onMouseLeave={() => setActive(null)}
           onFocus={() => setActive(payload)} onBlur={() => setActive(null)}>
           <circle cx={x} cy={y} r={9} fill="transparent" />
-          <circle cx={x} cy={y} r={3.5} fill={navy} data-mastery-vertex="" />
+          <circle cx={x} cy={y} r={3.5}
+            fill={payload.band === "insufficient" ? "white" : navy}
+            stroke={payload.band === "insufficient" ? navy : undefined}
+            strokeWidth={1.5} data-mastery-vertex="" />
         </g>
       ))}
     </g>
@@ -99,8 +116,8 @@ function KnowledgeRadar({ rows }) {
         </ResponsiveContainer>
         {active && <Tooltip row={active} className="left-1/2 top-1 -translate-x-1/2" />}
       </div>
-      {rows.some(({ mastery }) => !valid(mastery)) &&
-        <p className="text-xs text-slate-500">证据不足的指标仅显示名称，折线在该处断开。</p>}
+      {rows.some(({ mastery, band }) => !valid(mastery) || band === "insufficient") &&
+        <p className="text-xs text-slate-500">空心点表示证据不足，外侧空心点表示暂无数值。虚线标出不确定的连接。</p>}
     </section>
   );
 }
