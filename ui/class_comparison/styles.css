@@ -3,6 +3,7 @@
 @source "./ScoringReview.jsx";
 @source "./ErrorWaffle.jsx";
 @source "./StudentMastery.jsx";
+@source "./EvidenceDotMatrix.jsx";
 
 @layer base {
   body {

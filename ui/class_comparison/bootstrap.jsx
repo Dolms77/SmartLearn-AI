@@ -4,6 +4,7 @@ import { ClassComparison } from "./main.jsx";
 import { ScoringReview } from "./ScoringReview.jsx";
 import { ErrorWaffle } from "./ErrorWaffle.jsx";
 import { StudentMastery } from "./StudentMastery.jsx";
+import { EvidenceDotMatrix } from "./EvidenceDotMatrix.jsx";
 
 const root = createRoot(document.getElementById("root"));
 if (window.parent === window) {
@@ -11,15 +12,17 @@ if (window.parent === window) {
   if (view === "scoring-review") root.render(<ScoringReview />);
   else if (view === "error-waffle") root.render(<ErrorWaffle />);
   else if (view === "student-mastery") root.render(<StudentMastery />);
+  else if (view === "evidence-matrix") root.render(<EvidenceDotMatrix />);
   else root.render(<ClassComparison />);
 } else {
   const send = (type, fields = {}) => window.parent.postMessage({ isStreamlitMessage: true, type, ...fields }, "*");
   window.addEventListener("message", ({ source, data }) => {
     if (source === window.parent && data?.type === "streamlit:render") {
-      const { dashboard, scoringRows, errorRows, masteryRows } = data.args;
+      const { dashboard, scoringRows, errorRows, masteryRows, evidenceRows, evidenceThreshold } = data.args;
       if (Array.isArray(scoringRows)) root.render(<ScoringReview rows={scoringRows} />);
       else if (Array.isArray(errorRows)) root.render(<ErrorWaffle rows={errorRows} />);
       else if (Array.isArray(masteryRows)) root.render(<StudentMastery rows={masteryRows} />);
+      else if (Array.isArray(evidenceRows)) root.render(<EvidenceDotMatrix rows={evidenceRows} threshold={evidenceThreshold} />);
       else root.render(<ClassComparison data={dashboard} />);
     }
   });

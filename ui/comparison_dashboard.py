@@ -48,3 +48,8 @@ def render_student_mastery(sid: str, rows: list[dict]) -> None:
         for row in rows
     ]
     dashboard_component(masteryRows=mastery_rows, key=f"student_mastery_{sid}")
+
+
+def render_evidence_matrix(sid: str, indicators: list[dict], threshold: int) -> None:
+    rows = [{"id": row["code"], "name": row["name"], "count": row["n"]} for row in indicators]
+    dashboard_component(evidenceRows=rows, evidenceThreshold=threshold, key=f"student_evidence_{sid}")

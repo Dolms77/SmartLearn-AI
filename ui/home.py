@@ -10,7 +10,9 @@ import streamlit as st
 
 import adapter as A
 import charts as C
-from comparison_dashboard import render_comparison, render_error_waffle, render_student_mastery
+from comparison_dashboard import (
+    render_comparison, render_error_waffle, render_evidence_matrix, render_student_mastery,
+)
 import design
 import insights as I
 import labels
@@ -186,9 +188,8 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
 
     with t1:
         render_student_mastery(sid, v["indicators"])
-        with st.expander("证据量分布（为什么有的指标不下结论）", expanded=False):
-            C.show(C.evidence_bars(v))
-            st.caption("灰线为门槛 3 条；低于门槛一律「证据不足」，不参与薄弱排序。")
+        with st.expander("哪些指标还不能判断掌握度？"):
+            render_evidence_matrix(sid, v["indicators"], A.MIN_EVIDENCE)
         st.dataframe([{"知识点": i["name"], "编号": i["code"],
                        "掌握度": None if i["mastery"] is None else round(i["mastery"], 3),
                        "证据数": i["n"],
@@ -208,6 +209,11 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
             design.kpi_row([(f"{n} 处", k, f"{n / len(errs):.0%}") for k, n in
                             sorted(by_type.items(), key=lambda kv: -kv[1])[:4]])
             _render_error_review(bundle, sid, errs)
+            st.markdown("**我的错题记录**")
+            note = "查看每次作答的错因、得分和说明。"
+            if len(errs) > 20:
+                note += f"共 {len(errs)} 条，当前显示前 20 条。"
+            st.caption(note)
             st.dataframe([{"记录": e.get("record_id"), "题号": e.get("question_id"),
                            "指标": e.get("indicator_id"), "类型": e.get("error_type"),
                            "得分": f"{e.get('score')}/{e.get('full_score')}",
