@@ -106,6 +106,54 @@ def _evidence_dialog(bundle: dict, sid: str, code: str) -> None:
 # ---------------------------------------------------------------------------
 # 学生首页
 # ---------------------------------------------------------------------------
+def _render_error_review(bundle: dict, sid: str, errors: list[dict]) -> None:
+    models = bundle.get("llm_diag") or {}
+    reviewed = 0
+    disagreements = []
+    for error in errors:
+        model = models.get(error.get("record_id")) or {}
+        rule_code, model_code = error.get("error_type_code"), model.get("error_type_code")
+        rule_label = error.get("error_type") or A.ERROR_TYPE_NAMES.get(rule_code, rule_code)
+        model_label = model.get("error_type") or A.ERROR_TYPE_NAMES.get(model_code, model_code)
+        if not (rule_label and model_label):
+            continue
+        reviewed += 1
+        if (rule_code != model_code if rule_code and model_code else rule_label != model_label):
+            disagreements.append((error, rule_label, model_label))
+
+    st.markdown("**错因待复核**")
+    if not reviewed:
+        st.caption("暂无模型复核结果。")
+        return
+
+    if not disagreements:
+        st.caption(f"已复核 {reviewed}/{len(errors)} 条错因记录，暂未发现分类分歧。")
+        return
+
+    questions = {error.get("question_id") or error.get("record_id") for error, _, _ in disagreements}
+    records = {row["record_id"]: row for row in bundle["records_by_student"].get(sid, [])}
+    with st.expander(f"有 {len(questions)} 道题的错因判定不同"):
+        st.caption(f"已复核 {reviewed}/{len(errors)} 条错因记录。对照原题和你的作答，判断哪种解释更贴切。")
+        for error, rule_label, model_label in disagreements:
+            rid = error["record_id"]
+            qid = error.get("question_id") or records.get(rid, {}).get("question_id")
+            with st.container(border=True):
+                st.write(f"**{qid or '题号未记录'}** · 作答记录 {rid}")
+                left, right = st.columns(2)
+                left.caption("按评分规则分类")
+                left.write(rule_label)
+                right.caption("本地模型分类")
+                right.write(model_label)
+                if st.toggle("查看作答", key=f"error_review_{sid}_{rid}"):
+                    question = bundle["question_map"].get(qid, {})
+                    record = records.get(rid, {})
+                    st.caption("原题")
+                    st.write(question.get("question_text") or "暂无题干")
+                    st.caption("我的作答")
+                    answer = record.get("student_answer")
+                    st.write(str(answer) if answer is not None and answer != "" else "暂无作答记录")
+
+
 def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str) -> None:
     v = A.student_view(bundle, sid)
     stt = (bundle.get("statistics") or {}).get("by_student", {}).get(sid, {})
@@ -159,19 +207,12 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
             # 交换 label/value：错因类型用大字、数量用小字（kpi_row 的 value 是大字、label 是小字）
             design.kpi_row([(f"{n} 处", k, f"{n / len(errs):.0%}") for k, n in
                             sorted(by_type.items(), key=lambda kv: -kv[1])[:4]])
+            _render_error_review(bundle, sid, errs)
             st.dataframe([{"记录": e.get("record_id"), "题号": e.get("question_id"),
                            "指标": e.get("indicator_id"), "类型": e.get("error_type"),
                            "得分": f"{e.get('score')}/{e.get('full_score')}",
                            "说明": (e.get("error_description") or "")[:40]} for e in errs[:20]],
                          width="stretch", hide_index=True)
-            with st.expander("规则 vs 本地模型（如已生成）", expanded=False):
-                rows = []
-                for e in errs[:10]:
-                    d = (bundle.get("llm_diag") or {}).get(e.get("record_id")) or {}
-                    rows.append({"记录": e.get("record_id"), "规则": f"{e.get('error_type_code')} {e.get('error_type')}",
-                                 "模型": f"{d.get('error_type_code')} {d.get('error_type')}" if d else "—",
-                                 "一致": ("✅" if d.get("agree_with_rule") else ("🔁 改判" if d.get("agree_with_rule") is False else "—")) if d else "—"})
-                st.dataframe(rows, width="stretch", hide_index=True)
 
     with t3:
         rec = views._task3_for(bundle, sid)
