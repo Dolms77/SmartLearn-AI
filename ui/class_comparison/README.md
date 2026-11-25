@@ -6,6 +6,8 @@
 
 `ErrorWaffle.jsx` 导出错因构成图和 `mockErrors`。每项包含 `id`、`label` 和 `count`。独立预览使用 `?view=error-waffle`。
 
+`StudentMastery.jsx` 导出学生掌握度双图和 `mockMastery`。每项包含 `code`、`name`、`mastery`（0–1 或 `null`）和证据数 `n`。独立预览使用 `?view=student-mastery`。
+
 在本目录运行 `npm ci` 和 `npm run build` 会生成 `dist/`。开发预览可运行 `npx vite`，独立预览默认使用模拟数据。Streamlit 通过 `bootstrap.jsx` 传入实际数据，并按内容高度调整 iframe。
 
 `dist/` 随项目提交，普通用户可以直接运行项目的界面启动脚本。

@@ -2,6 +2,7 @@
 @source "./main.jsx";
 @source "./ScoringReview.jsx";
 @source "./ErrorWaffle.jsx";
+@source "./StudentMastery.jsx";
 
 @layer base {
   body {

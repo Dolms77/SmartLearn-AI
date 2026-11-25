@@ -40,3 +40,11 @@ def render_comparison(cls: str, class_rates: dict, indicators: dict, questions: 
 def render_error_waffle(cls: str, rows: list[dict]) -> None:
     error_rows = [{"id": row["代码"], "label": row["类型"], "count": row["条数"]} for row in rows]
     dashboard_component(errorRows=error_rows, key=f"class_error_waffle_{cls}")
+
+
+def render_student_mastery(sid: str, rows: list[dict]) -> None:
+    mastery_rows = [
+        {"code": row["code"], "name": row["name"], "mastery": row["mastery"], "n": row["n"]}
+        for row in rows
+    ]
+    dashboard_component(masteryRows=mastery_rows, key=f"student_mastery_{sid}")

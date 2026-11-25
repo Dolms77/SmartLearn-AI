@@ -10,7 +10,7 @@ import streamlit as st
 
 import adapter as A
 import charts as C
-from comparison_dashboard import render_comparison, render_error_waffle
+from comparison_dashboard import render_comparison, render_error_waffle, render_student_mastery
 import design
 import insights as I
 import labels
@@ -137,11 +137,7 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
     t1, t2, t3 = st.tabs(["📊 掌握度", "🔍 错因", "🎯 建议与提问"])
 
     with t1:
-        c1, c2 = st.columns([1, 1])
-        with c1:
-            C.show(C.student_radar(v))
-        with c2:
-            C.show(C.indicator_bars(v))
+        render_student_mastery(sid, v["indicators"])
         with st.expander("证据量分布（为什么有的指标不下结论）", expanded=False):
             C.show(C.evidence_bars(v))
             st.caption("灰线为门槛 3 条；低于门槛一律「证据不足」，不参与薄弱排序。")
