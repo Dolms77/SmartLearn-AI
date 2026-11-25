@@ -44,9 +44,22 @@ theme.inject()
 design.inject_tokens()
 st.markdown("""
 <style>
-  .block-container {padding-top: 1.6rem; padding-bottom: 4rem; max-width: 1180px;}
+  .block-container {
+    padding-top: 1.6rem; padding-bottom: 4rem;
+    max-width: 1180px; width: 100% !important;
+    margin-left: auto !important; margin-right: auto !important;
+  }
   div[data-testid="stMetricValue"] {font-size: 1.35rem;}
   section[data-testid="stSidebar"] {min-width: 268px;}
+  section[data-testid="stSidebar"][data-collapsed="true"] {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    flex-basis: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+  }
   div[data-testid="stChatMessage"] {border-radius: 14px;}
 </style>
 """, unsafe_allow_html=True)
