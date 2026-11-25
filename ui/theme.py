@@ -79,9 +79,11 @@ def _data_uri(filename: str) -> str:
     p = os.path.join(ASSET_DIR, filename)
     if not os.path.exists(p):
         return ""
-    mime = "image/png" if p.lower().endswith(".png") else "image/jpeg"
     with open(p, "rb") as f:
-        return f"data:{mime};base64," + base64.b64encode(f.read()).decode("ascii")
+        data = f.read()
+    # 素材可保留旧文件名，按实际编码声明 MIME。
+    mime = "image/png" if data.startswith(b"\x89PNG\r\n\x1a\n") else "image/jpeg"
+    return f"data:{mime};base64," + base64.b64encode(data).decode("ascii")
 
 
 def asset_path(filename: str) -> str | None:
@@ -110,18 +112,24 @@ def _thumb_uri(filename: str, size: int) -> str:
 
         from PIL import Image
 
-        im = Image.open(p).convert("RGB")
+        with Image.open(p) as source:
+            transparent = "A" in source.getbands() or "transparency" in source.info
+            im = source.convert("RGBA" if transparent else "RGB")
         im.thumbnail((size * 2, size * 2))       # 2x 便于高分屏
         buf = _io.BytesIO()
-        im.save(buf, format="JPEG", quality=84, optimize=True)
-        return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+        if transparent:
+            im.save(buf, format="PNG", optimize=True)
+        else:
+            im.save(buf, format="JPEG", quality=84, optimize=True)
+        mime = "image/png" if transparent else "image/jpeg"
+        return f"data:{mime};base64," + base64.b64encode(buf.getvalue()).decode("ascii")
     except Exception:  # noqa: BLE001 - 没装 Pillow 就退回原图
         return _data_uri(filename)
 
 
 def avatar_img(size: int = 132, cls: str = "sa-avatar") -> str:
     """角色图（内联 base64，免静态服务）；素材缺失时自动回退 SVG。"""
-    uri = _thumb_uri(CHARACTER_FILE, max(size, 32)) if size <= 72 else _data_uri(CHARACTER_FILE)
+    uri = _thumb_uri(CHARACTER_FILE, max(size, 32))
     if not uri:
         return avatar_svg(size, cls)
     return (f'<img class="{cls}" width="{size}" height="{size}" src="{uri}" '
