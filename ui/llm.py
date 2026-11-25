@@ -25,7 +25,7 @@ import urllib.request
 # --------------------------------------------------------------------------
 PROVIDER = os.environ.get("SA_LLM_PROVIDER", "ollama").strip().lower()
 # 提示词 / 守卫版本：进缓存键，改了口吻规则后旧答案自动失效（避免回放旧话术）
-_PROMPT_VER = "2026-11-24d"
+_PROMPT_VER = "2026-11-25-qa"
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
 OLLAMA_MODEL_ENV = os.environ.get("SA_OLLAMA_MODEL", "").strip()
 PREFERRED_MODELS = ["deepseek-r1:8b", "deepseek-r1:7b", "deepseek-r1", "qwen2.5:7b"]
@@ -314,12 +314,12 @@ def _chat_ollama(prompt: str, temperature: float, max_tokens: int) -> str:
 
 
 def _chat(key: str | None, prompt: str, temperature: float = 0.3, max_tokens: int = 700,
-          retries: int = 2) -> str:
+          retries: int = 2, *, provider: str | None = None) -> str:
     """统一入口：本地优先，失败重试；API 模式沿用 openai SDK。"""
     last: Exception | None = None
     for attempt in range(retries):
         try:
-            if PROVIDER == "api":
+            if (provider or PROVIDER) == "api":
                 if not key:
                     raise RuntimeError("API 模式需要 Key")
                 return _chat_api(key, prompt, temperature, max_tokens)
@@ -777,7 +777,7 @@ def _answer_from_facts(question: str, facts: dict,
 REWRITE_PROMPT_STUDENT = """你是"智慧学伴"，正在跟一位七年级学生说话：用第二人称"你"，语气亲切、短句，不啰嗦。
 学生看到的是自己的数据，可以直接说"你哪块薄弱""你该练哪几题"。
 
-下面【事实结论】已经核实过，**数字和结论一个字都不能改**，你只负责把语气改得更像人话。
+下面【事实结论】已经核实过。请把与问题最相关的结论放在第一句，其余事实可重新组织。逐字保留学生编号、题号、每个数字和百分比，并保留所有分类、结论和页面名称。
 不要输出思考过程，不要解释你在做什么，不要复述问题；也不要用「根据已核实」「根据分析」这类空话开头，直接说结论（不超过 3 句）；
 不要推测原因，只陈述事实与建议；不要把「证据条数」说成「错题数」或「做题数」；
 不要编造【事实结论】里没有的细分信息（例如每条证据分别对应哪个评分点、错误的具体环节）。
@@ -844,18 +844,8 @@ def _context_block(history: list[dict] | None) -> str:
     return "\n".join(lines) if lines else "（这是第一轮，没有上文）"
 
 
-def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "student",
-                  context: str = "") -> str:
-    """让模型改写 draft；改坏了（新增数字 / 编造指标 / 带思考链）就退回 draft。"""
-    try:
-        raw = _chat(key, _rewrite_prompt(role).format(
-            draft=draft, question=question, context=context or "（这是第一轮，没有上文）"),
-            temperature=0.3, max_tokens=300)
-        text = _clean_answer(raw)
-    except Exception:  # noqa: BLE001
-        return ""
-    if not text:
-        return ""
+def _check_rewrite(text: str, draft: str, role: str) -> str:
+    """校验改写是否遵守现有答案边界。"""
     allowed_nums = _numbers(draft) | {"3", "9"}      # 3=门槛、9=指标总数
     if _numbers(text) - allowed_nums or _numbers(draft) - _numbers(text):
         return ""  # 不能新增数字，也不能删掉草稿中的数字、百分比和样本量
@@ -888,36 +878,72 @@ def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "stude
     return text
 
 
+def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "student",
+                  context: str = "", *, provider: str | None = None) -> tuple[str, str]:
+    prompt = _rewrite_prompt(role).format(
+        draft=draft, question=question, context=context or "（这是第一轮，没有上文）",
+    )
+    reason = ""
+    for attempt in range(2):
+        request = prompt
+        if attempt:
+            request += (
+                "\n上一稿没有通过检查。请换一种表达，先给出与问题最相关的结论。"
+                "完整保留原稿的全部事实、数字、编号及页面名称，保留中文句号，正文 20–320 字。"
+                "只返回正文。"
+            )
+        try:
+            text = _clean_answer(_chat(key, request, temperature=0.3, max_tokens=450, provider=provider))
+        except Exception:  # noqa: BLE001 - 不将服务错误正文或密钥传给界面
+            return draft, "call_failed"
+        if not text:
+            reason = "unusable_output"
+        elif text == draft:
+            reason = "unchanged"
+        elif _check_rewrite(text, draft, role):
+            return text, ""
+        else:
+            reason = "fact_check"
+    return draft, reason
+
+
 def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
                     role: str = "student", history: list[dict] | None = None,
-                    return_meta: bool = False):
+                    return_meta: bool = False, *, provider: str | None = None):
     """先由事实生成"不会错"的草稿，再让模型改写口吻；改写不达标就用草稿。
 
     role: student / teacher —— 决定改写提示词与缓存分桶（两种口吻互不串用）。
     history: 最近几轮问答，用于指代消解（“那第二薄弱呢”“再详细点”）与提示词的【上文】。
     """
-    context = _context_block(history)
-    hist_key = hashlib.md5(context.encode("utf-8")).hexdigest()[:8] if history else "0"
-    # 提示词/守卫版本进缓存键：改了 prompt 或守卫后，旧缓存自动失效，避免回放旧话术
-    ident = (f"{_PROMPT_VER}|{role}|{hist_key}|" + question
-             + json.dumps(facts, ensure_ascii=False, sort_keys=True))
-    cached = read_cache(cache_dir, "qa", ident)
-    if cached:
-        return (cached.get('answer', ''), {'source': cached.get('source', 'template'), 'cached': True}) if return_meta else cached.get('answer', '')
-
+    provider = provider or PROVIDER
+    meta = {"source": "template", "cached": False, "provider": provider}
     draft = _answer_from_facts(question, facts, history)
     # 指代类追问（“那第二薄弱呢”“再详细点”）草稿已经足够自然，且模型改写容易编细节 → 不交给模型
     is_followup = _ordinal_index(question) is not None or any(
         k in question for k in _FOLLOWUP_HINTS)
     # “最薄弱”这类结论句带固定导航语（点开「我的学情」…），模型改写常把它丢掉 → 直接用草稿
     is_weakest = any(k in question for k in ("薄弱", "最弱", "拖后腿", "哪里差", "短板"))
-    text = draft if (is_followup or is_weakest) else (
-        _safe_rewrite(draft, question, key, role=role, context=context) or draft)
-    source = "model" if text != draft else "template"
-    write_cache(cache_dir, "qa", ident,
-                {"question": question, "role": role, "answer": text,
-                 "source": source, "draft": draft})
-    return (text, {'source': source, 'cached': False}) if return_meta else text
+    if is_followup or is_weakest:
+        meta["reason"] = "structured_question"
+        return (draft, meta) if return_meta else draft
+
+    context = _context_block(history)
+    backend = (API_BASE_URL, API_MODEL) if provider == "api" else (OLLAMA_HOST, pick_model())
+    ident = json.dumps(
+        [_PROMPT_VER, provider, backend, role, context, question, facts], ensure_ascii=False, sort_keys=True,
+    )
+    cached = read_cache(cache_dir, "qa", ident)
+    if cached and cached.get("source") == "model" and cached.get("answer"):
+        meta.update(source="model", cached=True)
+        return (cached["answer"], meta) if return_meta else cached["answer"]
+
+    text, reason = _safe_rewrite(draft, question, key, role=role, context=context, provider=provider)
+    if reason:
+        meta["reason"] = reason
+    else:
+        meta["source"] = "model"
+        write_cache(cache_dir, "qa", ident, {"role": role, "answer": text, "source": "model"})
+    return (text, meta) if return_meta else text
 
 
 # --------------------------------------------------------------------------

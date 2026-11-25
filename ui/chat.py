@@ -101,21 +101,30 @@ def _answer(question: str, role: str, ident: str, bundle: dict, key: str | None,
                  {'agent': '教师意图模块', 'action': '按问题与上文选择事实', 'detail': llm._rank_topic(question, history)},
                  {'agent': '证据边界模块', 'action': '检查统计范围', 'detail': '本班统计；明确提问两班时才比较'}]
 
-    meta = {'trace': trace, 'evidence': evidence[:6], 'source': 'template', 'cached': False}
+    provider = {"本地模型": "ollama", "云端 API": "api"}.get(
+        st.session_state.get("provider_choice"), llm.PROVIDER,
+    )
+    meta = {'trace': trace, 'evidence': evidence[:6], 'source': 'template',
+            'cached': False, 'provider': provider}
     practice = _practice_answer(question, ident, bundle) if role == 'student' and not denied else None
     if practice:
+        meta['reason'] = 'practice'
         meta['trace'].append({'agent': '分步练习模块', 'action': '维护当前题目与步骤', 'detail': '只使用项目题干和评分点，不自动判分、不写回BKT'})
         st.session_state[f'meta_{role}_{ident}'] = meta
         return practice
     try:
-        if key or (llm.PROVIDER == 'ollama' and llm.available()):
-            answer, model_meta = llm.answer_question(question, facts, key, cache_dir, role=role, history=history, return_meta=True)
+        if key or (provider == 'ollama' and llm.pick_model()):
+            answer, model_meta = llm.answer_question(
+                question, facts, key, cache_dir, role=role, history=history,
+                return_meta=True, provider=provider,
+            )
             meta.update(model_meta)
         else:
             answer = llm.offline_answer(question, facts, history)
-    except Exception as exc:
+            meta['reason'] = 'unavailable'
+    except Exception:
         answer = llm.offline_answer(question, facts, history)
-        meta['fallback'] = type(exc).__name__
+        meta['reason'] = 'call_failed'
     st.session_state[f'meta_{role}_{ident}'] = meta
     return answer
 
@@ -189,7 +198,20 @@ def _render_meta(meta: dict, role: str = "student") -> None:
     """展示本轮来源、协同路径与读取的作答记录（学生、教师都保留，便于复核）。"""
     if not meta:
         return
-    label = '模型改写（缓存）' if meta.get('source') == 'model' and meta.get('cached') else '模型改写' if meta.get('source') == 'model' else '规则回答（未使用模型改写）'
+    backend = {"api": "云端模型", "ollama": "本地模型"}.get(meta.get("provider"), "模型")
+    if meta.get("source") == "model":
+        label = f"{backend}改写" + ("（缓存）" if meta.get("cached") else "")
+    else:
+        reason = {
+            "structured_question": "此类问题直接按证据回答",
+            "practice": "分步练习按题库评分步骤回答",
+            "unavailable": f"{backend}尚未就绪",
+            "call_failed": f"{backend}调用失败",
+            "unusable_output": f"{backend}返回内容不可用",
+            "fact_check": f"{backend}的改写未通过事实校验",
+            "unchanged": f"{backend}返回内容与原稿相同",
+        }.get(meta.get("reason"), "未使用模型改写")
+        label = f"规则回答（{reason}）"
     st.caption('本轮来源：' + label)
     AB.render_trace_cards(meta.get('trace', []), evidence=meta.get('evidence'),
                           title='本轮协同路径', expanded=True)
