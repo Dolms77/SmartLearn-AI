@@ -879,12 +879,19 @@ def _check_rewrite(text: str, draft: str, role: str) -> str:
 
 
 def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "student",
-                  context: str = "", *, provider: str | None = None) -> tuple[str, str]:
+                  context: str = "", *, provider: str | None = None, attempts: int = 2) -> tuple[str, str]:
     prompt = _rewrite_prompt(role).format(
         draft=draft, question=question, context=context or "（这是第一轮，没有上文）",
     )
+    error_counts = (
+        re.findall(r"([\u4e00-\u9fff]{2,12})\s*(\d+)\s*处", draft)
+        if provider == "api" and role == "student" else []
+    )
+    if error_counts:
+        protected = "、".join(f"{label} {count} 处" for label, count in error_counts)
+        prompt += f"\n请在正文逐项保留这些错因和对应条数：{protected}。"
     reason = ""
-    for attempt in range(2):
+    for attempt in range(attempts):
         request = prompt
         if attempt:
             request += (
@@ -900,11 +907,35 @@ def _safe_rewrite(draft: str, question: str, key: str | None, role: str = "stude
             reason = "unusable_output"
         elif text == draft:
             reason = "unchanged"
-        elif _check_rewrite(text, draft, role):
+        elif _check_rewrite(text, draft, role) and all(
+            re.search(rf"{re.escape(label)}\s*{count}\s*处", text)
+            for label, count in error_counts
+        ):
             return text, ""
         else:
             reason = "fact_check"
     return draft, reason
+
+
+def _organize_cloud_answer(draft: str, question: str, key: str | None) -> tuple[str, str]:
+    """云端只选择呈现主题，程序保留已经核实的回答原文。"""
+    headings = {
+        "A": "掌握情况", "B": "错因分析", "C": "练习建议",
+        "D": "作答证据", "E": "关于你的问题",
+    }
+    options = "\n".join(f"{code}：{heading}" for code, heading in headings.items())
+    prompt = (
+        "你是学生学情助手。根据学生问题和核实好的回答，选择最贴切的标题。"
+        "只输出一个选项字母，不得重写正文。\n"
+        f"标题选项：\n{options}\n学生问题：{question}\n已核实回答：{draft}"
+    )
+    try:
+        choice = _chat(key, prompt, temperature=0, max_tokens=16, provider="api").strip().upper()
+    except Exception:
+        return draft, "call_failed"
+    if choice not in headings:
+        return draft, "unusable_output"
+    return f"**{headings[choice]}**\n\n{draft}", ""
 
 
 def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
@@ -923,33 +954,46 @@ def answer_question(question: str, facts: dict, key: str | None, cache_dir: str,
         k in question for k in _FOLLOWUP_HINTS)
     # “最薄弱”这类结论句带固定导航语（点开「我的学情」…），模型改写常把它丢掉 → 直接用草稿
     is_weakest = any(k in question for k in ("薄弱", "最弱", "拖后腿", "哪里差", "短板"))
-    local_student = provider == "ollama" and role == "student"
-    if (is_followup or is_weakest) and not local_student:
+    if (is_followup or is_weakest) and role != "student":
         meta["reason"] = "structured_question"
         return (draft, meta) if return_meta else draft
 
     context = _context_block(history)
     backend = (API_BASE_URL, API_MODEL) if provider == "api" else (OLLAMA_HOST, pick_model())
-    version = f"{_PROMPT_VER}-local-student-v2" if local_student else _PROMPT_VER
+    cloud_student = provider == "api" and role == "student"
+    version = (f"{_PROMPT_VER}-cloud-student-v2" if cloud_student
+               else f"{_PROMPT_VER}-local-student-v2" if role == "student" else _PROMPT_VER)
     ident = json.dumps(
         [version, provider, backend, role, context, question, facts], ensure_ascii=False, sort_keys=True,
     )
     cached = read_cache(cache_dir, "qa", ident)
     if cached and cached.get("source") == "model" and cached.get("answer"):
         meta.update(source="model", cached=True)
+        if cached.get("mode"):
+            meta["mode"] = cached["mode"]
         return (cached["answer"], meta) if return_meta else cached["answer"]
 
-    text, reason = _safe_rewrite(draft, question, key, role=role, context=context, provider=provider)
+    text, reason = _safe_rewrite(
+        draft, question, key, role=role, context=context, provider=provider,
+        attempts=1 if cloud_student else 2,
+    )
+    if cloud_student and reason and reason != "call_failed":
+        organized, outline_reason = _organize_cloud_answer(draft, question, key)
+        if not outline_reason:
+            text, reason = organized, ""
+            meta["mode"] = "structured_presentation"
     if reason:
         meta["reason"] = reason
     else:
         meta["source"] = "model"
-        write_cache(cache_dir, "qa", ident, {"role": role, "answer": text, "source": "model"})
+        write_cache(cache_dir, "qa", ident, {
+            "role": role, "answer": text, "source": "model", "mode": meta.get("mode"),
+        })
     return (text, meta) if return_meta else text
 
 
-def guide_local_practice(question: str, draft: str) -> tuple[str, dict]:
-    """让本地模型选择本轮引导，逐字保留题干、评分点和练习操作。"""
+def guide_practice(question: str, draft: str, key: str | None, *, provider: str) -> tuple[str, dict]:
+    """让所选模型决定本轮引导，逐字保留题干、评分点和练习操作。"""
     guides = {
         "A": "先看题目要求，再按下面的步骤作答。",
         "B": "对照当前这一步，检查你的写法和理由。",
@@ -963,7 +1007,7 @@ def guide_local_practice(question: str, draft: str) -> tuple[str, dict]:
         f"可选引导：\n{options}\n本轮问题：{question}\n练习内容：{draft}"
     )
     try:
-        choice = _chat(None, prompt, temperature=0, max_tokens=16, provider="ollama").strip().upper()
+        choice = _chat(key, prompt, temperature=0, max_tokens=16, provider=provider).strip().upper()
     except Exception:
         return draft, {"reason": "call_failed"}
     if choice not in guides:
@@ -977,10 +1021,10 @@ def guide_local_practice(question: str, draft: str) -> tuple[str, dict]:
 # 离线兜底
 # --------------------------------------------------------------------------
 def offline_answer(question: str, facts: dict,
-                   history: list[dict] | None = None) -> str:
+                   history: list[dict] | None = None, *, show_mode: bool = True) -> str:
     """没有可用模型时的确定性回答：直接复述事实，绝不编造。"""
     body = _answer_from_facts(question, facts, history)
-    return f"{body}\n\n（离线模式：以上内容全部来自结构化统计，未经模型改写。）"
+    return f"{body}\n\n（离线模式：以上内容全部来自结构化统计，未经模型改写。）" if show_mode else body
 
 
 def build_facts(student: dict, stats_student: dict | None, class_rows: dict | None) -> dict:

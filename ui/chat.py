@@ -110,12 +110,11 @@ def _answer(question: str, role: str, ident: str, bundle: dict, key: str | None,
     if practice:
         meta['reason'] = 'practice'
         meta['trace'].append({'agent': '分步练习模块', 'action': '维护当前题目与步骤', 'detail': '只使用项目题干和评分点，不自动判分、不写回BKT'})
-        if provider == 'ollama':
-            if key or llm.pick_model():
-                practice, guidance_meta = llm.guide_local_practice(question, practice)
-                meta.update(guidance_meta)
-            else:
-                meta['reason'] = 'unavailable'
+        if key or (provider == 'ollama' and llm.pick_model()):
+            practice, guidance_meta = llm.guide_practice(question, practice, key, provider=provider)
+            meta.update(guidance_meta)
+        else:
+            meta['reason'] = 'unavailable'
         st.session_state[f'meta_{role}_{ident}'] = meta
         return practice
     try:
@@ -126,10 +125,10 @@ def _answer(question: str, role: str, ident: str, bundle: dict, key: str | None,
             )
             meta.update(model_meta)
         else:
-            answer = llm.offline_answer(question, facts, history)
+            answer = llm.offline_answer(question, facts, history, show_mode=False)
             meta['reason'] = 'unavailable'
     except Exception:
-        answer = llm.offline_answer(question, facts, history)
+        answer = llm.offline_answer(question, facts, history, show_mode=False)
         meta['reason'] = 'call_failed'
     st.session_state[f'meta_{role}_{ident}'] = meta
     return answer
@@ -206,15 +205,19 @@ def _render_meta(meta: dict, role: str = "student") -> None:
         return
     backend = {"api": "云端模型", "ollama": "本地模型"}.get(meta.get("provider"), "模型")
     if meta.get("source") == "model":
+        cached = "（缓存）" if meta.get("cached") else ""
         if meta.get("mode") == "practice_guidance":
             label = f"{backend}选择练习呈现方式 · 题库评分步骤"
+        elif meta.get("mode") == "structured_presentation":
+            label = f"{backend}组织回答{cached} · 正文保留已核实事实"
         else:
-            label = f"{backend}改写" + ("（缓存）" if meta.get("cached") else "")
+            label = f"{backend}改写{cached}"
+    elif meta.get("reason") == "unavailable":
+        label = "规则回答"
     else:
         reason = {
             "structured_question": "此类问题直接按证据回答",
             "practice": "分步练习按题库评分步骤回答",
-            "unavailable": f"{backend}尚未就绪",
             "call_failed": f"{backend}调用失败",
             "unusable_output": f"{backend}返回内容不可用",
             "fact_check": f"{backend}的改写未通过事实校验",
