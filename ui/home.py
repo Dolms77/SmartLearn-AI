@@ -287,6 +287,57 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
                          "状态": "证据不足" if sv["coverage"]["decided"] == 0 else
                                  ('需关注' if sv['overall'] is not None and sv['overall'] < 0.4 else '正常')})
         st.dataframe(rows, width="stretch", hide_index=True)
+        if rows:
+            st.caption("选择学生可查看作答记录和学情。")
+            pick = st.selectbox("查看学生学情", [r["学生"] for r in rows],
+                                key=f"teacher_drill_{cls}")
+            with st.expander(f"查看 {pick} 的学情（与「我的学情」同一套页面）", expanded=False):
+                render_student_home(bundle, pick, st.session_state.get("_key"),
+                                    st.session_state.get("_cache"))
+
+
+def render_teacher_advice(bundle: dict, cls: str) -> None:
+    """讲评建议：按本班薄弱题与评分点排出讲评顺序，给出每题讲评要点与变式。"""
+    cv = A.class_view(bundle, cls)
+    row = cv["class_theme"].get(cls, {})
+    q_rates = I.class_question_rates(bundle, cls)
+    sp = I.class_scoring_points(bundle, cls)
+    design.identity_bar(
+        theme.avatar_img(40), f"{cls} · 讲评建议",
+        f"{row.get('students', 0)} 名学生 · {row.get('overall') or 0:.0%} 班级得分率 · "
+        f"薄弱评分点 {len([x for x in sp if x['得分率'] < 0.3])} 个")
+
+    st.caption("顺序按“班级得分率从低到高”给出；每题只讲丢分最多的 1–2 步，"
+               "讲完当堂做一道同指标变式。")
+
+    top = [x for x in q_rates.items() if x[1].get("rate") is not None and x[1].get("n", 0) >= 3]
+    top.sort(key=lambda kv: kv[1]["rate"])
+    if not top:
+        design.empty_state("📋", "本班暂无足够样本的题目", "先补齐作答记录，再生成讲评顺序。")
+        return
+
+    for i, (qid, info) in enumerate(top[:5], 1):
+        q = bundle["question_map"].get(qid, {})
+        text = (q.get("question_text") or "").strip()
+        point = I.scoring_point_name(bundle, f"{qid}P1") if q else ""
+        with st.container(border=True):
+            st.markdown(f"**第 {i} 讲 · {qid}**（得分率 {info['rate']:.0%}，样本 {info['n']} 条）")
+            if text:
+                st.caption(text[:80] + ("…" if len(text) > 80 else ""))
+            st.markdown(f"- 讲评要点：先让学生说思路，再对照「{point or '本题评分点'}」看丢在哪一步")
+            st.markdown(f"- 当堂练习：同指标变式题 1 道，限时 5 分钟")
+
+    st.divider()
+    st.markdown("**优先复盘的评分步骤**")
+    measured = [x for x in sp if x["得分率"] is not None][:8]
+    if measured:
+        st.dataframe([{"评分步骤": I.scoring_point_name(bundle, x["评分点"]),
+                       "题号": x["题号"],
+                       "得分率": f"{x['得分率']:.0%}",
+                       "正确/总数": x["正确/总数"]} for x in measured],
+                     width="stretch", hide_index=True)
+    else:
+        st.info("本班暂无有效的评分步骤记录。")
 
 
 def _scoring_review_rows(bundle: dict, cls: str) -> tuple[list[dict], list[dict]]:

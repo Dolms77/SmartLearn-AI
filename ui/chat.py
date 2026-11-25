@@ -202,6 +202,15 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
     n = sum(1 for r in bundle['records'] if r.get('class_id') == ident)
     st.info('可以查询已评分的作答记录、练习建议和讲评建议。')
 
+    # 教师端：可以把问题限定到某个学生（吸收原「智能体」页的选学生能力）
+    scope = "全班"
+    if role == "teacher":
+        students = A.list_students(bundle)
+        scope = st.selectbox("提问对象", ["全班"] + students, key=f"chat_scope_{ident}",
+                             help="选某个学生时，回答只针对该生的作答记录")
+        if scope != "全班":
+            st.caption(f"当前只回答 {scope} 的个人学情；改回「全班」可问班级讲评。")
+
     if not hist:
         if role == "student":
             v = A.student_view(bundle, ident)
@@ -216,8 +225,13 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
 
     for m in hist:
         with st.chat_message(m["role"], avatar="🧑‍🎓" if m["role"] == "user" else theme.character_path()):
-            st.markdown(labels.humanize(m["content"], bundle.get("output_dir"))
-                        if m["role"] != "user" else m["content"])
+            if m.get("content"):
+                st.markdown(labels.humanize(m["content"], bundle.get("output_dir"))
+                            if m["role"] != "user" else m["content"])
+            if m.get("agent"):
+                for r in (m["agent"].get("results") or []):
+                    AB.render_result(r)
+                AB.render_trace(m["agent"], expanded=False)
             if m.get('meta'):
                 _render_meta(m['meta'], role)
 
@@ -239,6 +253,21 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
     hist.append({"role": "user", "content": question})
     with st.chat_message("user", avatar="🧑‍🎓"):
         st.markdown(question)
+
+    # 教师端指定了学生：走多智能体（诊断 / 建议 / 证据），结果直接渲染在气泡里
+    if role == "teacher" and scope != "全班":
+        with st.spinner(f"正在读取 {scope} 的作答记录…"):
+            result = AB.ask(f"{scope} {question}", bundle.get("output_dir"))
+        with st.chat_message('assistant', avatar=theme.character_path()):
+            if result.get("error"):
+                st.error(f"智能体执行出错：{result['error']}")
+            else:
+                for r in (result.get("results") or []):
+                    AB.render_result(r)
+                AB.render_trace(result, expanded=False)
+        hist.append({'role': 'assistant', 'content': f'已按 {scope} 的作答记录回答。',
+                     'agent': result})
+        return
 
     # 用 st.spinner 代替 st.empty()+st.chat_message 的“打字动画”：
     # 后者会触发 Streamlit 前端的 removeChild 报错（占位符里嵌 chat_message + 自定义 HTML）。

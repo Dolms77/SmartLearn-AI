@@ -37,7 +37,7 @@
 | 多智能体演示 | `已完成脚本/07_multi_agent.py` | 可解释的智能体路由与建议 |
 | 任务3建议生成 | `已完成脚本/08_task3_generator.py` | 3 个典型案例 + 全班建议，需人工审校标记项 |
 | 任务1知识结构 | `已完成脚本/09_task1_knowledge_structure.py` | 可追溯的课标、教材、题目及作答证据映射 |
-| 交互界面 | `ui/` | Streamlit 11 页（学生 5 + 教师 6）+ 本地 Ollama / 云端 DeepSeek 双通道 |
+| 交互界面 | `ui/` | Streamlit 8 页（学生 4 + 教师 4）+ 本地 Ollama / 云端 DeepSeek 双通道 |
 
 ## 三条口径（代码里写死，答辩可直接讲）
 

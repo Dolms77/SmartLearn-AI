@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""页面：学生诊断 / 班级概览 / 任务1 知识结构 / 数据质量 / 成果文件。"""
+"""页面：知识结构 / 成果下载 / 数据质量（与其他页面组合渲染）。"""
 from __future__ import annotations
 
 import json
@@ -271,11 +271,13 @@ def render_knowledge_and_artifacts(bundle: dict) -> None:
     else:
         st.info("知识结构数据生成后，可在这里浏览图谱。")
 
-    knowledge, artifacts = st.tabs(["知识结构", "成果下载"])
+    knowledge, artifacts, quality = st.tabs(["知识结构", "成果下载", "数据质量"])
     with knowledge:
         render_knowledge(bundle, rows)
     with artifacts:
         render_artifacts(bundle)
+    with quality:
+        render_quality(bundle)
 
 
 def render_artifacts(bundle: dict) -> None:

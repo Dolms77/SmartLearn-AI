@@ -16,26 +16,23 @@ import theme
 import views
 
 NAV_LABELS = {
-    "对话": ("💬", "与智能体对话"),
-    "智能体": ("🤖", "多智能体"),
+    "对话": ("💬", "多智能体对话"),
     "我的学情": ("📊", "我的学情"),
     "学习建议": ("🎯", "学习建议"),
     "知识与成果": ("🗺", "知识与成果"),
     "班级概览": ("📈", "班级概览"),
-    "学生名单": ("👥", "学生名单"),
-    "数据质量": ("🧹", "数据质量"),
+    "讲评建议": ("🎯", "讲评建议"),
 }
 
 # 控件 key 用 ASCII slug：Streamlit 的 st-key-* 类名对非 ASCII 不保证，CSS 会匹配不到
 NAV_KEYS = {
-    "对话": "chat", "智能体": "agent", "我的学情": "diagnosis",
-    "学习建议": "advice", "知识与成果": "knowledge", "班级概览": "class",
-    "学生名单": "students", "数据质量": "quality",
+    "对话": "chat", "我的学情": "diagnosis", "学习建议": "advice",
+    "知识与成果": "knowledge", "班级概览": "class", "讲评建议": "lecture",
 }
 
 
-STUDENT_PAGES = ["对话", "智能体", "我的学情", "学习建议", "知识与成果"]
-TEACHER_PAGES = ["对话", "智能体", "班级概览", "学生名单", "数据质量", "知识与成果"]
+STUDENT_PAGES = ["对话", "我的学情", "学习建议", "知识与成果"]
+TEACHER_PAGES = ["对话", "班级概览", "讲评建议", "知识与成果"]
 
 
 # --------------------------------------------------------------------------
@@ -145,32 +142,6 @@ def pick_identity(bundle: dict) -> None:
 # --------------------------------------------------------------------------
 # 登录后的页面
 # --------------------------------------------------------------------------
-def render_students_list(bundle: dict, cls: str) -> None:
-    st.subheader("学生名单与覆盖情况")
-    rows = []
-    for sid in A.list_students(bundle):
-        if A.student_class(bundle, sid) != cls:
-            continue
-        v = A.student_view(bundle, sid)
-        rows.append({
-            "学生": sid, "班级": v["cls"], "有效记录": v["evidence_total"],
-            "可判定指标": f"{v['coverage']['decided']}/9",
-            "可判定掌握度": "—" if v["overall"] is None else f"{v['overall']:.0%}",
-            "错因条数": len(v["errors"]),
-            "状态": "证据不足" if v["coverage"]["decided"] == 0 else
-                    ('需关注' if v['overall'] is not None and v['overall'] < 0.4 else '正常'),
-        })
-    if not rows:
-        st.info("当前班级没有学生名单。")
-        return
-    df = pd.DataFrame(rows)
-    st.dataframe(df, width="stretch", hide_index=True)
-    st.caption("选择学生可查看作答记录和学情。")
-    sid = st.selectbox("查看学生学情", [r["学生"] for r in rows], key=f"teacher_drill_{cls}")
-    with st.expander(f"查看 {sid} 的学情（与新版「我的学情」同一套页面）", expanded=False):
-        home.render_student_home(bundle, sid, st.session_state.get("_key"),
-                                 st.session_state.get("_cache"))
-
 
 def render_advice(bundle: dict, sid: str) -> None:
     v = A.student_view(bundle, sid)
@@ -283,11 +254,5 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
         views.render_knowledge_and_artifacts(bundle)
     elif page == "班级概览":
         home.render_teacher_home(bundle, ident)
-    elif page == "学生名单":
-        render_students_list(bundle, ident)
-    elif page == "数据质量":
-        views.render_quality(bundle)
-    elif page == "智能体":
-        import agent_bridge as AB
-
-        AB.render_agent_page(bundle.get("output_dir"))
+    elif page == "讲评建议":
+        home.render_teacher_advice(bundle, ident)

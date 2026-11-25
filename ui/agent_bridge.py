@@ -15,7 +15,9 @@
     ask()                调 run()，异常兜底
     render_trace()       执行轨迹时间线（直接读 trace.steps）
     render_result()      按 Agent 类型渲染（诊断 / 建议 / 讲评 / 班级）
-    render_agent_page()  整页对话：历史 + 快捷问题 + 轨迹 + 结构化结果
+    ask()           单轮调用：返回 routing / results / trace
+   render_result() 结构化结果卡片（诊断 / 建议 / 讲评 / 班级）
+   render_trace()  执行轨迹
 """
 from __future__ import annotations
 
@@ -314,103 +316,6 @@ def _render_class(res: dict) -> None:
 
 # ---------------------------------------------------------------------------
 # 整页对话
-# ---------------------------------------------------------------------------
-CHAT_KEY = "agent_bridge_history"
-SID_KEY = "agent_bridge_student"
-
-
-def render_agent_page(output_dir: str = DEFAULT_OUTPUT,
-                      quick_questions: list[str] | None = None) -> None:
-    st.subheader("学情分析与讲评")
-    st.caption("可查询学生错因、练习建议和班级讲评。"
-               "展开回答详情可查看使用的记录和校验结果。")
-
-    students = list_students(output_dir)
-    c1, c2 = st.columns([1, 3])
-    sid = c1.selectbox("当前学生", students or ["D01"],
-                       index=(students.index(st.session_state.get(SID_KEY, "D01"))
-                              if students and st.session_state.get(SID_KEY, "D01") in students else 0),
-                       key="ab_sid")
-    st.session_state[SID_KEY] = sid
-    c2.caption("可以在问题中写学生编号。未指定编号时沿用当前学生。")
-
-    hist = st.session_state.setdefault(CHAT_KEY, [])
-    if not hist:
-        hist.append({"role": "assistant", "content":
-                     "可以从这些问题开始：\n\n"
-                     f"- **{sid} 哪里最薄弱？**（诊断）\n"
-                     f"- **{sid} 哪些知识点需要复习？可以练哪些题？**\n"
-                     "- **下周这个班该怎么讲？**（讲评稿）\n"
-                     "- **两个班差在哪？**（班级对比）\n"
-                     "- **他呢？**（沿用上一位学生）"})
-
-    for m in hist:
-        with st.chat_message(m["role"], avatar="🧑‍🎓" if m["role"] == "user" else theme.character_path()):
-            st.markdown(_humanize(m["content"]) if m["role"] != "user" else m["content"])
-            if m.get("result"):
-                for r in m["result"].get("results", []) or []:
-                    render_result(r)
-                render_trace(m["result"], expanded=False)
-
-    chips = quick_questions or [
-        f"{sid}哪里最薄弱？",
-        f"{sid}哪里薄弱，顺便说说该练什么",
-        "下周这个班该怎么讲？",
-        "他呢？",
-    ]
-    cols = st.columns(len(chips))
-    picked = None
-    for i, (c, txt) in enumerate(zip(cols, chips)):
-        if c.button(txt, key=f"ab_chip_{i}", width="stretch"):
-            picked = txt
-
-    typed = st.chat_input("问智能体任何学情问题…")
-    question = picked or typed
-    if not question:
-        return
-
-    # 没有学生编号、也不是班级类问题时，补上当前学生，避免落进"班级"分支
-    if not re.search(r"D\d{2}", question) and not any(k in question for k in CLASS_HINTS):
-        question = f"{sid} {question}"
-
-    hist.append({"role": "user", "content": question})
-    with st.chat_message("user", avatar="🧑‍🎓"):
-        st.markdown(question)
-
-    with st.chat_message("assistant", avatar=theme.character_path()):
-        with st.status("🧭 协调器正在识别意图…", expanded=False) as status:
-            result = ask(question, output_dir)
-            if result.get("error"):
-                status.update(label="⚠️ 执行出错", state="error", expanded=False)
-            else:
-                intents = (result.get("routing") or {}).get("intents") or []
-                status.update(label=f"✅ 调度完成：{' → '.join(intents)}"
-                                    f"（{len(result.get('results', []))} 个结果）",
-                              state="complete", expanded=False)
-
-        if result.get("error"):
-            st.error(f"智能体执行出错：{result['error']}")
-            st.code(result.get("traceback", ""))
-            hist.append({"role": "assistant", "content": f"⚠️ 执行出错：{result['error']}"})
-            return
-
-        render_trace(result, expanded=True, compact=False)
-        parts = []
-        for r in result.get("results", []) or []:
-            head = f"**[{r.get('agent')}]**"
-            body = r.get("summary") or r.get("diagnosis_summary") or r.get("title") or ""
-            parts.append(f"{head} {_humanize(body)}".strip())
-        answer_md = "\n\n".join(parts) or "（无结构化输出）"
-        st.markdown(answer_md)
-        for r in result.get("results", []) or []:
-            render_result(r)
-        hist.append({"role": "assistant", "content": answer_md, "result": result})
-
-    with st.sidebar:
-        if st.button("🗑 清空智能体对话", width="stretch", key="ab_clear"):
-            st.session_state.pop(CHAT_KEY, None)
-            st.rerun()
-
 
 # ---------------------------------------------------------------------------
 # CLI 自检

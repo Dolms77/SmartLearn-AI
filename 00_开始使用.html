@@ -67,9 +67,9 @@
 <pre>ollama pull deepseek-r1:8b      <span class="c"># 约 5.2 GB；也可用 deepseek-r1:7b</span>
 ollama list                     <span class="c"># 确认在列表里，回界面刷新即可</span></pre>
   <div class="ok">
-    界面共 <b>11 页</b>，入口是「<b>选择身份 → 选身份 → 选账号</b>」三步：<br>
-    学生端 5 页：<b>对话 · 智能体 · 我的学情 · 学习建议 · 知识与成果</b>；<br>
-    教师端 6 页：<b>对话 · 智能体 · 班级概览 · 学生名单 · 数据质量 · 知识与成果</b>。
+    界面共 <b>8 页</b>，入口是「<b>选择身份 → 选身份 → 选账号</b>」三步：<br>
+    学生端 4 页：<b>多智能体对话 · 我的学情 · 学习建议 · 知识与成果</b>；<br>
+    教师端 4 页：<b>多智能体对话 · 班级概览 · 讲评建议 · 知识与成果</b>。
   </div>
 </div>
 
@@ -93,7 +93,7 @@ ollama list                     <span class="c"># 确认在列表里，回界面
   <tr><td><code>00_开始使用.html</code></td><td>本文件</td><td>—</td></tr>
   <tr><td><code>README.md</code></td><td>仓库首页说明</td><td>必读</td></tr>
   <tr><td><code>docs/复现手册.md</code></td><td>完整复现步骤、文件清单、报错对照</td><td>必读</td></tr>
-  <tr><td><code>docs/界面验证记录.md</code></td><td>11 个页面 / 14 项检查的验证结果（可作复核材料）</td><td>选读</td></tr>
+  <tr><td><code>docs/界面验证记录.md</code></td><td>8 个页面 / 9 项检查的验证结果（可作复核材料）</td><td>选读</td></tr>
   <tr><td><code>requirements.txt</code></td><td>运行时依赖（版本为下限，兼容 Python ≥3.10）</td><td>必需</td></tr>
   <tr><td><code>requirements-rag.txt</code></td><td>04 向量库依赖（约 2 GB）</td><td>可选</td></tr>
 <tr><td><code>requirements-build.txt</code></td><td>打包 exe 用（PyInstaller）</td><td>可选</td></tr>
@@ -148,7 +148,7 @@ set DEEPSEEK_API_KEY=sk-xxxx</pre>
 <pre><span class="c"># 本地模型：免费，约 11 分钟（173 条）</span>
 .venv-ui\Scripts\python.exe ui\llm_upgrade.py --limit 173 --sleep 0.3
 <span class="c"># 云端模型：按 token 计费，约 ¥0.5–1、15–20 分钟</span></pre>
-  <p>没跑这一步也能用：智能体页的「规则 vs 本地模型」对比会留空，其余功能不受影响。</p>
+  <p>没跑这一步也能用：会少一块「规则 vs 本地模型」的复核对比，其余功能不受影响。</p>
 </div>
 
 <h2>五、常见问题</h2>

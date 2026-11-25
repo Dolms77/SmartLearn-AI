@@ -688,7 +688,7 @@ def _answer_from_facts(question: str, facts: dict,
     q = question or ""
 
     if any(k in q for k in ('全班', '这个班', '两个班', '同学名单')) or re.search(r'D\d{2}', q.replace(sid, '')):
-        return '学生入口只讨论你自己的学习记录，不提供其他同学的数据。班级讲评和学生名单请在教师入口查看。'
+        return '学生入口只讨论你自己的学习记录，不提供其他同学的数据。班级讲评请在教师入口查看。'
     if any(k in q for k in ('你能做什么', 'AI能力', '什么能力', '多agent', '多智能体')):
         return '我能读取你的作答证据、解释学情、给出分步练习建议并接续追问。统计和推荐由规则任务模块执行；模型在线时负责表达改写。不支持把任意新答案自动判分，也不能用模拟数据证明教学成效。'
 
