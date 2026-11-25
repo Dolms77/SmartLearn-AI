@@ -235,7 +235,7 @@ def render_upload_panel() -> None:
     """欢迎页右侧「上传学情数据」展开的面板（同页内联，不用弹窗）。"""
     st.divider()
     head1, head2 = st.columns([4, 1])
-    head1.markdown("### 📤 上传学情数据")
+    head1.markdown(f"### {theme.icon_md('data_stack.png', '上传')} 上传学情数据")
     if head2.button("收起", key="ds_close", width="stretch"):
         st.session_state["show_upload"] = False
         st.rerun()

@@ -9,6 +9,7 @@ from functools import lru_cache
 import streamlit as st
 
 ASSET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+ICON_DIR = os.path.join(ASSET_DIR, "icons")
 CHARACTER_FILE = "character.jpg"
 ICON_FILE = "icon.jpg"
 
@@ -40,9 +41,9 @@ img.sa-avatar { background:transparent; object-fit:contain; }
 .sa-role-card { border:1px solid #e5ebf5; border-radius:18px; padding:22px; background:#fff; text-align:center;
   box-shadow:0 6px 20px rgba(23,43,77,.06); transition: all .18s ease; }
 .sa-role-card:hover { transform: translateY(-3px); box-shadow:0 14px 32px rgba(23,43,77,.12); border-color:#c7d8fb; }
-.sa-role-ico { font-size:40px; line-height:1; }
-.sa-role-title { font-size:18px; font-weight:700; margin-top:8px; color:#16233a; }
-.sa-role-desc { font-size:13px; color:#6b7787; margin-top:6px; line-height:1.7; }
+.sa-role-ico { font-size:48px; line-height:1; }
+.sa-role-title { font-size:21.6px; font-weight:700; margin-top:9.6px; color:#16233a; }
+.sa-role-desc { font-size:15.6px; color:#6b7787; margin-top:7.2px; line-height:1.7; }
 
 .sa-brand { display:flex; align-items:center; gap:10px; padding:2px 0 10px; }
 .sa-brand .sa-avatar { width:46px; height:46px; animation: sa-float 5s ease-in-out infinite; }
@@ -62,6 +63,28 @@ img.sa-avatar { background:transparent; object-fit:contain; }
 .sa-chip { font-size:12.5px; padding:5px 12px; border-radius:999px; background:#eef3fe; color:#2F6FED; border:1px solid #dbe7fd; }
 
 .sa-fade { animation: sa-fadein .5s ease both; }
+.sa-emoji-icon { width:1.2em; height:1.2em; object-fit:contain; display:inline-block; vertical-align:-0.18em; }
+.sa-role-ico img { width:57.6px !important; height:57.6px !important; max-width:57.6px !important; max-height:57.6px !important; object-fit:contain; }
+.sa-empty img.sa-emoji-icon { width:48.96px !important; height:48.96px !important; max-width:48.96px !important; max-height:48.96px !important; object-fit:contain; }
+h3:has(img[src^="data:image/png"]) { font-size:33.6px !important; line-height:1.2; }
+h3 img[src^="data:image/png"] { width:auto !important; height:57.6px !important; max-height:57.6px !important; vertical-align:middle; }
+button [data-testid="stMarkdownContainer"] p,
+[data-baseweb="tab"] p,
+[role="tab"] p { display:inline-flex; align-items:center; gap:.28em; margin:0; line-height:1; }
+button:has(img[src^="data:image/png"]) { font-size:19.2px !important; line-height:1.2; }
+button[data-baseweb="tab"]:has(img[src^="data:image/png"]),
+[role="tab"]:has(img[src^="data:image/png"]) { font-size:16.8px !important; line-height:1.2; }
+button img[src^="data:image/png"],
+[data-baseweb="tab"] img,
+[role="tab"] img { width:20.16px !important; height:20.16px !important; max-width:20.16px !important; max-height:20.16px !important; flex:0 0 20.16px; object-fit:contain !important; vertical-align:-0.18em; }
+section[data-testid="stSidebar"] .stButton > button[kind="primary"] {
+  background:linear-gradient(135deg,rgba(47,111,237,.82),rgba(108,99,255,.74)) !important;
+  box-shadow:0 8px 18px rgba(47,111,237,.20) !important;
+}
+[data-testid="stChatMessage"]:has([aria-label="Chat message from user"]) > img[data-testid="stChatMessageAvatarImage"] {
+  width:46.08px !important; height:46.08px !important; max-width:46.08px !important; max-height:46.08px !important;
+  object-fit:contain; margin:-7.04px;
+}
 </style>
 """
 
@@ -100,6 +123,11 @@ def icon_path() -> str | None:
     return asset_path(ICON_FILE)
 
 
+def icon_asset_path(filename: str) -> str | None:
+    """给 Streamlit 原生 avatar 等只接受路径的组件使用。"""
+    return asset_path(os.path.join("icons", filename))
+
+
 @lru_cache(maxsize=8)
 def _thumb_uri(filename: str, size: int) -> str:
     """小尺寸头像：用 Pillow 压到几十 KB，避免每次 rerun 塞 110KB base64。"""
@@ -124,6 +152,32 @@ def _thumb_uri(filename: str, size: int) -> str:
         return f"data:{mime};base64," + base64.b64encode(buf.getvalue()).decode("ascii")
     except Exception:  # noqa: BLE001 - 没装 Pillow 就退回原图
         return _data_uri(filename)
+
+
+@lru_cache(maxsize=64)
+def icon_uri(filename: str, size: int = 32) -> str:
+    """返回图标的 data URI，按显示尺寸生成 2x 小图。"""
+    return _thumb_uri(os.path.join("icons", filename), max(size, 24))
+
+
+def icon_md(filename: str, alt: str = "") -> str:
+    """给 st.button / st.tabs 等支持 Markdown 标签的位置使用。"""
+    uri = icon_uri(filename, 24)
+    return f"![{alt}]({uri})" if uri else ""
+
+
+def icon_html(filename: str, size: str = "1.2em", cls: str = "sa-emoji-icon", alt: str = "") -> str:
+    """给自定义 HTML 卡片、空状态使用，统一控制宽高和 object-fit。"""
+    uri = icon_uri(filename, 32)
+    if not uri:
+        return ""
+    return f'<img class="{cls}" src="{uri}" alt="{alt}" style="width:{size};height:{size};object-fit:contain;"/>'
+
+
+def role_avatar(role: str) -> str | None:
+    """聊天消息头像：学生/教师分别使用对应角色图。"""
+    filename = "teacher.png" if role == "teacher" else "student.png"
+    return icon_asset_path(filename)
 
 
 def avatar_img(size: int = 132, cls: str = "sa-avatar") -> str:
@@ -178,9 +232,10 @@ def bubble(text: str) -> None:
 
 
 def role_card(icon: str, title: str, desc: str) -> None:
+    icon_markup = icon_html(icon, "57.6px", alt=title) if icon.endswith(".png") else icon
     st.markdown(
         f"""<div class="sa-role-card">
-              <div class="sa-role-ico">{icon}</div>
+              <div class="sa-role-ico">{icon_markup}</div>
               <div class="sa-role-title">{title}</div>
               <div class="sa-role-desc">{desc}</div>
             </div>""",

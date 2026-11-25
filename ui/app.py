@@ -39,7 +39,7 @@ BUNDLE_FILES = (
     "task3_recommendations.json",
 )
 
-st.set_page_config(page_title="智慧学伴 · 学情诊断智能体", page_icon=(theme.icon_path() or "🤖"), layout="wide")
+st.set_page_config(page_title="智慧学伴 · 学情诊断智能体", page_icon=(theme.icon_path() or theme.icon_asset_path("chat_agent_alt.png")), layout="wide")
 theme.inject()
 design.inject_tokens()
 st.markdown("""
@@ -203,7 +203,7 @@ with st.sidebar:
             st.warning(stt["reason"] or "模型不可用", icon="⚠️")
             st.code("ollama pull deepseek-r1:8b", language="powershell")
             st.caption("拉取后无需重启界面，点右上角 Rerun 即可。")
-    if st.button("🔄 上传 / 切换学情数据", width="stretch", key="switch_dataset"):
+    if st.button(f"{theme.icon_md('data_stack.png', '上传或切换学情数据')} 上传 / 切换学情数据", width="stretch", key="switch_dataset"):
         st.session_state.pop("ident", None)
         st.session_state["stage"] = "landing"
         st.session_state["show_upload"] = True

@@ -39,14 +39,14 @@ DEFAULT_OUTPUT = os.path.join(REPO_ROOT, "output")
 AGENT_SCRIPT = os.path.join(REPO_ROOT, "已完成脚本", "07_multi_agent.py")
 
 AGENT_META = {
-    "Coordinator": ("🧭", "协调器", "#4ECDC4"),
-    "DiagnosisAgent": ("🔍", "诊断", "#45B7D1"),
-    "RecommendationAgent": ("📚", "建议", "#9B59B6"),
-    "LectureAgent": ("👩‍🏫", "讲评", "#E67E22"),
-    "ClassAgent": ("🏫", "班级", "#3498DB"),
+    "Coordinator": ("compass.png", "协调器", "#4ECDC4"),
+    "DiagnosisAgent": ("search_alert.png", "诊断", "#45B7D1"),
+    "RecommendationAgent": ("book.png", "建议", "#9B59B6"),
+    "LectureAgent": ("teacher.png", "讲评", "#E67E22"),
+    "ClassAgent": ("comparison.png", "班级", "#3498DB"),
     "ValidatorAgent": ("🛡️", "校验", "#2ECC71"),
-    "EvidenceAgent": ("🧾", "证据", "#4E7B8F"),
-    "班级统计模块": ("📊", "班级统计", "#3E7CB1"),
+    "EvidenceAgent": ("data_stack.png", "证据", "#4E7B8F"),
+    "班级统计模块": ("chart_bar.png", "班级统计", "#3E7CB1"),
     "教师意图模块": ("🧠", "意图匹配", "#8E6BBE"),
     "证据边界模块": ("🔒", "边界校验", "#2E9E5B"),
     "分步练习模块": ("🪜", "分步练习", "#D08770"),
@@ -186,17 +186,18 @@ def render_trace_cards(steps: list[dict], *, evidence: list[str] | None = None,
     .sa-flow{display:flex;align-items:stretch;gap:6px;overflow-x:auto;padding:8px 2px 12px}
     .sa-flow-card{min-width:132px;flex:1;padding:12px 10px;border-radius:12px;background:#fff;border:1px solid #e2eaf4;box-shadow:0 4px 12px rgba(22,35,58,.06);position:relative}
     .sa-flow-card:not(:last-child):after{content:'→';position:absolute;right:-12px;top:40%;z-index:2;color:#95a8bd;font-size:18px;font-weight:700}
-    .sa-flow-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:15px;margin-bottom:7px}
-    .sa-flow-name{font-size:12px;font-weight:700;color:#22324a}.sa-flow-action{font-size:11px;color:#63748a;margin-top:3px;line-height:1.4}
-    .sa-flow-detail{font-size:10px;color:#8a99aa;margin-top:7px;line-height:1.35;border-top:1px solid #eef2f6;padding-top:6px}
+    .sa-flow-icon{width:33.6px;height:33.6px;display:flex;align-items:center;justify-content:center;border-radius:9.6px;font-size:18px;margin-bottom:8.4px}
+    .sa-flow-name{font-size:14.4px;font-weight:700;color:#22324a}.sa-flow-action{font-size:13.2px;color:#63748a;margin-top:3.6px;line-height:1.4}
+    .sa-flow-detail{font-size:12px;color:#8a99aa;margin-top:8.4px;line-height:1.35;border-top:1px solid #eef2f6;padding-top:7.2px}
     @media(max-width:760px){.sa-flow-card{min-width:118px}.sa-flow{gap:12px}}
     </style>'''
     with st.expander(f'🧩 {title} · {len(unique)} 个步骤', expanded=expanded):
         cards = []
         for s in unique:
             icon, cn, color = AGENT_META.get(s.get('agent', ''), ('⚙', str(s.get('agent') or '任务模块'), '#90A4AE'))
+            icon_markup = theme.icon_html(icon, "21.6px", cls="sa-flow-icon-img", alt=cn) if icon.endswith(".png") else icon
             detail = _humanize(str(s.get('detail') or s.get('output') or ''))[:44]
-            cards.append(f'<div class="sa-flow-card"><div class="sa-flow-icon" style="background:{color}18;color:{color}">{icon}</div><div class="sa-flow-name">{cn}</div><div class="sa-flow-action">{s.get("action", "处理")}</div><div class="sa-flow-detail">{detail or "结构化事实"}</div></div>')
+            cards.append(f'<div class="sa-flow-card"><div class="sa-flow-icon" style="background:{color}18;color:{color}">{icon_markup}</div><div class="sa-flow-name">{cn}</div><div class="sa-flow-action">{s.get("action", "处理")}</div><div class="sa-flow-detail">{detail or "结构化事实"}</div></div>')
         st.markdown(css + '<div class="sa-flow">' + ''.join(cards) + '</div>', unsafe_allow_html=True)
         st.caption('以下是本次问题的处理步骤，按执行顺序排列。')
         if evidence:

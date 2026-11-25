@@ -16,12 +16,12 @@ import theme
 import views
 
 NAV_LABELS = {
-    "对话": ("💬", "多智能体对话"),
-    "我的学情": ("📊", "我的学情"),
-    "学习建议": ("🎯", "学习建议"),
-    "知识与成果": ("🗺", "知识与成果"),
-    "班级概览": ("📈", "班级概览"),
-    "讲评建议": ("🎯", "讲评建议"),
+    "对话": ("chat_agent.png", "多智能体对话"),
+    "我的学情": ("lightbulb.png", "我的学情"),
+    "学习建议": ("target.png", "学习建议"),
+    "知识与成果": ("compass.png", "知识与成果"),
+    "班级概览": ("chart_line.png", "班级概览"),
+    "讲评建议": ("target.png", "讲评建议"),
 }
 
 # 控件 key 用 ASCII slug：Streamlit 的 st-key-* 类名对非 ASCII 不保证，CSS 会匹配不到
@@ -68,7 +68,7 @@ def landing() -> None:
             st.session_state["stage"] = "role"
             st.rerun()
     with c3:
-        if st.button("上传学情数据", width="stretch", key="open_upload"):
+        if st.button(f"{theme.icon_md('data_stack.png', '上传学情数据')} 上传学情数据", width="stretch", key="open_upload"):
             st.session_state["show_upload"] = True
             st.rerun()
 
@@ -78,13 +78,13 @@ def pick_role() -> None:
     st.write("")
     c1, c2 = st.columns(2)
     with c1:
-        theme.role_card("🧑‍🎓", "我是学生",
+        theme.role_card("student.png", "我是学生",
                         "查看个人学情、错因和练习建议。")
         if st.button("以学生身份进入", type="primary", width="stretch", key="as_student"):
             st.session_state.update({"role": "student", "stage": "identity"})
             st.rerun()
     with c2:
-        theme.role_card("🧑‍🏫", "我是教师",
+        theme.role_card("teacher.png", "我是教师",
                         "查看班级得分、共性难点和学生作答。")
         if st.button("以教师身份进入", type="primary", width="stretch", key="as_teacher"):
             st.session_state.update({"role": "teacher", "stage": "identity"})
@@ -181,13 +181,15 @@ def _select_page(page: str) -> None:
     st.session_state["nav_page"] = page
 
 
-def _nav(pages: list[str]) -> str:
+def _nav(pages: list[str], role: str) -> str:
     """Use one native button per page and a stable route key."""
     active = st.session_state["nav_page"]
     for page in pages:
         icon, label = NAV_LABELS[page]
+        if page == "知识与成果":
+            icon = "trophy.png" if role == "student" else "book.png"
         st.button(
-            f"{icon} {label}", key=f"nav_{NAV_KEYS[page]}",
+            f"{theme.icon_md(icon, label)} {label}", key=f"nav_{NAV_KEYS[page]}",
             type="primary" if page == active else "secondary", width="stretch",
             on_click=_select_page, args=(page,),
         )
@@ -220,12 +222,12 @@ def render_app(bundle: dict, role: str, ident: str, key: str | None, cache_dir: 
             ident = _teacher_class_selector(bundle, ident)
         else:
             theme.brand(sub=f"学生视角 · {ident}")
-        page = _nav(pages)
+        page = _nav(pages, role)
         st.session_state["page"] = page
         st.divider()
         st.caption("学情数据")
         st.success(f"已加载 {len(bundle['records'])} 条记录", icon="✅")
-        if st.button("🔄 切换身份", width="stretch", key="switch_role"):
+        if st.button(f"{theme.icon_md('switch_role.png', '切换身份')} 切换身份", width="stretch", key="switch_role"):
             reset()
             st.rerun()
 

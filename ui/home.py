@@ -101,7 +101,7 @@ def _evidence_dialog(bundle: dict, sid: str, code: str) -> None:
                 st.markdown(f"- `{d.get('record_id')}` {d.get('question_id')}："
                             f"{d.get('error_type_code')} {d.get('error_type')} — {d.get('error_description', '')}")
     else:
-        design.empty_state("🗂", "这个指标还没有作答记录", "做完同指标 3 道题，就能给出结论。")
+        design.empty_state("data_stack.png", "这个指标还没有作答记录", "做完同指标 3 道题，就能给出结论。")
     st.caption("仅统计已评分的作答记录。")
 
 
@@ -184,7 +184,11 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
         if v["insufficient"]:
             st.caption(f"⚪ {len(v['insufficient'])} 个指标证据不足")
 
-    t1, t2, t3 = st.tabs(["📊 掌握度", "🔍 错因", "🎯 建议与提问"])
+    t1, t2, t3 = st.tabs([
+        f"{theme.icon_md('mastery.png', '掌握度')} 掌握度",
+        f"{theme.icon_md('search_x.png', '错因')} 错因",
+        f"{theme.icon_md('chat_bubble.png', '建议与提问')} 建议与提问",
+    ])
 
     with t1:
         render_student_mastery(sid, v["indicators"])
@@ -193,7 +197,7 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
     with t2:
         errs = v["errors"]
         if not errs:
-            design.empty_state("✅", "没有可归因的错误记录", "保持节奏，做一次综合练习即可。")
+            design.empty_state("search_x.png", "没有可归因的错误记录", "保持节奏，做一次综合练习即可。")
         else:
             by_type: dict[str, int] = {}
             for e in errs:
@@ -228,7 +232,7 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
                     st.markdown(f"{i}. **{x['name']}**（掌握度 {x['mastery']:.0%}，证据 {x['n']} 条）"
                                 f"→ 练 {'、'.join(todo[:3]) if todo else '该指标变式题'}")
             else:
-                design.empty_state("🎉", "没有薄弱指标", "可以进入下一主题的迁移练习。")
+                design.empty_state("trophy.png", "没有薄弱指标", "可以进入下一主题的迁移练习。")
         if v["insufficient"]:
             st.markdown("**需要先补观察的指标**")
             st.dataframe([{"知识点": x["name"], "已有证据": x["n"], "编号": x["code"]}
@@ -270,7 +274,11 @@ def render_teacher_home(bundle: dict, cls: str) -> None:
     headline, metrics, _ = _teacher_headline(bundle, cls)
     design.conclusion_card("核心结论", headline, metrics)
 
-    t1, t2, t3 = st.tabs(["📈 班级对比", "🔍 薄弱点", "👥 学生"])
+    t1, t2, t3 = st.tabs([
+        f"{theme.icon_md('chart_bar.png', '班级对比')} 班级对比",
+        f"{theme.icon_md('search_alert.png', '薄弱点')} 薄弱点",
+        f"{theme.icon_md('people.png', '学生')} 学生",
+    ])
     with t1:
         render_comparison(cls, cv["class_theme"], ind_rates, q_rates, A.INDICATOR_NAMES)
     with t2:
@@ -349,7 +357,7 @@ def render_teacher_advice(bundle: dict, cls: str) -> None:
     top = [x for x in q_rates.items() if x[1].get("rate") is not None and x[1].get("n", 0) >= 3]
     top.sort(key=lambda kv: kv[1]["rate"])
     if not top:
-        design.empty_state("📋", "本班暂无足够样本的题目", "先补齐作答记录，再生成讲评顺序。")
+        design.empty_state("search_x.png", "本班暂无足够样本的题目", "先补齐作答记录，再生成讲评顺序。")
         return
 
     for i, (qid, info) in enumerate(top[:5], 1):

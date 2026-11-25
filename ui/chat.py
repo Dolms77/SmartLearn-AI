@@ -258,7 +258,7 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
                          "content": TEACHER_GREET.format(cls=ident, n=row.get("students", 0), m=n)})
 
     for m in hist:
-        with st.chat_message(m["role"], avatar="🧑‍🎓" if m["role"] == "user" else theme.character_path()):
+        with st.chat_message(m["role"], avatar=theme.role_avatar(role) if m["role"] == "user" else theme.character_path()):
             if m.get("content"):
                 st.markdown(labels.humanize(m["content"], bundle.get("output_dir"))
                             if m["role"] != "user" else m["content"])
@@ -285,7 +285,7 @@ def render(bundle: dict, role: str, ident: str, key: str | None, cache_dir: str)
         return
 
     hist.append({"role": "user", "content": question})
-    with st.chat_message("user", avatar="🧑‍🎓"):
+    with st.chat_message("user", avatar=theme.role_avatar(role)):
         st.markdown(question)
 
     # 教师端指定了学生：走多智能体（诊断 / 建议 / 证据），结果直接渲染在气泡里

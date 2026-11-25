@@ -59,9 +59,9 @@ TOKENS_CSS = """
 .sa-ev.bad{background:#fff3f2;border-color:#f5c9c4;} .sa-ev.bad .dot{background:var(--bad);}
 /* ---------- 空状态 ---------- */
 .sa-empty{text-align:center;padding:36px 16px;color:var(--muted);}
-.sa-empty .ico{font-size:34px;opacity:.75;}
-.sa-empty .h{font-size:var(--f-m);color:var(--ink-2);margin-top:10px;font-weight:600;}
-.sa-empty .d{font-size:var(--f-xs);margin-top:6px;}
+.sa-empty .ico{font-size:40.8px;opacity:.75;}
+.sa-empty .h{font-size:19.2px;color:var(--ink-2);margin-top:12px;font-weight:600;}
+.sa-empty .d{font-size:14.4px;margin-top:7.2px;}
 /* ---------- Tab 区 ---------- */
 div[data-baseweb="tab-list"]{gap:6px;}
 button[data-baseweb="tab"]{font-size:var(--f-s);}
@@ -236,6 +236,9 @@ def conclusion_card(tag: str, headline: str,
 
 
 def empty_state(icon: str, title: str, desc: str = "") -> None:
+    if icon.endswith(".png"):
+        import theme
+        icon = theme.icon_html(icon, "48.96px", alt=title)
     st.markdown(
         f'<div class="sa-empty"><div class="ico">{icon}</div>'
         f'<div class="h">{title}</div><div class="d">{desc}</div></div>',
