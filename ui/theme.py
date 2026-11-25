@@ -24,8 +24,7 @@ CSS = """
 .sa-hero { display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 0 4px; animation: sa-fadein .6s ease both; }
 .sa-avatar-wrap { position:relative; width:160px; height:160px; display:flex; align-items:center; justify-content:center; }
 .sa-avatar { width:132px; height:132px; animation: sa-float 4.2s ease-in-out infinite, sa-glow 4.2s ease-in-out infinite; }
-img.sa-avatar { border-radius:26px; background:#fff; object-fit:cover;
-  box-shadow:0 10px 26px rgba(23,43,77,.16); }
+img.sa-avatar { background:transparent; object-fit:contain; }
 .sa-avatar .sa-eye { animation: sa-blink 5.5s infinite; transform-origin: center; }
 .sa-ring { position:absolute; width:150px; height:150px; border-radius:50%; border:2px solid rgba(47,111,237,.45); animation: sa-pulse 2.6s ease-out infinite; }
 .sa-ring.d2 { animation-delay: 1.3s; }
@@ -46,9 +45,9 @@ img.sa-avatar { border-radius:26px; background:#fff; object-fit:cover;
 .sa-role-desc { font-size:13px; color:#6b7787; margin-top:6px; line-height:1.7; }
 
 .sa-brand { display:flex; align-items:center; gap:10px; padding:2px 0 10px; }
-.sa-brand .sa-avatar { width:46px; height:46px; border-radius:12px; animation: sa-float 5s ease-in-out infinite; }
+.sa-brand .sa-avatar { width:46px; height:46px; animation: sa-float 5s ease-in-out infinite; }
 .sa-brand-compact { gap:6px; padding-bottom:0; }
-.sa-brand-compact .sa-avatar { width:30px; height:30px; flex:none; border-radius:8px; }
+.sa-brand-compact .sa-avatar { width:30px; height:30px; flex:none; }
 .sa-brand-compact .sa-brand-t { font-size:14px; white-space:nowrap; }
 .sa-brand-t { font-weight:700; font-size:16px; color:#16233a; line-height:1.2; }
 .sa-brand-s { font-size:11.5px; color:#7c8798; }
