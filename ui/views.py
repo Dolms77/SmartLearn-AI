@@ -73,6 +73,7 @@ def _record_table(records: list[dict], quality_rule_names: dict[str, str] | None
 # 页面 1：学生诊断
 # --------------------------------------------------------------------------
 def render_diagnosis(bundle: dict, sid: str, key: str | None, cache_dir: str) -> None:
+    """已废弃：学生名单下钻改用 home.render_student_home（与「我的学情」同一套页面）。"""
     v = A.student_view(bundle, sid)
     stats = (bundle.get("statistics") or {}).get("by_student", {}).get(sid, {})
 

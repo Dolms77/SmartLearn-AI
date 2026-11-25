@@ -167,8 +167,9 @@ def render_students_list(bundle: dict, cls: str) -> None:
     st.dataframe(df, width="stretch", hide_index=True)
     st.caption("选择学生可查看作答记录和学情。")
     sid = st.selectbox("查看学生学情", [r["学生"] for r in rows], key=f"teacher_drill_{cls}")
-    with st.expander(f"打开 {sid} 的完整学情", expanded=False):
-        views.render_diagnosis(bundle, sid, st.session_state.get("_key"), st.session_state.get("_cache"))
+    with st.expander(f"查看 {sid} 的学情（与新版「我的学情」同一套页面）", expanded=False):
+        home.render_student_home(bundle, sid, st.session_state.get("_key"),
+                                 st.session_state.get("_cache"))
 
 
 def render_advice(bundle: dict, sid: str) -> None:
