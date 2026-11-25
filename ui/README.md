@@ -10,7 +10,7 @@ ui/
 ├─ charts.py             # Plotly 图表构件
 ├─ comparison_dashboard.py # 班级对比 / 错因 waffle 的 React 组件桥接
 ├─ scoring_review.py     # 评分步骤列表的 React 组件桥接
-├─ class_comparison/     # React 组件源码与 dist 构建（dist 已提交）
+├─ class_comparison/     # React 组件源码与 dist 构建（dist 已提交；改 JSX 后 npm run build，见其 README）
 ├─ views.py              # 班级概览 / 任务1 / 数据质量 / 知识与成果等页面组件
 ├─ llm.py                # 本地 Ollama / 云端 DeepSeek 双通道（缓存 / 守卫 / 离线降级）
 ├─ llm_upgrade.py        # 批量生成 LLM 错因诊断（增量、断点续跑）

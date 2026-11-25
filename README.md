@@ -45,6 +45,20 @@
 2. 整体掌握度只用"可判定指标"计算，全无证据时显示 `—`；
 3. LLM 输出必须可映射到 C1–C6 且指标在 9 个之内，否则整条丢弃，以规则结果为准。
 
+## 前端组件（班级对比 / 错因 waffle / 评分步骤列表）
+
+教师端三个图表是独立的 React 组件，源码在 `ui/class_comparison/`，构建产物 `ui/class_comparison/dist/` **已随仓库提交**，普通使用不需要 Node。
+
+只有**修改了 JSX / CSS / 组件数据格式**时才需要重新构建：
+
+```powershell
+cd ui\class_comparison
+npm ci            # 首次
+npm run build     # 生成 dist/（base=./，供 Streamlit declare_component 直接加载）
+```
+
+改完务必把 `dist/` 一起提交，否则界面仍加载旧的构建产物。前端细节见 `ui/class_comparison/README.md`。
+
 ## 环境
 
 Python ≥ 3.10；运行时依赖（界面 + 脚本）见 `requirements.txt`，RAG 可选依赖见 `requirements-rag.txt`，打包 exe 见 `requirements-build.txt`。界面默认用本机 Ollama（`ollama pull deepseek-r1:8b`），不装也能跑，只是问答退回离线模板。
