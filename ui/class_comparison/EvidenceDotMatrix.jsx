@@ -21,7 +21,7 @@ export function EvidenceDotMatrix({ rows = mockEvidence, threshold = 3 }) {
         <div className="pb-2 text-xs font-medium text-slate-500">指标</div>
         <div className="relative pb-2 text-xs text-slate-600">
           <span className="absolute -translate-x-1/2 whitespace-nowrap"
-            style={{ left: `${threshold / slots.length * 100}%` }}>门槛：{threshold} 条</span>
+            style={{ left: `${threshold / slots.length * 100}%` }}>满 {threshold} 条可判定</span>
         </div>
         {rows.length > 0 && (
           <div aria-hidden="true" className="pointer-events-none relative col-start-2 self-stretch"

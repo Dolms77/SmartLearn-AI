@@ -44,7 +44,8 @@ def render_error_waffle(cls: str, rows: list[dict]) -> None:
 
 def render_student_mastery(sid: str, rows: list[dict]) -> None:
     mastery_rows = [
-        {"code": row["code"], "name": row["name"], "mastery": row["mastery"], "n": row["n"]}
+        {"code": row["code"], "name": row["name"], "mastery": row["mastery"],
+         "n": row["n"], "band": row["band"]}
         for row in rows
     ]
     dashboard_component(masteryRows=mastery_rows, key=f"student_mastery_{sid}")

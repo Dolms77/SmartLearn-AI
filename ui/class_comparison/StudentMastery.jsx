@@ -24,7 +24,10 @@ const shortNames = {
 const valid = (rate) => Number.isFinite(rate) && rate >= 0 && rate <= 1;
 const format = new Intl.NumberFormat("zh-CN", { style: "percent", maximumFractionDigits: 1 });
 const rateText = (row) => valid(row.mastery) ? format.format(row.mastery) : "证据不足";
-const detail = (row) => `${row.code} ${row.name}，${rateText(row)}，作答 ${row.n} 条`;
+const bands = { mastered: "已掌握", developing: "发展中", weak: "薄弱" };
+const detail = (row) => [
+  `${row.code} ${row.name}`, rateText(row), `作答 ${row.n} 条`, bands[row.band],
+].filter(Boolean).join("，");
 
 function Tooltip({ row, className = "" }) {
   return (
@@ -33,6 +36,7 @@ function Tooltip({ row, className = "" }) {
       text-slate-600 shadow-md ${className}`}>
       <strong className="font-semibold text-slate-800">{row.name}</strong>
       <br />{row.code} · {rateText(row)} · 作答 {row.n} 条
+      {bands[row.band] && <><br />掌握度判定：{bands[row.band]}</>}
     </div>
   );
 }

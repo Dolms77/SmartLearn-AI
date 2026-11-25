@@ -188,14 +188,7 @@ def render_student_home(bundle: dict, sid: str, key: str | None, cache_dir: str)
 
     with t1:
         render_student_mastery(sid, v["indicators"])
-        with st.expander("哪些指标还不能判断掌握度？"):
-            render_evidence_matrix(sid, v["indicators"], A.MIN_EVIDENCE)
-        st.dataframe([{"知识点": i["name"], "编号": i["code"],
-                       "掌握度": None if i["mastery"] is None else round(i["mastery"], 3),
-                       "证据数": i["n"],
-                       "判定": {"mastered": "已掌握", "developing": "发展中", "weak": "薄弱",
-                                "insufficient": "证据不足"}[i["band"]]} for i in v["indicators"]],
-                     width="stretch", hide_index=True)
+        render_evidence_matrix(sid, v["indicators"], A.MIN_EVIDENCE)
 
     with t2:
         errs = v["errors"]
